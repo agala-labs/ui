@@ -30,7 +30,7 @@ const cls = computed(() => [
 
 <template>
   <div v-if="!dismissed" role="alert" aria-atomic="true" :class="cls">
-    <span v-if="icon !== false" class="alert__icon" aria-hidden="true">
+    <span class="alert__icon" aria-hidden="true">
       <AgalaIcon :name="(icon as IconName) || iconMap[props.variant]" :size="16" />
     </span>
     <div class="alert__content">
