@@ -19,6 +19,8 @@ const iconMap: Record<AlertVariant, IconName> = {
   danger: 'alert-circle',
 }
 
+const iconSize = computed(() => props.flat ? 16 : 20)
+
 const cls = computed(() => [
   'alert',
   `alert--${props.variant}`,
@@ -31,7 +33,7 @@ const cls = computed(() => [
 <template>
   <div v-if="!dismissed" role="alert" aria-atomic="true" :class="cls">
     <span v-if="icon !== false" class="alert__icon" aria-hidden="true">
-      <AgalaIcon :name="(icon as IconName) || iconMap[props.variant]" :size="20" />
+      <AgalaIcon :name="(icon as IconName) || iconMap[props.variant]" :size="iconSize" />
     </span>
     <div class="alert__content">
       <h4 v-if="props.title && !props.flat" class="alert__title">{{ props.title }}</h4>
