@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { AgalaIcon } from '../AgalaIcon'
-import type { ButtonVariant, ButtonSize } from './types'
+import type { ButtonVariant, ButtonSize, ButtonType } from './types'
 import type { IconName } from '../AgalaIcon/types'
 
 const props = withDefaults(defineProps<{
   variant?: ButtonVariant
   size?: ButtonSize
+  type?: ButtonType
   loading?: boolean
   block?: boolean
   icon?: string
@@ -15,6 +16,7 @@ const props = withDefaults(defineProps<{
 }>(), {
   variant: 'default',
   size: 'md',
+  type: 'button',
   loading: false,
   block: false,
   icon: '',
@@ -49,7 +51,7 @@ const cls = computed(() => [
 
 <template>
   <button
-    type="button"
+    :type="type"
     :class="cls"
     :disabled="disabled || loading"
     :data-loading="loading"
