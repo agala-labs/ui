@@ -59,7 +59,9 @@ export function useGridSelection(options: UseGridSelectionOptions): UseGridSelec
   function yToMinutes(y: number): number {
     const hourHeight = options.hourHeightRef.value
     if (hourHeight <= 0) return 0
-    const mins = (y / hourHeight) * 60
+    // Grid renders only the dayStart..dayEnd window, so y=0 maps to dayStart,
+    // not midnight. Offset by dayStartMins to resolve the real clicked time.
+    const mins = dayStartMins.value + (y / hourHeight) * 60
     return snapToInterval(Math.round(mins), snap.value)
   }
 
@@ -73,7 +75,8 @@ export function useGridSelection(options: UseGridSelectionOptions): UseGridSelec
 
     const topMins = Math.min(start, end)
     const bottomMins = Math.max(start, end)
-    const top = (topMins / 60) * hourHeight
+    // Position relative to dayStart (grid origin), not midnight.
+    const top = ((topMins - dayStartMins.value) / 60) * hourHeight
     const height = ((bottomMins - topMins) / 60) * hourHeight
 
     selectionStyle.value = {
