@@ -1,6 +1,6 @@
 {
   "name": "@el-agala/ui",
-  "version": "0.26.0",
+  "version": "0.27.0",
   "description": "Agala UI — A zero-dependency Vue 3 component library with atomic design tokens, theming, and accessibility.",
   "type": "module",
   "module": "./dist/agala-ui.es.js",
