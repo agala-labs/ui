@@ -1,4 +1,5 @@
 export type FileStatus = 'pending' | 'uploading' | 'success' | 'error'
+export type FileUploadVariant = 'dropzone' | 'inline'
 
 export interface FileItem {
   id: string
@@ -13,6 +14,7 @@ export interface FileItem {
 
 export interface FileUploadProps {
   modelValue?: FileItem[]
+  variant?: FileUploadVariant
   accept?: string
   multiple?: boolean
   maxSize?: number
@@ -22,5 +24,6 @@ export interface FileUploadProps {
   helper?: string
   dragText?: string
   browseText?: string
+  buttonText?: string
   class?: string
 }

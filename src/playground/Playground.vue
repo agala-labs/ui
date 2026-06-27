@@ -4,7 +4,7 @@ import { AgalaButton, AgalaCenter, AgalaDivider, AgalaInput, AgalaFormField, Aga
 
 import { useMediaQuery } from '../lib/composables/useMediaQuery'
 import AgalaIcon from '../lib/components/AgalaIcon/AgalaIcon.vue'
-import type { TableColumn, TabItem, CalendarEvent, CalendarView } from '../lib'
+import type { TableColumn, TabItem, CalendarEvent, CalendarView, FileItem } from '../lib'
 
 /* ─── Theme ─── */
 type Theme = 'default' | 'forja' | 'custom'
@@ -170,7 +170,8 @@ function openDrawer(placement: 'left' | 'right' | 'top' | 'bottom') {
 }
 
 /* ─── FileUpload state ─── */
-const uploadedFiles = ref<InstanceType<typeof FileUpload>['$props']['modelValue']>([])
+const uploadedFiles = ref<FileItem[]>([])
+const inlineUploadedFiles = ref<FileItem[]>([])
 
 /* ─── Tabs state ─── */
 const activeTab = ref('overview')
@@ -1296,6 +1297,16 @@ const AckDialog = {
           label="Upload documents"
           helper="Images and PDFs up to 2 MB, max 5 files"
           @change="files => toastManager.show({ message: `${files.length} file(s) added`, variant: 'default' })"
+          @remove="file => toastManager.show({ message: `Removed ${file.name}`, variant: 'default' })"
+          @error="msg => toastManager.show({ message: msg, variant: 'danger' })"
+        />
+        <AgalaFileUpload
+          v-model="inlineUploadedFiles"
+          variant="inline"
+          accept="image/*,.pdf"
+          helper="Inline variant for compact layouts"
+          button-text="Attach file"
+          @change="files => toastManager.show({ message: `${files.length} inline file(s) selected`, variant: 'default' })"
           @remove="file => toastManager.show({ message: `Removed ${file.name}`, variant: 'default' })"
           @error="msg => toastManager.show({ message: msg, variant: 'danger' })"
         />

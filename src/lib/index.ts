@@ -142,7 +142,7 @@ export { default as AgalaDrawer } from './components/Drawer/Drawer.vue'
 export type { DrawerProps, DrawerPlacement } from './components/Drawer'
 
 export { default as AgalaFileUpload } from './components/FileUpload/FileUpload.vue'
-export type { FileUploadProps, FileItem, FileStatus } from './components/FileUpload'
+export type { FileUploadProps, FileUploadVariant, FileItem, FileStatus } from './components/FileUpload'
 
 export { default as AgalaVStack } from './components/Stack/VStack.vue'
 

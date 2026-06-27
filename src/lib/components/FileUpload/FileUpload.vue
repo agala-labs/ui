@@ -5,6 +5,7 @@ import type { FileUploadProps, FileItem, FileStatus } from './types'
 import type { IconName } from '../AgalaIcon/types'
 
 const props = withDefaults(defineProps<FileUploadProps>(), {
+  variant: 'dropzone',
   multiple: false,
   dragText: 'Drag and drop files here',
   browseText: 'or click to browse',
@@ -27,6 +28,32 @@ const files = computed({
     internalFiles.value = val
     emit('update:modelValue', val)
   },
+})
+
+const inlineButtonText = computed(() => {
+  return props.buttonText ?? (props.multiple ? 'Choose files' : 'Choose file')
+})
+
+const inlineErrorCount = computed(() => {
+  return files.value.filter((file) => file.status === 'error').length
+})
+
+const inlineSummaryText = computed(() => {
+  const count = files.value.length
+  if (!count) return ''
+
+  const fileText = count === 1 ? 'file selected' : 'files selected'
+  if (inlineErrorCount.value) {
+    return `${count} ${fileText}, ${inlineErrorCount.value} with errors`
+  }
+
+  return `${count} ${fileText}`
+})
+
+const inlineSummaryTitle = computed(() => {
+  return files.value
+    .map((file) => `${file.name} (${formatSize(file.size)})${file.error ? ` - ${file.error}` : ''}`)
+    .join('\n')
 })
 
 function generateId() {
@@ -99,6 +126,12 @@ function removeFile(id: string) {
   emit('remove', file)
 }
 
+function clearFiles() {
+  const removed = files.value
+  files.value = []
+  removed.forEach((file) => emit('remove', file))
+}
+
 function onDragOver(e: DragEvent) {
   e.preventDefault()
   if (!props.disabled) isDragging.value = true
@@ -144,9 +177,10 @@ function statusColor(status: FileStatus): string {
 </script>
 
 <template>
-  <div :class="['fileUpload', props.class]">
+  <div :class="['fileUpload', `fileUpload--${variant}`, props.class]">
     <!-- Dropzone -->
     <div
+      v-if="variant === 'dropzone'"
       class="fileUpload__zone"
       :class="{ 'fileUpload__zone--dragging': isDragging, 'fileUpload__zone--disabled': disabled }"
       @dragover="onDragOver"
@@ -170,11 +204,56 @@ function statusColor(status: FileStatus): string {
       </div>
     </div>
 
+    <!-- Inline picker -->
+    <div v-else class="fileUpload__inline">
+      <div class="fileUpload__inlineControl">
+        <input
+          ref="inputRef"
+          type="file"
+          :accept="accept"
+          :multiple="multiple"
+          :disabled="disabled"
+          class="fileUpload__input fileUpload__input--hidden"
+          @change="onInputChange"
+        />
+        <button
+          type="button"
+          class="fileUpload__inlineButton"
+          :disabled="disabled"
+          @click="openFileDialog"
+        >
+          <AgalaIcon name="plus" :size="14" />
+          <span>{{ inlineButtonText }}</span>
+        </button>
+
+        <span
+          v-if="files.length"
+          class="fileUpload__inlineSummary"
+          :class="{ 'fileUpload__inlineSummary--error': inlineErrorCount > 0 }"
+          :title="inlineSummaryTitle"
+          aria-live="polite"
+        >
+          {{ inlineSummaryText }}
+        </span>
+
+        <button
+          v-if="files.length"
+          type="button"
+          class="fileUpload__inlineClear"
+          :disabled="disabled"
+          aria-label="Clear selected files"
+          @click="clearFiles"
+        >
+          <AgalaIcon name="x" :size="12" />
+        </button>
+      </div>
+    </div>
+
     <!-- Helper text -->
     <p v-if="helper" class="fileUpload__helper">{{ helper }}</p>
 
     <!-- File list -->
-    <ul v-if="files.length" class="fileUpload__list">
+    <ul v-if="files.length && variant === 'dropzone'" class="fileUpload__list">
       <li
         v-for="file in files"
         :key="file.id"
@@ -259,6 +338,19 @@ function statusColor(status: FileStatus): string {
   cursor: not-allowed;
 }
 
+.fileUpload__input--hidden {
+  position: absolute;
+  inset: auto;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
 .fileUpload__zoneContent {
   display: flex;
   flex-direction: column;
@@ -281,10 +373,127 @@ function statusColor(status: FileStatus): string {
   color: hsl(var(--agala-muted-foreground));
 }
 
+.fileUpload__inline {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.fileUpload__inlineControl {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.fileUpload__inlineButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: var(--agala-height-sm);
+  padding: 0 0.75rem;
+  border: 1px solid hsl(var(--agala-input));
+  border-radius: calc(var(--agala-radius) - 2px);
+  background: hsl(var(--agala-background));
+  color: hsl(var(--agala-foreground));
+  font: inherit;
+  font-size: var(--agala-font-size-sm);
+  font-weight: var(--agala-font-weight-medium);
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background var(--agala-transition-fast),
+    border-color var(--agala-transition-fast),
+    color var(--agala-transition-fast),
+    box-shadow var(--agala-transition-fast);
+}
+
+.fileUpload--inline {
+  gap: 0.25rem;
+  max-width: 18rem;
+}
+
+.fileUpload--inline .fileUpload__inlineButton {
+  min-height: 1.75rem;
+  padding: 0 0.5rem;
+  gap: 0.25rem;
+  border-radius: var(--agala-radius-sm);
+  font-size: 0.6875rem;
+}
+
+.fileUpload__inlineSummary {
+  min-width: 0;
+  max-width: 9rem;
+  overflow: hidden;
+  color: hsl(var(--agala-muted-foreground));
+  font-size: 0.6875rem;
+  line-height: 1rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fileUpload__inlineSummary--error {
+  color: hsl(var(--agala-danger));
+}
+
+.fileUpload__inlineClear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  padding: 0;
+  border: none;
+  border-radius: var(--agala-radius-sm);
+  background: transparent;
+  color: hsl(var(--agala-muted-foreground));
+  cursor: pointer;
+  transition: background var(--agala-transition-fast), color var(--agala-transition-fast);
+}
+
+.fileUpload__inlineClear:hover:not(:disabled) {
+  background: hsl(var(--agala-accent));
+  color: hsl(var(--agala-danger));
+}
+
+.fileUpload__inlineClear:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px hsl(var(--agala-ring) / 0.35);
+}
+
+.fileUpload__inlineClear:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.fileUpload__inlineButton:hover:not(:disabled) {
+  background: hsl(var(--agala-accent));
+  border-color: hsl(var(--agala-border));
+}
+
+.fileUpload__inlineButton:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px hsl(var(--agala-ring) / 0.35);
+}
+
+.fileUpload__inlineButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .fileUpload__helper {
   margin: 0;
   font-size: var(--agala-font-size-sm);
   color: hsl(var(--agala-muted-foreground));
+}
+
+.fileUpload--inline .fileUpload__helper {
+  font-size: 0.6875rem;
+  line-height: 1rem;
 }
 
 .fileUpload__list {
