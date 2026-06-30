@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref, h, watch } from 'vue'
-import { AgalaButton, AgalaCenter, AgalaDivider, AgalaInput, AgalaFormField, AgalaSelect, AgalaCreatableSelect, AgalaDatePicker, AgalaColorPicker, AgalaHStack, AgalaListGroup, AgalaListGroupItem, AgalaModal, AgalaModalProvider, modalManager, AgalaBadge, AgalaCheckbox, AgalaToggle, AgalaAvatar, AgalaToastProvider, toastManager, AgalaTextarea, AgalaDropdownMenu, AgalaTable, AgalaTabs, AgalaCard, AgalaTooltip, AgalaRadioGroup, AgalaSegmentedControl, AgalaNavbar, AgalaSidebar, AgalaSidebarItem, AgalaSidebarGroup, AgalaSidebarToggle, AgalaAccordion, AgalaAccordionItem, AgalaSkeleton, AgalaStat, AgalaEmptyState, AgalaProgress, AgalaSpacer, AgalaStack, AgalaTag, AgalaPagination, AgalaDrawer, AgalaFileUpload, AgalaDevEnvBanner, AgalaCalendar, AgalaAlert, AgalaVStack } from '../lib'
+import { AgalaButton, AgalaCenter, AgalaDivider, AgalaInput, AgalaFormField, AgalaSelect, AgalaCreatableSelect, AgalaDatePicker, AgalaColorPicker, AgalaHStack, AgalaListGroup, AgalaListGroupItem, AgalaModal, AgalaModalProvider, modalManager, AgalaBadge, AgalaCheckbox, AgalaToggle, AgalaAvatar, AgalaToastProvider, toastManager, AgalaTextarea, AgalaDropdownMenu, AgalaTable, AgalaTabs, AgalaCard, AgalaTooltip, AgalaRadioGroup, AgalaSegmentedControl, AgalaNavbar, AgalaSidebar, AgalaSidebarToggle, AgalaAccordion, AgalaAccordionItem, AgalaSkeleton, AgalaStat, AgalaEmptyState, AgalaProgress, AgalaSpacer, AgalaTag, AgalaPagination, AgalaDrawer, AgalaFileUpload, AgalaDevEnvBanner, AgalaCalendar, AgalaAlert, AgalaVStack } from '../lib'
 
 import { useMediaQuery } from '../lib/composables/useMediaQuery'
 import AgalaIcon from '../lib/components/AgalaIcon/AgalaIcon.vue'
-import type { TableColumn, TabItem, CalendarEvent, CalendarView, FileItem } from '../lib'
+import type { TableColumn, TabItem, CalendarEvent, CalendarView, FileItem, SidebarNode } from '../lib'
 
 /* ─── Theme ─── */
 type Theme = 'default' | 'forja' | 'custom'
@@ -146,8 +146,65 @@ const progressValue = ref(65)
 /* ─── Sidebar state ─── */
 const sidebarCollapsed = ref(false)
 const sidebarOpen = ref(false)
+const sidebarActive = ref('member-directory')
+const sidebarExpanded = ref(['operations', 'members'])
 const { matches: isMobileViewport } = useMediaQuery('(max-width: 639px)')
 const { matches: isDesktopViewport } = useMediaQuery('(min-width: 768px)')
+
+const SIDEBAR_ITEMS: SidebarNode[] = [
+  {
+    label: 'Workspace',
+    items: [
+      { value: 'dashboard', label: 'Dashboard', icon: 'home', href: '#sidebar' },
+      {
+        value: 'operations',
+        label: 'Operations',
+        icon: 'building',
+        badge: '12',
+        children: [
+          {
+            value: 'members',
+            label: 'Members',
+            icon: 'users',
+            badge: 248,
+            children: [
+              { value: 'member-directory', label: 'Directory', href: '#sidebar' },
+              { value: 'member-segments', label: 'Segments', href: '#sidebar' },
+              { value: 'member-imports', label: 'Imports', dot: true, dotVariant: 'warning', href: '#sidebar' },
+            ],
+          },
+          { value: 'access', label: 'Access control', icon: 'key', dot: true, dotVariant: 'danger', href: '#sidebar' },
+          { value: 'schedule', label: 'Schedule', icon: 'calendar', href: '#sidebar' },
+          { value: 'shifts', label: 'Staff shifts', icon: 'clock', disabled: true },
+        ],
+      },
+    ],
+  },
+  {
+    label: 'Commercial',
+    items: [
+      {
+        value: 'billing',
+        label: 'Billing',
+        icon: 'credit-card',
+        children: [
+          { value: 'plans', label: 'Plans', icon: 'document', href: '#sidebar' },
+          { value: 'renewals', label: 'Renewals', icon: 'refresh', badge: 59, badgeVariant: 'danger', href: '#sidebar' },
+          { value: 'payments', label: 'Payments', icon: 'credit-card', href: '#sidebar' },
+        ],
+      },
+      { value: 'reports', label: 'Reports', icon: 'chart-bar', href: '#sidebar' },
+      { value: 'notifications', label: 'Notifications', icon: 'bell', badge: 4, badgeVariant: 'warning', href: '#sidebar' },
+    ],
+  },
+  {
+    label: 'System',
+    items: [
+      { value: 'settings', label: 'Settings', icon: 'settings', href: '#sidebar' },
+      { value: 'profile', label: 'Profile', icon: 'user', href: '#sidebar' },
+    ],
+  },
+]
 
 /* ─── Tag state ─── */
 const tagList = ref([
@@ -1340,9 +1397,9 @@ const AckDialog = {
 
     <!-- ═══════════════════ SIDEBAR (Responsive) ═══════════════════ -->
     <section id="sidebar">
-      <h2>Sidebar — Responsive</h2>
+      <h2>Sidebar — Responsive sublevels</h2>
       <p class="muted" style="margin: 0 0 0.75rem; font-size: 0.875rem">
-        Auto-collapses to icon-only on tablet (640–768 px). Hidden on mobile (&lt;640 px) — use the toggle to open the Drawer.
+        Data-driven navigation with nested branches. Auto-collapses to icon-only on tablet (640–768 px). Hidden on mobile (&lt;640 px) — use the toggle to open the Drawer.
       </p>
       <div style="border: 1px solid hsl(var(--agala-border)); border-radius: var(--agala-radius-lg); overflow: hidden">
         <AgalaNavbar>
@@ -1378,29 +1435,11 @@ const AckDialog = {
             :responsive="true"
             v-model:collapsed="sidebarCollapsed"
             v-model:open="sidebarOpen"
+            v-model:active-value="sidebarActive"
+            v-model:expanded="sidebarExpanded"
+            :items="SIDEBAR_ITEMS"
           >
             <!-- No #header when paired with Navbar — app identity lives in Navbar #brand -->
-
-            <AgalaSidebarGroup label="Operación">
-              <AgalaSidebarItem icon="home" label="Panel" active />
-              <AgalaSidebarItem icon="users" label="Socios" badge="248" />
-              <AgalaSidebarItem icon="key" label="Accesos" dot dot-variant="danger" />
-              <AgalaSidebarItem icon="calendar" label="Agenda" />
-              <AgalaSidebarItem icon="clock" label="Horarios" />
-            </AgalaSidebarGroup>
-
-            <AgalaSidebarGroup label="Comercial">
-              <AgalaSidebarItem icon="document" label="Planes" />
-              <AgalaSidebarItem icon="refresh" label="Renovaciones" badge="59" badge-variant="danger" />
-              <AgalaSidebarItem icon="bell" label="Notificaciones" />
-              <AgalaSidebarItem icon="credit-card" label="Pagos" />
-              <AgalaSidebarItem icon="chart-bar" label="Reportes" />
-            </AgalaSidebarGroup>
-
-            <AgalaSidebarGroup label="Sistema">
-              <AgalaSidebarItem icon="settings" label="Configuración" />
-              <AgalaSidebarItem icon="user" label="Perfil" />
-            </AgalaSidebarGroup>
 
             <template #footer="{ collapsed }">
               <div style="display: flex; align-items: center; gap: 0.5rem; overflow: hidden; padding: 0 0.25rem">
@@ -1416,9 +1455,11 @@ const AckDialog = {
             Main content area. Resize the viewport to see responsive behavior:
             <ul style="margin: 0.5rem 0; padding-left: 1.25rem">
               <li><strong>Desktop (&gt;768 px):</strong> full sidebar with optional manual collapse.</li>
-              <li><strong>Tablet (640–768 px):</strong> auto-collapses to icon-only (64 px).</li>
-              <li><strong>Mobile (&lt;640 px):</strong> sidebar hidden; use the toggle to open the Drawer.</li>
+              <li><strong>Tablet (640–768 px):</strong> auto-collapses to icon-only (64 px) with tooltips.</li>
+              <li><strong>Mobile (&lt;640 px):</strong> sidebar hidden; use the toggle to open the Drawer with expanded sublevels.</li>
             </ul>
+            <p style="margin: 0.75rem 0 0">Active item: <strong>{{ sidebarActive }}</strong></p>
+            <p style="margin: 0.25rem 0 0">Expanded: <strong>{{ sidebarExpanded.join(', ') || 'none' }}</strong></p>
           </div>
         </div>
       </div>

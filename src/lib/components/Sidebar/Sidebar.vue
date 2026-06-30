@@ -1,10 +1,16 @@
 <script setup lang="ts">
-import { computed, provide, watch } from 'vue'
+import { computed, provide, ref, watch } from 'vue'
 import Drawer from '../Drawer/Drawer.vue'
 import { useMediaQuery } from '../../composables/useMediaQuery'
-import type { SidebarProps } from './types'
+import SidebarTree from './SidebarTree.vue'
+import type { SidebarNavItem, SidebarNode, SidebarProps } from './types'
 
 const props = withDefaults(defineProps<SidebarProps>(), {
+  items: undefined,
+  activeValue: undefined,
+  expanded: undefined,
+  defaultExpanded: () => [],
+  indent: 'comfortable',
   collapsed: false,
   width: '240px',
   collapsedWidth: '64px',
@@ -15,6 +21,9 @@ const props = withDefaults(defineProps<SidebarProps>(), {
 const emit = defineEmits<{
   'update:collapsed': [value: boolean]
   'update:open': [value: boolean]
+  'update:activeValue': [value: string]
+  'update:expanded': [value: string[]]
+  select: [item: SidebarNavItem, event: MouseEvent | KeyboardEvent]
 }>()
 
 const { matches: isTablet } = useMediaQuery(`(max-width: 767px)`)
@@ -33,6 +42,62 @@ const currentWidth = computed(() => {
   return props.collapsed ? props.collapsedWidth : props.width
 })
 
+const internalExpanded = ref<string[]>(props.defaultExpanded)
+
+function isSection(node: SidebarNode): node is { label: string; items: SidebarNavItem[]; class?: string } {
+  return 'items' in node && !('value' in node)
+}
+
+function collectActiveAncestors(nodes: SidebarNode[] | undefined, activeValue: string | undefined): string[] {
+  if (!nodes || !activeValue) return []
+
+  for (const node of nodes) {
+    const children = isSection(node) ? node.items : node.children
+    if (!children) continue
+
+    if (children.some((item) => item.value === activeValue || item.active)) {
+      return isSection(node) ? [] : [node.value]
+    }
+
+    const nested = collectActiveAncestors(children, activeValue)
+    if (nested.length > 0) {
+      return isSection(node) ? nested : [node.value, ...nested]
+    }
+  }
+
+  return []
+}
+
+function collectMarkedActiveAncestors(nodes: SidebarNode[] | undefined): string[] {
+  if (!nodes) return []
+
+  for (const node of nodes) {
+    const children = isSection(node) ? node.items : node.children
+    if (!children) continue
+
+    if (children.some((item) => item.active)) {
+      return isSection(node) ? [] : [node.value]
+    }
+
+    const nested = collectMarkedActiveAncestors(children)
+    if (nested.length > 0) {
+      return isSection(node) ? nested : [node.value, ...nested]
+    }
+  }
+
+  return []
+}
+
+const activeAncestors = computed(() => {
+  const byValue = collectActiveAncestors(props.items, props.activeValue)
+  return byValue.length > 0 ? byValue : collectMarkedActiveAncestors(props.items)
+})
+
+const expandedValues = computed(() => {
+  if (props.expanded !== undefined) return props.expanded
+  return Array.from(new Set([...internalExpanded.value, ...activeAncestors.value]))
+})
+
 const cls = computed(() => [
   'sidebar',
   props.responsive ? 'sidebarResponsive' : undefined,
@@ -46,6 +111,69 @@ function toggle() {
 
 function onDrawerClose() {
   emit('update:open', false)
+}
+
+function setExpanded(values: string[]) {
+  const next = Array.from(new Set(values))
+  if (props.expanded === undefined) {
+    internalExpanded.value = next
+  }
+  emit('update:expanded', next)
+}
+
+function toggleExpanded(value: string) {
+  const current = new Set(expandedValues.value)
+  if (current.has(value)) current.delete(value)
+  else current.add(value)
+  setExpanded(Array.from(current))
+}
+
+function hasChildren(item: SidebarNavItem) {
+  return Array.isArray(item.children) && item.children.length > 0
+}
+
+function onSelect(item: SidebarNavItem, event: MouseEvent | KeyboardEvent) {
+  if (item.disabled) {
+    event.preventDefault()
+    return
+  }
+
+  if (props.responsive && isTablet.value && !isMobile.value && isCollapsed.value && hasChildren(item)) {
+    emit('update:open', true)
+    return
+  }
+
+  emit('update:activeValue', item.value)
+  emit('select', item, event)
+
+  if (props.responsive && isMobile.value && props.open && !hasChildren(item)) {
+    emit('update:open', false)
+  }
+}
+
+function getFocusableItems(event: KeyboardEvent) {
+  const root = (event.currentTarget as HTMLElement).closest('.sidebarNav')
+  if (!root) return []
+  return Array.from(root.querySelectorAll<HTMLElement>('[data-sidebar-node]'))
+    .filter((el) => !el.hasAttribute('disabled') && el.getAttribute('aria-disabled') !== 'true')
+}
+
+function focusRelative(event: KeyboardEvent, offset: number) {
+  const items = getFocusableItems(event)
+  const current = event.target as HTMLElement
+  const index = items.indexOf(current)
+  if (index === -1 || items.length === 0) return
+  const next = (index + offset + items.length) % items.length
+  items[next]?.focus()
+}
+
+function focusFirst(event: KeyboardEvent) {
+  getFocusableItems(event)[0]?.focus()
+}
+
+function focusLast(event: KeyboardEvent) {
+  const items = getFocusableItems(event)
+  items[items.length - 1]?.focus()
 }
 
 provide('sidebar-collapsed', isCollapsed)
@@ -65,7 +193,21 @@ watch(isMobile, (mobile) => {
     </div>
 
     <nav class="sidebarNav">
-      <slot :collapsed="isCollapsed" :toggle="toggle" />
+      <SidebarTree
+        v-if="items"
+        :items="items"
+        :active-value="activeValue"
+        :expanded-values="expandedValues"
+        :collapsed="isCollapsed"
+        :indent="indent"
+        @toggle="toggleExpanded"
+        @select="onSelect"
+        @focus-next="focusRelative($event, 1)"
+        @focus-previous="focusRelative($event, -1)"
+        @focus-first="focusFirst"
+        @focus-last="focusLast"
+      />
+      <slot v-else :collapsed="isCollapsed" :toggle="toggle" />
     </nav>
 
     <div v-if="$slots.footer" class="sidebarFooter">
@@ -81,7 +223,21 @@ watch(isMobile, (mobile) => {
     @close="onDrawerClose"
   >
     <nav class="sidebarNav drawerNav">
-      <slot :collapsed="false" :toggle="toggle" />
+      <SidebarTree
+        v-if="items"
+        :items="items"
+        :active-value="activeValue"
+        :expanded-values="expandedValues"
+        :collapsed="false"
+        :indent="indent"
+        @toggle="toggleExpanded"
+        @select="onSelect"
+        @focus-next="focusRelative($event, 1)"
+        @focus-previous="focusRelative($event, -1)"
+        @focus-first="focusFirst"
+        @focus-last="focusLast"
+      />
+      <slot v-else :collapsed="false" :toggle="toggle" />
     </nav>
   </Drawer>
 </template>

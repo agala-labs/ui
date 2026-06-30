@@ -107,7 +107,7 @@ export { default as AgalaSidebar } from './components/Sidebar/Sidebar.vue'
 export { default as AgalaSidebarItem } from './components/Sidebar/SidebarItem.vue'
 export { default as AgalaSidebarGroup } from './components/Sidebar/SidebarGroup.vue'
 export { default as AgalaSidebarToggle } from './components/SidebarToggle/SidebarToggle.vue'
-export type { SidebarProps, SidebarItemProps, SidebarGroupProps, SidebarItemBadgeVariant, SidebarItemDotVariant } from './components/Sidebar'
+export type { SidebarProps, SidebarItemProps, SidebarGroupProps, SidebarItemBadgeVariant, SidebarItemDotVariant, SidebarIndent, SidebarNavItem, SidebarNode, SidebarSection } from './components/Sidebar'
 export type { SidebarToggleProps } from './components/SidebarToggle'
 
 export { default as AgalaNavbar } from './components/Navbar/Navbar.vue'

@@ -1,4 +1,4 @@
-import { type App } from 'vue'
+import { type App, type Component } from 'vue'
 import Button from './components/Button/Button.vue'
 import Input from './components/Input/Input.vue'
 import FormField from './components/FormField/FormField.vue'
@@ -48,7 +48,7 @@ import VStack from './components/Stack/VStack.vue'
 import DevEnvBanner from './components/DevEnvBanner/DevEnvBanner.vue'
 import Alert from './components/Alert/Alert.vue'
 
-const componentMap: Record<string, any> = {
+const componentMap: Record<string, Component> = {
   AgalaButton: Button,
   AgalaInput: Input,
   AgalaFormField: FormField,

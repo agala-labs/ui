@@ -15,7 +15,7 @@ const HEX_SHORT_RE = /^#?([0-9a-fA-F]{3})$/
 
 /** Parse hex string → RGB. Accepts "#ff6600", "ff6600", "#f60". Returns null on invalid input. */
 export function hexToRgb(hex: string): RGB | null {
-  let h = hex.trim()
+  const h = hex.trim()
 
   const short = h.match(HEX_SHORT_RE)
   if (short) {

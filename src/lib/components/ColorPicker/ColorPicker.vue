@@ -268,9 +268,9 @@ function handlePopoverKeyDown(e: KeyboardEvent) {
   }
 
   if (e.key === 'Tab') {
-    const focusable = floatingRef.value?.querySelectorAll(
+    const focusable = Array.from(floatingRef.value?.querySelectorAll<HTMLElement>(
       'input, button, [tabindex]:not([tabindex="-1"])'
-    ) as NodeListOf<HTMLElement> | undefined
+    ) || [])
     if (!focusable || focusable.length === 0) return
 
     const first = focusable[0]
