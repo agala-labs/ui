@@ -108,8 +108,9 @@
   --agala-height-lg: 2.5rem;
 
   /* ─── Z-index ─── */
-  --agala-z-dropdown: 1050;
+  --agala-z-navbar: 100;
   --agala-z-modal: 1000;
+  --agala-z-dropdown: 1050;
 
   /* ─── Breakpoints ─── */
   --agala-breakpoint-sm: 640px;

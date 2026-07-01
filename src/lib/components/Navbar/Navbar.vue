@@ -24,7 +24,7 @@ const props = defineProps<NavbarProps>()
 .navbar {
   position: sticky;
   top: 0;
-  z-index: var(--agala-z-dropdown);
+  z-index: var(--agala-z-navbar, 100);
   display: flex;
   align-items: center;
   height: var(--agala-navbar-height, 3.5rem);
