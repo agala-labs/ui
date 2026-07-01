@@ -85,6 +85,10 @@ export type { ToastOptions, ToastItem, ToastVariant } from './components/Toast'
 export { default as AgalaTextarea } from './components/Textarea/Textarea.vue'
 export type { TextareaProps, TextareaResize } from './components/Textarea'
 
+export { default as AgalaMarkdownEditor } from './components/MarkdownEditor/MarkdownEditor.vue'
+export { default as AgalaMarkdownPreview } from './components/MarkdownEditor/MarkdownPreview.vue'
+export type { MarkdownEditorPreview, MarkdownEditorProps, MarkdownPreviewProps, MarkdownToolbarAction, MarkdownToolbarActionKey } from './components/MarkdownEditor'
+
 export { default as AgalaDropdownMenu } from './components/DropdownMenu/DropdownMenu.vue'
 export type { DropdownMenuProps, DropdownMenuItem, DropdownMenuPlacement, DropdownMenuItemVariant } from './components/DropdownMenu'
 

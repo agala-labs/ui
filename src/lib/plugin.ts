@@ -22,6 +22,8 @@ import Toggle from './components/Toggle/Toggle.vue'
 import Avatar from './components/Avatar/Avatar.vue'
 import ToastProvider from './components/Toast/ToastProvider.vue'
 import Textarea from './components/Textarea/Textarea.vue'
+import MarkdownEditor from './components/MarkdownEditor/MarkdownEditor.vue'
+import MarkdownPreview from './components/MarkdownEditor/MarkdownPreview.vue'
 import DropdownMenu from './components/DropdownMenu/DropdownMenu.vue'
 import Table from './components/Table/Table.vue'
 import Tabs from './components/Tabs/Tabs.vue'
@@ -72,6 +74,8 @@ const componentMap: Record<string, Component> = {
   AgalaAvatar: Avatar,
   AgalaToastProvider: ToastProvider,
   AgalaTextarea: Textarea,
+  AgalaMarkdownEditor: MarkdownEditor,
+  AgalaMarkdownPreview: MarkdownPreview,
   AgalaDropdownMenu: DropdownMenu,
   AgalaTable: Table,
   AgalaTabs: Tabs,

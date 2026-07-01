@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, h, watch } from 'vue'
-import { AgalaButton, AgalaCenter, AgalaDivider, AgalaInput, AgalaFormField, AgalaSelect, AgalaCreatableSelect, AgalaDatePicker, AgalaColorPicker, AgalaHStack, AgalaListGroup, AgalaListGroupItem, AgalaModal, AgalaModalProvider, modalManager, AgalaBadge, AgalaCheckbox, AgalaToggle, AgalaAvatar, AgalaToastProvider, toastManager, AgalaTextarea, AgalaDropdownMenu, AgalaTable, AgalaTabs, AgalaCard, AgalaTooltip, AgalaRadioGroup, AgalaSegmentedControl, AgalaNavbar, AgalaSidebar, AgalaSidebarToggle, AgalaAccordion, AgalaAccordionItem, AgalaSkeleton, AgalaStat, AgalaEmptyState, AgalaProgress, AgalaSpacer, AgalaTag, AgalaPagination, AgalaDrawer, AgalaFileUpload, AgalaDevEnvBanner, AgalaCalendar, AgalaAlert, AgalaVStack } from '../lib'
+import { AgalaButton, AgalaCenter, AgalaDivider, AgalaInput, AgalaFormField, AgalaSelect, AgalaCreatableSelect, AgalaDatePicker, AgalaColorPicker, AgalaHStack, AgalaListGroup, AgalaListGroupItem, AgalaModal, AgalaModalProvider, modalManager, AgalaBadge, AgalaCheckbox, AgalaToggle, AgalaAvatar, AgalaToastProvider, toastManager, AgalaTextarea, AgalaMarkdownEditor, AgalaMarkdownPreview, AgalaDropdownMenu, AgalaTable, AgalaTabs, AgalaCard, AgalaTooltip, AgalaRadioGroup, AgalaSegmentedControl, AgalaNavbar, AgalaSidebar, AgalaSidebarToggle, AgalaAccordion, AgalaAccordionItem, AgalaSkeleton, AgalaStat, AgalaEmptyState, AgalaProgress, AgalaSpacer, AgalaTag, AgalaPagination, AgalaDrawer, AgalaFileUpload, AgalaDevEnvBanner, AgalaCalendar, AgalaAlert, AgalaVStack } from '../lib'
 
 import { useMediaQuery } from '../lib/composables/useMediaQuery'
 import AgalaIcon from '../lib/components/AgalaIcon/AgalaIcon.vue'
@@ -139,6 +139,16 @@ const tgLg = ref(true)
 
 /* ─── Textarea state ─── */
 const textareaValue = ref('')
+const markdownValue = ref(`# Everyday Canvas Tote
+
+Durable cotton tote for daily errands, market runs, and gift packaging.
+
+- 16 oz washed canvas
+- Interior slip pocket
+- Holds up to **12 kg**
+
+[View care guide](https://example.com/care)`)
+const shortMarkdownValue = ref('Compact description with **bold** details and [shipping](/shipping) link.')
 
 /* ─── Progress state ─── */
 const progressValue = ref(65)
@@ -491,6 +501,7 @@ const AckDialog = {
     <a href="#avatar">Avatar</a>
     <a href="#toast">Toast</a>
     <a href="#textarea">Textarea</a>
+    <a href="#markdown">Markdown</a>
     <a href="#dropdown">Dropdown</a>
     <a href="#table">Table</a>
     <a href="#tabs">Tabs</a>
@@ -1084,6 +1095,39 @@ const AckDialog = {
         <AgalaTextarea placeholder="Disabled textarea" :disabled="true" />
       </div>
       <p class="muted" style="margin-top: 0.5rem; font-size: 0.875rem">Value: {{ textareaValue || '—' }}</p>
+    </section>
+
+    <!-- ═══════════════════ MARKDOWN EDITOR ═══════════════════ -->
+    <section id="markdown">
+      <h2>MarkdownEditor</h2>
+      <div class="stack" style="max-width: 900px">
+        <AgalaFormField label="Product description" helper="Stores markdown and renders a safe preview with raw HTML disabled.">
+          <AgalaMarkdownEditor
+            v-model="markdownValue"
+            placeholder="Write a product description in markdown..."
+            preview="split"
+            :maxlength="500"
+            show-count
+          />
+        </AgalaFormField>
+        <AgalaFormField label="Localized labels">
+          <AgalaMarkdownEditor
+            v-model="shortMarkdownValue"
+            :rows="6"
+            preview="tab"
+            edit-label="Write"
+            preview-label="Read"
+            empty-preview="No product copy yet."
+          />
+        </AgalaFormField>
+        <AgalaFormField label="Standalone preview">
+          <AgalaMarkdownPreview
+            :source="markdownValue"
+            empty-text="No markdown content."
+            aria-label="Product description preview"
+          />
+        </AgalaFormField>
+      </div>
     </section>
 
     <!-- ═══════════════════ DROPDOWN MENU ═══════════════════ -->
