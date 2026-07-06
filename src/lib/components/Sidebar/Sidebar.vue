@@ -1,9 +1,23 @@
 <script setup lang="ts">
-import { computed, provide, ref, watch } from 'vue'
+import { computed, defineComponent, provide, ref, watch } from 'vue'
 import Drawer from '../Drawer/Drawer.vue'
 import { useMediaQuery } from '../../composables/useMediaQuery'
 import SidebarTree from './SidebarTree.vue'
 import type { SidebarNavItem, SidebarNode, SidebarProps } from './types'
+
+const SidebarCollapsedProvider = defineComponent({
+  name: 'SidebarCollapsedProvider',
+  props: {
+    collapsed: {
+      type: Boolean,
+      required: true,
+    },
+  },
+  setup(providerProps, { slots }) {
+    provide('sidebar-collapsed', computed(() => providerProps.collapsed))
+    return () => slots.default?.()
+  },
+})
 
 const props = withDefaults(defineProps<SidebarProps>(), {
   items: undefined,
@@ -40,6 +54,11 @@ const currentWidth = computed(() => {
   if (!props.responsive) return props.collapsed ? props.collapsedWidth : props.width
   // CSS media queries will override width for tablet/mobile
   return props.collapsed ? props.collapsedWidth : props.width
+})
+
+const drawerSize = computed(() => {
+  if (isMobile.value) return 'calc(100vw - 1rem)'
+  return '20rem'
 })
 
 const internalExpanded = ref<string[]>(props.defaultExpanded)
@@ -219,26 +238,34 @@ watch(isMobile, (mobile) => {
     v-if="responsive"
     :open="open"
     placement="left"
-    size="280px"
+    :size="drawerSize"
     @close="onDrawerClose"
   >
-    <nav class="sidebarNav drawerNav">
-      <SidebarTree
-        v-if="items"
-        :items="items"
-        :active-value="activeValue"
-        :expanded-values="expandedValues"
-        :collapsed="false"
-        :indent="indent"
-        @toggle="toggleExpanded"
-        @select="onSelect"
-        @focus-next="focusRelative($event, 1)"
-        @focus-previous="focusRelative($event, -1)"
-        @focus-first="focusFirst"
-        @focus-last="focusLast"
-      />
-      <slot v-else :collapsed="false" :toggle="toggle" />
-    </nav>
+    <SidebarCollapsedProvider :collapsed="false">
+      <nav class="sidebarNav drawerNav">
+        <SidebarTree
+          v-if="items"
+          :items="items"
+          :active-value="activeValue"
+          :expanded-values="expandedValues"
+          :collapsed="false"
+          :indent="indent"
+          @toggle="toggleExpanded"
+          @select="onSelect"
+          @focus-next="focusRelative($event, 1)"
+          @focus-previous="focusRelative($event, -1)"
+          @focus-first="focusFirst"
+          @focus-last="focusLast"
+        />
+        <slot v-else :collapsed="false" :toggle="toggle" />
+      </nav>
+    </SidebarCollapsedProvider>
+
+    <template v-if="$slots.footer" #footer>
+      <SidebarCollapsedProvider :collapsed="false">
+        <slot name="footer" :collapsed="false" :toggle="toggle" />
+      </SidebarCollapsedProvider>
+    </template>
   </Drawer>
 </template>
 
@@ -273,7 +300,8 @@ watch(isMobile, (mobile) => {
 }
 
 .drawerNav {
-  padding: 0.5rem;
+  min-height: 100%;
+  padding: var(--agala-sidebar-drawer-nav-padding, 0.75rem);
 }
 
 .sidebarFooter {

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { nextTick, ref, watch } from 'vue'
 import { AgalaIcon } from '../AgalaIcon'
 import type { ModalSize } from './types'
 
@@ -19,6 +20,8 @@ const props = withDefaults(defineProps<{
 const emit = defineEmits<{
   close: []
 }>()
+
+const dialogRef = ref<HTMLElement | null>(null)
 
 const sizeMap: Record<ModalSize, string> = {
   sm: 'dialogSm',
@@ -42,6 +45,12 @@ function handleKeyDown(e: KeyboardEvent) {
     emit('close')
   }
 }
+
+watch(() => props.open, async (open) => {
+  if (!open) return
+  await nextTick()
+  dialogRef.value?.focus()
+})
 </script>
 
 <template>
@@ -53,6 +62,7 @@ function handleKeyDown(e: KeyboardEvent) {
       @keydown="handleKeyDown"
     >
       <div
+        ref="dialogRef"
         :class="[ 'dialog', sizeMap[size] ].filter(Boolean).join(' ')"
         role="dialog"
         aria-modal="true"
@@ -105,12 +115,13 @@ function handleKeyDown(e: KeyboardEvent) {
   display: flex;
   flex-direction: column;
   max-height: calc(100vh - 3rem);
+  max-height: calc(100dvh - 3rem);
   background-color: hsl(var(--agala-card));
   color: hsl(var(--agala-card-foreground));
   border: var(--agala-border-width) solid hsl(var(--agala-border));
   border-radius: var(--agala-radius-lg);
   box-shadow: var(--agala-shadow-lg);
-  overflow-y: auto;
+  overflow: hidden;
   animation: dialogIn 200ms ease-out;
 }
 
@@ -123,7 +134,12 @@ function handleKeyDown(e: KeyboardEvent) {
 .dialogMd { width: 100%; max-width: 32rem; }
 .dialogLg { width: 100%; max-width: 40rem; }
 .dialogXl { width: 100%; max-width: 48rem; }
-.dialogFull { width: 100%; max-width: calc(100vw - 3rem); height: calc(100vh - 3rem); }
+.dialogFull {
+  width: 100%;
+  max-width: calc(100vw - 3rem);
+  height: calc(100vh - 3rem);
+  height: calc(100dvh - 3rem);
+}
 
 .header {
   display: flex;
@@ -164,6 +180,8 @@ function handleKeyDown(e: KeyboardEvent) {
 }
 
 .body {
+  flex: 1 1 auto;
+  min-height: 0;
   padding: 1.25rem;
   overflow-y: auto;
   font-size: var(--agala-font-size-base);
@@ -175,6 +193,7 @@ function handleKeyDown(e: KeyboardEvent) {
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  flex-wrap: wrap;
   gap: 0.75rem;
   padding: 0.875rem 1.25rem;
   border-top: var(--agala-border-width) solid hsl(var(--agala-border));
@@ -190,8 +209,16 @@ function handleKeyDown(e: KeyboardEvent) {
   .dialogMd,
   .dialogLg,
   .dialogXl {
+    width: 100%;
     max-width: calc(100vw - 2rem);
-    margin: 1rem auto;
+    max-height: calc(100vh - 2rem);
+    max-height: calc(100dvh - 2rem);
+  }
+
+  .dialogFull {
+    max-width: calc(100vw - 2rem);
+    height: calc(100vh - 2rem);
+    height: calc(100dvh - 2rem);
   }
 
   .header {
@@ -203,6 +230,7 @@ function handleKeyDown(e: KeyboardEvent) {
   }
 
   .footer {
+    align-items: stretch;
     padding: 0.75rem 1rem;
   }
 

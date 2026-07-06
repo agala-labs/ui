@@ -857,7 +857,7 @@ const AckDialog = {
     <section id="modal">
       <h2>Modal — Declarative</h2>
       <p class="muted" style="margin: 0 0 0.75rem; font-size: 0.875rem">
-        Shrinks to near-full-width on viewports below 640 px automatically.
+        Shrinks to near-full-width on viewports below 640 px, with the body scrolling separately from the header and footer.
       </p>
       <div class="row">
         <AgalaButton @click="basicOpen = true">Open Basic Modal</AgalaButton>
@@ -871,6 +871,7 @@ const AckDialog = {
         </p>
         <template #footer="{ close }">
           <AgalaButton variant="outline" size="sm" @click="close">Close</AgalaButton>
+          <AgalaButton variant="secondary" size="sm" @click="basicOpen = false">Review Later</AgalaButton>
           <AgalaButton size="sm" @click="basicOpen = false">Save Changes</AgalaButton>
         </template>
       </AgalaModal>
@@ -1443,7 +1444,7 @@ const AckDialog = {
     <section id="sidebar">
       <h2>Sidebar — Responsive sublevels</h2>
       <p class="muted" style="margin: 0 0 0.75rem; font-size: 0.875rem">
-        Data-driven navigation with nested branches. Auto-collapses to icon-only on tablet (640–768 px). Hidden on mobile (&lt;640 px) — use the toggle to open the Drawer.
+        Data-driven navigation with nested branches. Auto-collapses to icon-only on tablet (640–768 px). Hidden on mobile (&lt;640 px) — use the toggle to open the near-full-width Drawer.
       </p>
       <div style="border: 1px solid hsl(var(--agala-border)); border-radius: var(--agala-radius-lg); overflow: hidden">
         <AgalaNavbar>
@@ -1500,7 +1501,7 @@ const AckDialog = {
             <ul style="margin: 0.5rem 0; padding-left: 1.25rem">
               <li><strong>Desktop (&gt;768 px):</strong> full sidebar with optional manual collapse.</li>
               <li><strong>Tablet (640–768 px):</strong> auto-collapses to icon-only (64 px) with tooltips.</li>
-              <li><strong>Mobile (&lt;640 px):</strong> sidebar hidden; use the toggle to open the Drawer with expanded sublevels.</li>
+              <li><strong>Mobile (&lt;640 px):</strong> sidebar hidden; use the toggle to open a readable Drawer with expanded sublevels.</li>
             </ul>
             <p style="margin: 0.75rem 0 0">Active item: <strong>{{ sidebarActive }}</strong></p>
             <p style="margin: 0.25rem 0 0">Expanded: <strong>{{ sidebarExpanded.join(', ') || 'none' }}</strong></p>
