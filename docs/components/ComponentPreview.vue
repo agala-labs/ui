@@ -164,14 +164,14 @@ const events = [
     >
       <AgalaAlert
         variant="info"
-        title="New version available"
+        title="Sync paused"
       >
-        Review the release notes before updating.
+        Reconnect the warehouse before accepting new orders.
       </AgalaAlert><AgalaAlert
         variant="success"
-        title="Published"
+        title="Catalog synchronized"
       >
-        Your changes are live.
+        184 items were updated at 14:32.
       </AgalaAlert>
     </div>
     <div
@@ -202,7 +202,20 @@ const events = [
             v-model="selected"
             :options="options"
           />
-        </AgalaFormField><template #footer>
+        </AgalaFormField>
+        <AgalaFormField
+          label="Search inventory"
+          helper="Search by SKU, product, or warehouse."
+        >
+          <AgalaInput placeholder="Start typing…" />
+        </AgalaFormField>
+        <template #footer="{ close }">
+          <AgalaButton
+            variant="ghost"
+            @click="close"
+          >
+            Cancel
+          </AgalaButton>
           <AgalaButton @click="drawerOpen = false">
             Apply filters
           </AgalaButton>
@@ -413,13 +426,23 @@ const events = [
     </div>
     <AgalaCard
       v-else-if="slug === 'card'"
+      class="card-demo"
       accent="top"
     >
       <template #header>
-        <strong>Monthly usage</strong>
-      </template><p>8,420 of 10,000 included events processed.</p><template #footer>
+        <div class="card-demo__header">
+          <span>Warehouse sync</span><AgalaBadge
+            variant="success"
+            dot
+          >
+            Connected
+          </AgalaBadge>
+        </div>
+      </template><p class="card-demo__body">
+        Last completed today at 14:32. All 184 catalog items are up to date.
+      </p><template #footer>
         <AgalaButton variant="link">
-          View usage
+          View sync log
         </AgalaButton>
       </template>
     </AgalaCard>
@@ -518,5 +541,8 @@ const events = [
 .center-demo { height: 10rem; border: 1px dashed hsl(var(--agala-border)); }
 .icon-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
 .icon-grid span { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; }
+.card-demo { width: min(100%, 36rem); }
+.card-demo__header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.card-demo__body { margin: 0; color: hsl(var(--agala-muted-foreground)); }
 @media (max-width: 640px) { .icon-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 </style>

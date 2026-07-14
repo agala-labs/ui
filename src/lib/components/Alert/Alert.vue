@@ -8,6 +8,7 @@ const props = withDefaults(defineProps<AlertProps>(), {
   variant: 'info',
   dismissible: false,
   flat: false,
+  icon: undefined,
 })
 
 const dismissed = ref(false)
@@ -29,13 +30,33 @@ const cls = computed(() => [
 </script>
 
 <template>
-  <div v-if="!dismissed" role="alert" aria-atomic="true" :class="cls">
-    <span class="alert__icon" aria-hidden="true">
-      <AgalaIcon :name="(icon as IconName) || iconMap[props.variant]" :size="16" />
+  <div
+    v-if="!dismissed"
+    role="alert"
+    aria-atomic="true"
+    :class="cls"
+  >
+    <span
+      v-if="props.icon !== false"
+      class="alert__icon"
+      aria-hidden="true"
+    >
+      <AgalaIcon
+        :name="(props.icon as IconName) || iconMap[props.variant]"
+        :size="16"
+      />
     </span>
     <div class="alert__content">
-      <h4 v-if="props.title && !props.flat" class="alert__title">{{ props.title }}</h4>
-      <div v-if="$slots.default" class="alert__body">
+      <h4
+        v-if="props.title && !props.flat"
+        class="alert__title"
+      >
+        {{ props.title }}
+      </h4>
+      <div
+        v-if="$slots.default"
+        class="alert__body"
+      >
         <slot />
       </div>
     </div>
@@ -46,7 +67,10 @@ const cls = computed(() => [
       aria-label="Dismiss alert"
       @click="dismissed = true"
     >
-      <AgalaIcon name="x" :size="16" />
+      <AgalaIcon
+        name="x"
+        :size="16"
+      />
     </button>
   </div>
 </template>
@@ -55,35 +79,50 @@ const cls = computed(() => [
 .alert {
   display: flex;
   flex-direction: row;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--agala-alert-gap, 0.75rem);
-  padding: var(--agala-alert-padding, 0.75rem 1rem);
-  border-radius: var(--agala-alert-radius, calc(var(--agala-radius) - 2px));
-  border-left: var(--agala-alert-border-width, 4px) solid hsl(var(--alert-accent));
-  background: hsl(var(--alert-accent) / 0.1);
+  padding: var(--agala-alert-padding, 0.875rem 1rem);
+  border: var(--agala-alert-border-width, var(--agala-border-width)) solid var(--agala-alert-border-color, hsl(var(--alert-accent) / 0.28));
+  border-radius: var(--agala-alert-radius, var(--agala-radius-md));
+  background: var(--agala-alert-bg, hsl(var(--agala-card)));
+  box-shadow: var(--agala-alert-shadow, none);
   font-family: var(--agala-font-sans);
 }
 
-/* Variants — only set the accent variable */
-.alert--info     { --alert-accent: var(--agala-primary); }
-.alert--success  { --alert-accent: var(--agala-success); }
-.alert--warning  { --alert-accent: var(--agala-warning); }
-.alert--danger   { --alert-accent: var(--agala-danger); }
-
-/* When title is present, align items to top */
-.alert--has-title {
-  align-items: flex-start;
+/* Variants set a semantic pair for the compact status tile. */
+.alert--info {
+  --alert-accent: var(--agala-primary);
+  --alert-accent-foreground: var(--agala-primary-foreground);
+}
+.alert--success {
+  --alert-accent: var(--agala-success);
+  --alert-accent-foreground: var(--agala-success-foreground);
+}
+.alert--warning {
+  --alert-accent: var(--agala-warning);
+  --alert-accent-foreground: var(--agala-warning-foreground);
+}
+.alert--danger {
+  --alert-accent: var(--agala-danger);
+  --alert-accent-foreground: var(--agala-danger-foreground);
 }
 
-/* Flat variant — no background, no border, minimal icon+text */
+/* Flat variant — no surface, just a compact status cue and message. */
 .alert--flat {
   background: transparent;
-  border-left: none;
+  border: 0;
+  border-radius: 0;
   padding: var(--agala-alert-flat-padding, 0.25rem 0);
   gap: var(--agala-alert-flat-gap, 0.5rem);
 }
 .alert--flat .alert__icon {
-  margin-top: 0;
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0.125rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: hsl(var(--alert-accent));
 }
 .alert--flat .alert__body {
   color: hsl(var(--agala-muted-foreground));
@@ -95,10 +134,13 @@ const cls = computed(() => [
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: var(--agala-alert-icon-size, 1rem);
-  height: var(--agala-alert-icon-size, 1rem);
-  margin-top: 0.125rem;
-  color: hsl(var(--alert-accent));
+  width: var(--agala-alert-icon-size, 1.75rem);
+  height: var(--agala-alert-icon-size, 1.75rem);
+  margin-top: 0;
+  border: 0;
+  border-radius: var(--agala-alert-icon-radius, var(--agala-radius-md));
+  background: hsl(var(--alert-accent));
+  color: hsl(var(--alert-accent-foreground));
 }
 
 .alert__content {
@@ -114,7 +156,7 @@ const cls = computed(() => [
   font-weight: var(--agala-alert-title-weight, var(--agala-font-weight-semibold));
   font-size: var(--agala-alert-title-size, var(--agala-font-size-base));
   line-height: var(--agala-line-height-normal);
-  color: hsl(var(--alert-accent));
+  color: hsl(var(--agala-foreground));
   overflow-wrap: break-word;
 }
 
@@ -125,6 +167,10 @@ const cls = computed(() => [
   overflow-wrap: break-word;
 }
 
+.alert--has-title .alert__body {
+  color: hsl(var(--agala-muted-foreground));
+}
+
 .alert__dismiss {
   flex-shrink: 0;
   display: inline-flex;
@@ -132,19 +178,21 @@ const cls = computed(() => [
   justify-content: center;
   width: 1.5rem;
   height: 1.5rem;
+  margin: 0.125rem -0.25rem 0 0;
   padding: 0;
   border: none;
   border-radius: var(--agala-radius-sm);
   background: transparent;
   color: hsl(var(--agala-muted-foreground));
   cursor: pointer;
-  opacity: 0.5;
-  transition: opacity var(--agala-transition-fast), background var(--agala-transition-fast);
+  opacity: 0.72;
+  transition: opacity var(--agala-transition-fast), background var(--agala-transition-fast), color var(--agala-transition-fast);
 }
 
 .alert__dismiss:hover {
   opacity: 1;
-  background: hsl(var(--agala-muted-foreground) / 0.1);
+  background: hsl(var(--agala-muted));
+  color: hsl(var(--agala-foreground));
 }
 
 .alert__dismiss:focus-visible {
