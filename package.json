@@ -20,7 +20,10 @@
     "skills"
   ],
   "scripts": {
-    "dev": "vite",
+    "dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs",
+    "playground:dev": "vite",
     "build:lib": "vue-tsc --noEmit && vite build && cp src/lib/reset.css dist/reset.css && cp dist/agala-ui.es.js dist/agala-ui.browser.js && node -e \"require('fs').writeFileSync('dist/agala-ui.browser.js', require('fs').readFileSync('dist/agala-ui.es.js','utf-8').replace(/import '\\.\\/index\\.css';[^\\n]*\\n?/g, ''))\"",
     "lint": "eslint .",
     "preview": "vite preview",
@@ -42,6 +45,7 @@
     "vite": "^8.0.10",
     "vite-plugin-dts": "^4.5.3",
     "vite-plugin-lib-inject-css": "^2.2.1",
+    "vitepress": "^1.6.4",
     "vue-tsc": "^3.2.8"
   },
   "dependencies": {

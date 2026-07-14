@@ -1,0 +1,49 @@
+:root {
+  --vp-c-brand-1: hsl(var(--agala-primary));
+  --vp-c-brand-2: hsl(var(--agala-primary) / 0.88);
+  --vp-c-brand-3: hsl(var(--agala-primary) / 0.76);
+  --vp-c-brand-soft: hsl(var(--agala-primary) / 0.12);
+}
+
+html[data-theme='forja'] {
+  color-scheme: dark;
+  --vp-c-bg: hsl(var(--agala-background));
+  --vp-c-bg-alt: hsl(var(--agala-card));
+  --vp-c-bg-elv: hsl(var(--agala-popover));
+  --vp-c-text-1: hsl(var(--agala-foreground));
+  --vp-c-text-2: hsl(var(--agala-muted-foreground));
+  --vp-c-divider: hsl(var(--agala-border));
+}
+
+.VPDoc .container {
+  max-width: 1180px;
+}
+
+.VPDoc.has-aside .content-container {
+  max-width: 860px;
+}
+
+.vp-doc table {
+  display: table;
+  width: 100%;
+}
+
+.vp-doc table code {
+  white-space: nowrap;
+}
+
+.agala-doc-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.agala-doc-grid > * {
+  min-width: 0;
+}
+
+@media (max-width: 720px) {
+  .agala-doc-grid {
+    grid-template-columns: 1fr;
+  }
+}
