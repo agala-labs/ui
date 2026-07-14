@@ -39,6 +39,8 @@ export function useChartTheme() {
   function getBaseOption(type: 'line' | 'bar' | 'pie' | 'scatter' | 'radar' | 'gauge') {
     const t = readTokens()
     const colorPalette = getColorPalette()
+    const reduceMotion = typeof window !== 'undefined'
+      && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
     const base: Record<string, unknown> = {
       color: colorPalette,
@@ -47,7 +49,7 @@ export function useChartTheme() {
         fontFamily: getToken('--agala-font-sans', 'system-ui, sans-serif'),
         color: t.fg,
       },
-      animation: true,
+      animation: !reduceMotion,
       animationDuration: 500,
     }
 
@@ -56,6 +58,7 @@ export function useChartTheme() {
         ...base,
         tooltip: {
           trigger: 'item' as const,
+          confine: true,
           backgroundColor: t.bg,
           borderColor: t.border,
           borderWidth: 1,
@@ -63,6 +66,7 @@ export function useChartTheme() {
         },
         legend: {
           textStyle: { color: t.fg },
+          type: 'scroll' as const,
         },
       }
     }
@@ -72,6 +76,7 @@ export function useChartTheme() {
         ...base,
         tooltip: {
           trigger: 'item' as const,
+          confine: true,
           backgroundColor: t.bg,
           borderColor: t.border,
           borderWidth: 1,
@@ -80,6 +85,7 @@ export function useChartTheme() {
         legend: {
           textStyle: { color: t.fg },
           bottom: 0,
+          type: 'scroll' as const,
         },
         splitLineColor: t.border,
         axisLineColor: t.border,
@@ -100,6 +106,7 @@ export function useChartTheme() {
       ...base,
       tooltip: {
         trigger: isScatter ? ('item' as const) : ('axis' as const),
+        confine: true,
         backgroundColor: t.bg,
         borderColor: t.border,
         borderWidth: 1,

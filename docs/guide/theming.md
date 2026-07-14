@@ -42,13 +42,27 @@ The default theme responds to `prefers-color-scheme: dark`. Consumers do not nee
 
 ## Named themes
 
-Named product themes override tokens through an HTML data attribute. The bundled Forja theme uses:
+Named product themes ship as optional CSS entry points. Import the palette you need after the library, then apply its HTML data attribute:
 
 ```ts
-document.documentElement.setAttribute('data-theme', 'forja')
+import '@el-agala/ui/themes/main.css'
+
+document.documentElement.setAttribute('data-theme', 'main')
 ```
 
-Remove the attribute to return to the default theme. Load any fonts required by a named theme separately; the token stylesheet does not perform network requests.
+| Theme | Import | Selector | Character |
+| --- | --- | --- | --- |
+| Main | `@el-agala/ui/themes/main.css` | `main` | Agala Labs navy and electric blue |
+| Smaltt | `@el-agala/ui/themes/smaltt.css` | `smaltt` or `esmaltt` | Warm clinical canvas and teal |
+| Kervo | `@el-agala/ui/themes/kervo.css` | `kervo` | Operational navy and bright blue |
+
+For example, the Kervo theme can be selected with:
+
+```ts
+document.documentElement.setAttribute('data-theme', 'kervo')
+```
+
+Remove the attribute to return to the default theme and its automatic OS-level dark mode. Main, Smaltt, and Kervo are fixed light themes. Load any fonts required by a named theme separately because theme stylesheets do not perform network requests.
 
 ## Component-level customization
 

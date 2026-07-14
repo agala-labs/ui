@@ -1,0 +1,53 @@
+/* Smaltt — warm clinical canvas + teal brand
+ * Mirrors the canonical palette in smaltt-app. Both selector spellings are
+ * supported while existing applications continue to use "esmaltt".
+ */
+
+html[data-theme="smaltt"],
+html[data-theme="esmaltt"] {
+  color-scheme: light;
+
+  --agala-background: 40 20% 97%;
+  --agala-foreground: 220 14% 15%;
+  --agala-card: 0 0% 100%;
+  --agala-card-foreground: 220 14% 15%;
+  --agala-popover: 0 0% 100%;
+  --agala-popover-foreground: 220 14% 15%;
+  --agala-input-background: 0 0% 100%;
+
+  --agala-primary: 174 72% 35%;
+  --agala-primary-foreground: 220 14% 12%;
+  --agala-secondary: 210 20% 96%;
+  --agala-secondary-foreground: 220 14% 20%;
+  --agala-muted: 210 18% 96%;
+  --agala-muted-foreground: 220 9% 46%;
+  --agala-accent: 174 60% 95%;
+  --agala-accent-foreground: 174 72% 25%;
+
+  --agala-danger: 0 84% 45%;
+  --agala-danger-foreground: 0 0% 100%;
+  --agala-success: 145 63% 32%;
+  --agala-success-foreground: 0 0% 100%;
+  --agala-warning: 38 92% 48%;
+  --agala-warning-foreground: 0 0% 10%;
+  --agala-info: 217 91% 48%;
+  --agala-info-foreground: 0 0% 100%;
+
+  --agala-border: 220 13% 91%;
+  --agala-input: 220 13% 91%;
+  --agala-ring: 174 72% 35%;
+  --agala-overlay: 0 0% 0%;
+
+  --agala-radius-sm: 0.375rem;
+  --agala-radius: 0.625rem;
+  --agala-radius-md: 0.625rem;
+  --agala-radius-lg: 0.875rem;
+  --agala-shadow-xs: 0 1px 2px hsl(220 14% 15% / 0.04);
+  --agala-shadow-sm: 0 1px 3px hsl(220 14% 15% / 0.06), 0 1px 2px -1px hsl(220 14% 15% / 0.06);
+  --agala-shadow-md: 0 4px 6px -1px hsl(220 14% 15% / 0.06), 0 2px 4px -2px hsl(220 14% 15% / 0.06);
+  --agala-shadow-lg: 0 10px 15px -3px hsl(220 14% 15% / 0.06), 0 4px 6px -4px hsl(220 14% 15% / 0.06);
+
+  --agala-font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --agala-font-display: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  --agala-font-mono: 'JetBrains Mono', ui-monospace, monospace;
+}

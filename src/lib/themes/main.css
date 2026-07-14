@@ -1,0 +1,49 @@
+/* Agala Labs — navy + electric blue
+ * Usage: import "@el-agala/ui/themes/main.css" and set
+ * <html data-theme="main">.
+ */
+
+html[data-theme="main"] {
+  color-scheme: light;
+
+  --agala-background: 216 50% 98%;
+  --agala-foreground: 219 81% 18%; /* #092354 */
+  --agala-card: 0 0% 100%;
+  --agala-card-foreground: 219 81% 18%;
+  --agala-popover: 0 0% 100%;
+  --agala-popover-foreground: 219 81% 18%;
+  --agala-input-background: 0 0% 100%;
+
+  --agala-primary: 223 98% 50%; /* #0249FD */
+  --agala-primary-foreground: 0 0% 100%;
+  --agala-secondary: 216 45% 95%;
+  --agala-secondary-foreground: 219 81% 18%;
+  --agala-muted: 216 35% 95%;
+  --agala-muted-foreground: 218 20% 42%;
+  --agala-accent: 220 100% 96%;
+  --agala-accent-foreground: 223 88% 42%;
+
+  --agala-danger: 0 72% 46%;
+  --agala-danger-foreground: 0 0% 100%;
+  --agala-success: 158 74% 32%;
+  --agala-success-foreground: 0 0% 100%;
+  --agala-warning: 38 92% 48%;
+  --agala-warning-foreground: 219 81% 12%;
+  --agala-info: 197 92% 42%;
+  --agala-info-foreground: 0 0% 100%;
+
+  --agala-border: 216 30% 88%;
+  --agala-input: 216 30% 85%;
+  --agala-ring: 223 98% 50%;
+  --agala-overlay: 219 81% 10%;
+
+  --agala-radius: 0.625rem;
+  --agala-shadow-xs: 0 1px 2px hsl(219 81% 18% / 0.05);
+  --agala-shadow-sm: 0 1px 3px hsl(219 81% 18% / 0.08), 0 1px 2px -1px hsl(219 81% 18% / 0.06);
+  --agala-shadow-md: 0 8px 20px -6px hsl(219 81% 18% / 0.16);
+  --agala-shadow-lg: 0 18px 40px -12px hsl(219 81% 18% / 0.2);
+
+  --agala-font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --agala-font-display: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --agala-font-mono: 'JetBrains Mono', ui-monospace, monospace;
+}

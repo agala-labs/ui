@@ -1,8 +1,8 @@
-Agala UI - Agent Instructions
+Agala Labs UI - Agent Instructions
 
 ## Project Overview
 
-**Agala UI** (`@el-agala/ui`) is a Vue 3 component library with scoped CSS, semantic HSL design tokens, accessible primitives, and a companion charts workspace package.
+**Agala Labs UI** (`@el-agala/ui`, intended future name `@agala-labs/ui`) is a Vue 3 component library with scoped CSS, semantic HSL design tokens, accessible primitives, and a companion charts workspace package.
 
 - **Tech stack:** Vue 3 + TypeScript + Vite + scoped CSS. No CSS Modules.
 - **Runtime:** Vue peer dependency (`^3.3.0`); current source also uses `date-fns` for date/calendar utilities.
@@ -19,7 +19,9 @@ src/
 │   ├── index.ts
 │   ├── plugin.ts
 │   ├── themes/
-│   │   └── forja.css
+│   │   ├── main.css
+│   │   ├── smaltt.css
+│   │   └── kervo.css
 │   ├── composables/
 │   └── components/
 │       ├── AgalaIcon/
@@ -66,7 +68,7 @@ Component folders should expose local `index.ts` and `types.ts` when public type
   ```
 - Import `tokens.css` once through `src/lib/index.ts`.
 - Dark mode belongs in `tokens.css` via `@media (prefers-color-scheme: dark)`.
-- Theme overrides use selectors such as `html[data-theme="forja"]`.
+- Shipped theme overrides use `html[data-theme="main|smaltt|kervo"]`; Smaltt also supports the existing `esmaltt` value.
 - Prefer component-level CSS custom properties with token fallbacks for themeable values.
 
 ### Icons
@@ -90,6 +92,23 @@ Public components include Button, Input, FormField, Select, CreatableSelect, Dat
 
 Public utilities currently exported from `src/lib/index.ts` are `useMediaQuery` and date helpers. Other composables in `src/lib/composables` are internal unless explicitly exported.
 
+## AI Skill Maintenance
+
+The versioned consumer guidance shipped with this repository lives in:
+
+- `skills/agala-ui/SKILL.md` for `@el-agala/ui`.
+- `skills/agala-charts/SKILL.md` for `@el-agala/charts`.
+
+Update the affected skill in the same change whenever consumer-visible behavior changes. This includes adding, removing, or renaming components; changing props, defaults, emits, slots, `v-model` contracts, exports, plugin registration, icons, tokens, themes, public utilities, chart inputs, accessibility behavior, responsive behavior, or documented limitations.
+
+Keep skill content aligned with the current source and public docs:
+
+- Add new public APIs and examples when they become available.
+- Remove or correct renamed, deleted, or changed APIs immediately.
+- Do not describe internal composables or types as package imports unless the package entry point exports them.
+- Update the matching VitePress component or chart documentation when the same change affects public usage.
+- Internal refactors that do not affect consumers do not require a skill update.
+
 ## Build & Publish
 
 ### Scripts
@@ -106,13 +125,14 @@ npm run lint
 - `dist/agala-ui.es.js`
 - `dist/index.d.ts`
 - `dist/reset.css`
+- `dist/themes/{main,smaltt,kervo}.css`
 - `dist/agala-ui.browser.js` for browser import-map usage without CSS module import
 
 ### Package Config
 
 - ESM package.
 - Exported package root and `./reset.css`.
-- `files` includes `dist`, `AI_CONTEXT.md`, and `skills`.
+- `files` includes `dist` and the maintained `skills` directory.
 - Workspace package: `packages/charts`.
 
 ## Accessibility Standards
@@ -131,4 +151,4 @@ npm run lint
 - Do not revert unrelated local changes; this repo is actively edited.
 
 ---
-*Last updated: 2026-06-30*
+*Last updated: 2026-07-14*

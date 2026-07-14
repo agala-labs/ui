@@ -1,6 +1,8 @@
-# Agala UI
+# Agala Labs UI
 
-Agala is a Vue 3 component system with scoped CSS, semantic HSL design tokens, accessible interaction patterns, and an optional ECharts companion package.
+Agala Labs UI is a Vue 3 component system with scoped CSS, semantic HSL design tokens, accessible interaction patterns, and an optional ECharts companion package.
+
+The intended future package name is `@agala-labs/ui`. The published package remains `@el-agala/ui`, so current installation and import examples deliberately keep that name.
 
 ## Packages
 
@@ -47,6 +49,16 @@ import App from './App.vue'
 
 createApp(App).use(AgalaUI).mount('#app')
 ```
+
+Optional product themes are shipped as CSS subpaths:
+
+```ts
+import '@el-agala/ui/themes/main.css'
+
+document.documentElement.dataset.theme = 'main'
+```
+
+Available selectors are `main`, `smaltt` (also `esmaltt`), and `kervo`.
 
 ```vue
 <script setup lang="ts">

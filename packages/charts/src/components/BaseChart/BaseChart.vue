@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { shallowRef, onMounted, onUnmounted } from 'vue'
+import { onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
 import VChart from 'vue-echarts'
 import { use } from 'echarts/core'
 import {
@@ -70,9 +70,13 @@ const props = withDefaults(defineProps<Props>(), {
 
 const { getBaseOption, getColorPalette } = useChartTheme()
 const option = shallowRef<Record<string, unknown>>({})
+const rootRef = ref<HTMLElement | null>(null)
+const containerWidth = ref(0)
+let resizeObserver: ResizeObserver | null = null
 
 function buildOption() {
   const palette = getColorPalette()
+  const compact = containerWidth.value > 0 && containerWidth.value <= 480
 
   if (props.type === 'pie') {
     const base = getBaseOption(props.type) as Record<string, unknown>
@@ -86,11 +90,15 @@ function buildOption() {
       series: [
         {
           type: 'pie',
-          radius: ['35%', '60%'],
-          center: ['50%', '55%'],
+          radius: compact ? ['30%', '52%'] : ['35%', '60%'],
+          center: compact ? ['50%', '45%'] : ['50%', '55%'],
           avoidLabelOverlap: true,
           itemStyle: { borderRadius: 4, borderWidth: 2 },
-          label: { show: true, formatter: '{b}: {d}%' },
+          label: {
+            show: !compact,
+            formatter: '{b}: {d}%',
+            overflow: 'truncate',
+          },
           emphasis: {
             scale: false,
             itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: 'rgba(0,0,0,0.2)' },
@@ -143,10 +151,11 @@ function buildOption() {
       radar: {
         indicator: indicators,
         shape: 'polygon' as const,
-        radius: '65%',
+        radius: compact ? '52%' : '65%',
         splitNumber: 4,
         axisName: {
           color: (base.textStyle as Record<string, string>)?.color,
+          fontSize: compact ? 10 : 12,
         },
         splitLine: {
           lineStyle: { color: (base as Record<string, unknown>).splitLineColor as string || 'rgba(0,0,0,0.1)' },
@@ -191,7 +200,7 @@ function buildOption() {
         {
           type: 'gauge',
           center: ['50%', '60%'],
-          radius: '80%',
+          radius: compact ? '70%' : '80%',
           startAngle: 220,
           endAngle: -40,
           min: 0,
@@ -209,19 +218,19 @@ function buildOption() {
           },
           axisTick: { show: false },
           splitLine: { length: 8, lineStyle: { width: 2 } },
-          axisLabel: { distance: 16 },
+          axisLabel: { distance: compact ? 10 : 16, fontSize: compact ? 10 : 12 },
           pointer: { width: 4 },
           detail: {
             valueAnimation: true,
             formatter: `{value}`,
-            fontSize: 24,
+            fontSize: compact ? 20 : 24,
             color: (base.textStyle as Record<string, string>)?.color,
             offsetCenter: ['0%', '40%'],
           },
           title: {
             show: true,
             offsetCenter: ['0%', '70%'],
-            fontSize: 14,
+            fontSize: compact ? 12 : 14,
             color: (base.textStyle as Record<string, string>)?.color,
           },
           data: [{ value: val, name: props.datasets[0]?.name || '' }],
@@ -238,6 +247,18 @@ function buildOption() {
     xAxis: {
       ...((base.xAxis as Record<string, unknown>) || {}),
       data: props.labels,
+      axisLabel: {
+        ...((((base.xAxis as Record<string, unknown>)?.axisLabel as Record<string, unknown>) || {})),
+        hideOverlap: true,
+        fontSize: compact ? 10 : 12,
+      },
+    },
+    grid: {
+      ...((base.grid as Record<string, unknown>) || {}),
+      left: compact ? 8 : '3%',
+      right: compact ? 8 : '4%',
+      bottom: compact ? 8 : '3%',
+      containLabel: true,
     },
     series: props.datasets.map((ds, i) => {
       const color = ds.color || palette[i % palette.length]
@@ -282,6 +303,8 @@ function buildOption() {
 
 buildOption()
 
+watch(() => props, buildOption, { deep: true })
+
 /* ─── Theme reactivity ─── */
 let mo: MutationObserver | null = null
 let mq: MediaQueryList | null = null
@@ -291,6 +314,16 @@ function onThemeChange() {
 }
 
 onMounted(() => {
+  if (rootRef.value && typeof ResizeObserver !== 'undefined') {
+    resizeObserver = new ResizeObserver((entries) => {
+      const width = Math.round(entries[0]?.contentRect.width || 0)
+      if (width === containerWidth.value) return
+      containerWidth.value = width
+      buildOption()
+    })
+    resizeObserver.observe(rootRef.value)
+  }
+
   mo = new MutationObserver((mutations) => {
     for (const m of mutations) {
       if (m.type === 'attributes' && m.attributeName === 'data-theme') {
@@ -314,13 +347,18 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  resizeObserver?.disconnect()
   mo?.disconnect()
   mq?.removeEventListener('change', onThemeChange)
 })
 </script>
 
 <template>
-  <div class="base-chart" :style="{ height: `${props.height}px` }">
+  <div
+    ref="rootRef"
+    class="base-chart"
+    :style="{ height: `${props.height}px` }"
+  >
     <VChart
       :option="option"
       autoresize
@@ -333,5 +371,7 @@ onUnmounted(() => {
 .base-chart {
   position: relative;
   width: 100%;
+  min-width: 0;
+  overflow: hidden;
 }
 </style>

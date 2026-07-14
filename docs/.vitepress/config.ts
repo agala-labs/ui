@@ -42,12 +42,17 @@ const componentGroups = [
 }))
 
 export default defineConfig({
-  title: 'Agala',
-  description: 'Accessible Vue 3 components and charts, built on semantic design tokens.',
+  title: 'Agala Labs UI',
+  description: 'Accessible Vue 3 components and charts from Agala Labs, built on semantic design tokens.',
   cleanUrls: true,
   lastUpdated: true,
+  head: [
+    ['link', { rel: 'icon', type: 'image/png', href: '/brand/agala-labs-icon.png' }],
+    ['script', {}, "try{const theme=localStorage.getItem('agala-docs-theme')||'main';if(theme==='default')document.documentElement.removeAttribute('data-theme');else document.documentElement.dataset.theme=theme}catch{document.documentElement.dataset.theme='main'}"],
+  ],
   themeConfig: {
-    logo: '/favicon.svg',
+    appearance: false,
+    logo: '/brand/agala-labs-icon.png',
     search: { provider: 'local' },
     nav: [
       { text: 'Guide', link: '/guide/getting-started' },
@@ -80,7 +85,7 @@ export default defineConfig({
     },
     footer: {
       message: 'Released under the MIT License.',
-      copyright: 'Agala UI',
+      copyright: 'Agala Labs UI',
     },
   },
   vite: {

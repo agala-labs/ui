@@ -7,7 +7,9 @@ import ComponentDoc from '../../components/ComponentDoc.vue'
 import ChartGallery from '../../components/ChartGallery.vue'
 import ThemeControls from '../../components/ThemeControls.vue'
 import DocsLayout from '../../components/DocsLayout.vue'
-import '../../../src/lib/themes/forja.css'
+import '../../../src/lib/themes/main.css'
+import '../../../src/lib/themes/smaltt.css'
+import '../../../src/lib/themes/kervo.css'
 import './custom.css'
 
 const BaseChart = defineClientComponent(() =>

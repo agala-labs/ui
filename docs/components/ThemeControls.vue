@@ -1,18 +1,28 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 
-type Theme = 'default' | 'forja'
-const theme = ref<Theme>('default')
+type Theme = 'default' | 'main' | 'smaltt' | 'kervo'
+
+const themes: ReadonlyArray<{ value: Theme, label: string }> = [
+  { value: 'default', label: 'Default' },
+  { value: 'main', label: 'Main' },
+  { value: 'smaltt', label: 'Smaltt' },
+  { value: 'kervo', label: 'Kervo' },
+]
+
+const theme = ref<Theme>('main')
 
 function apply(value: Theme) {
   theme.value = value
   if (typeof document === 'undefined') return
-  if (value === 'forja') document.documentElement.setAttribute('data-theme', 'forja')
-  else document.documentElement.removeAttribute('data-theme')
+  if (value === 'default') document.documentElement.removeAttribute('data-theme')
+  else document.documentElement.setAttribute('data-theme', value)
+  localStorage.setItem('agala-docs-theme', value)
 }
 
 onMounted(() => {
-  theme.value = document.documentElement.dataset.theme === 'forja' ? 'forja' : 'default'
+  const selected = document.documentElement.dataset.theme
+  theme.value = themes.some(item => item.value === selected) ? selected as Theme : 'default'
 })
 </script>
 
@@ -23,13 +33,14 @@ onMounted(() => {
   >
     <span>Preview theme</span>
     <AgalaButton
-      v-for="value in (['default', 'forja'] as const)"
-      :key="value"
+      v-for="item in themes"
+      :key="item.value"
       size="sm"
-      :variant="theme === value ? 'default' : 'outline'"
-      @click="apply(value)"
+      :variant="theme === item.value ? 'default' : 'outline'"
+      :aria-pressed="theme === item.value"
+      @click="apply(item.value)"
     >
-      {{ value === 'default' ? 'Default' : 'Forja' }}
+      {{ item.label }}
     </AgalaButton>
   </div>
 </template>

@@ -1,0 +1,62 @@
+/* Kervo — operational navy + electric blue
+ * Mirrors the reusable design tokens in kervo-app without its app-specific
+ * global selectors and layout overrides.
+ */
+
+html[data-theme="kervo"] {
+  color-scheme: light;
+
+  --agala-background: 204 46% 97.8%;
+  --agala-foreground: 220 49% 8.4%;
+  --agala-card: 0 0% 100%;
+  --agala-card-foreground: 220 49% 8.4%;
+  --agala-popover: 0 0% 100%;
+  --agala-popover-foreground: 220 49% 8.4%;
+  --agala-input-background: 0 0% 100%;
+
+  --agala-primary: 225 97% 58%;
+  --agala-primary-foreground: 0 0% 100%;
+  --agala-secondary: 210 40% 96%;
+  --agala-secondary-foreground: 220 49% 18%;
+  --agala-muted: 210 40% 96.1%;
+  --agala-muted-foreground: 215 19% 34.5%;
+  --agala-accent: 220 100% 95.9%;
+  --agala-accent-foreground: 224 76% 48%;
+
+  --agala-success: 160 84% 39%;
+  --agala-success-foreground: 220 49% 8.4%;
+  --agala-warning: 38 92% 50%;
+  --agala-warning-foreground: 220 49% 8.4%;
+  --agala-danger: 0 84% 60%;
+  --agala-danger-foreground: 220 49% 8.4%;
+  --agala-info: 189 95% 43%;
+  --agala-info-foreground: 220 49% 8.4%;
+
+  --agala-border: 213 30% 88.2%;
+  --agala-input: 213 30% 88.2%;
+  --agala-ring: 225 97% 58%;
+  --agala-overlay: 210 63% 8%;
+  --agala-navy: 210 63% 15%;
+
+  --agala-radius: 0.625rem;
+  --agala-shadow-xs: 0 1px 2px hsl(210 60% 10% / 0.04);
+  --agala-shadow-sm: 0 1px 2px hsl(210 60% 10% / 0.04), 0 8px 24px hsl(210 60% 10% / 0.05);
+  --agala-shadow-md: 0 8px 24px hsl(210 60% 10% / 0.08);
+  --agala-shadow-lg: 0 16px 40px hsl(210 60% 10% / 0.12);
+
+  --agala-card-shadow: none;
+  --agala-card-border: 1px solid hsl(213 30% 88.2%);
+  --agala-card-header-border: 0;
+  --agala-stat-bg: hsl(var(--agala-card));
+  --agala-stat-border: 1px solid hsl(213 30% 88.2%);
+  --agala-stat-shadow: none;
+  --agala-stat-label-spacing: 0;
+  --agala-navbar-bg: hsl(0 0% 100%);
+  --agala-navbar-border: 1px solid hsl(213 30% 88.2%);
+  --agala-navbar-padding: 0 1.25rem 0 1rem;
+  --agala-navbar-shadow: none;
+
+  --agala-font-sans: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --agala-font-display: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --agala-font-mono: 'Geist Mono', ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
+}

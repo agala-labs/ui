@@ -5,14 +5,38 @@
   --vp-c-brand-soft: hsl(var(--agala-primary) / 0.12);
 }
 
-html[data-theme='forja'] {
-  color-scheme: dark;
+html[data-theme] {
   --vp-c-bg: hsl(var(--agala-background));
   --vp-c-bg-alt: hsl(var(--agala-card));
   --vp-c-bg-elv: hsl(var(--agala-popover));
+  --vp-c-bg-soft: hsl(var(--agala-muted));
+  --vp-c-border: hsl(var(--agala-border));
   --vp-c-text-1: hsl(var(--agala-foreground));
   --vp-c-text-2: hsl(var(--agala-muted-foreground));
+  --vp-c-text-3: hsl(var(--agala-muted-foreground) / 0.72);
   --vp-c-divider: hsl(var(--agala-border));
+  --vp-c-gutter: hsl(var(--agala-border));
+  --vp-c-neutral: hsl(var(--agala-foreground));
+  --vp-c-neutral-inverse: hsl(var(--agala-background));
+  --vp-c-default-1: hsl(var(--agala-secondary-foreground));
+  --vp-c-default-2: hsl(var(--agala-muted-foreground));
+  --vp-c-default-3: hsl(var(--agala-border));
+  --vp-c-default-soft: hsl(var(--agala-muted));
+  --vp-code-block-bg: hsl(var(--agala-muted));
+  --vp-code-tab-bg: hsl(var(--agala-card));
+}
+
+.VPNavBarTitle .logo {
+  width: auto;
+  max-width: 1.65rem;
+  height: 1.85rem;
+  object-fit: contain;
+}
+
+.VPHero .image-src {
+  width: min(30rem, 100%);
+  max-height: 18rem;
+  object-fit: contain;
 }
 
 .VPDoc .container {
@@ -24,12 +48,29 @@ html[data-theme='forja'] {
 }
 
 .vp-doc table {
-  display: table;
+  display: block;
   width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
 }
 
 .vp-doc table code {
   white-space: nowrap;
+}
+
+.vp-doc,
+.vp-doc > div,
+.component-doc {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.vp-doc pre,
+.vp-doc div[class*='language-'] {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
 }
 
 .agala-doc-grid {
@@ -43,6 +84,24 @@ html[data-theme='forja'] {
 }
 
 @media (max-width: 720px) {
+  .VPHero .main {
+    width: 100%;
+    min-width: 0;
+    flex-shrink: 1;
+  }
+
+  .VPHero .name,
+  .VPHero .text,
+  .VPHero .tagline {
+    width: auto;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+
+  .VPHero .image-src {
+    max-height: 12rem;
+  }
+
   .agala-doc-grid {
     grid-template-columns: 1fr;
   }

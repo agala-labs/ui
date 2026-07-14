@@ -25,7 +25,7 @@ Series colors begin with `--agala-primary`, `--agala-success`, `--agala-warning`
 }
 ```
 
-`BaseChart` reacts to `data-theme` changes and `prefers-color-scheme` changes. Named themes such as Forja therefore update UI and chart components together.
+`BaseChart` reacts to `data-theme` changes and `prefers-color-scheme` changes. Main, Smaltt, and Kervo therefore update UI and chart components together.
 
 ## Per-series color
 

@@ -4,7 +4,9 @@ outline: deep
 
 # Getting started
 
-Agala UI is a Vue 3 component library built with scoped CSS and semantic HSL design tokens. Components can be imported individually or registered through the plugin.
+Agala Labs UI is a Vue 3 component library built with scoped CSS and semantic HSL design tokens. Components can be imported individually or registered through the plugin.
+
+The intended future package name is `@agala-labs/ui`. For now, install and import the currently published `@el-agala/ui` package.
 
 ## Install
 

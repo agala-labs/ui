@@ -7,7 +7,7 @@ import AgalaIcon from '../lib/components/AgalaIcon/AgalaIcon.vue'
 import type { TableColumn, TabItem, CalendarEvent, CalendarView, FileItem, SidebarNode } from '../lib'
 
 /* ─── Theme ─── */
-type Theme = 'default' | 'forja' | 'custom'
+type Theme = 'default' | 'main' | 'smaltt' | 'kervo' | 'custom'
 const activeTheme = ref<Theme>('default')
 const customThemeCss = ref(`/* Paste your custom theme CSS here */
 :root {
@@ -37,11 +37,9 @@ function resetCustomTheme() {
 }
 
 watch(activeTheme, (t) => {
-  if (t === 'forja') {
-    document.documentElement.setAttribute('data-theme', 'forja')
-    if (customStyleEl.value) customStyleEl.value.textContent = ''
-  } else if (t !== 'custom') {
-    document.documentElement.removeAttribute('data-theme')
+  if (t !== 'custom') {
+    if (t === 'default') document.documentElement.removeAttribute('data-theme')
+    else document.documentElement.setAttribute('data-theme', t)
     if (customStyleEl.value) customStyleEl.value.textContent = ''
   }
 }, { immediate: true })
@@ -472,7 +470,7 @@ const AckDialog = {
     <span class="themebar__label">Theme</span>
     <div class="themebar__pills">
       <button
-        v-for="t in (['default', 'forja'] as const)"
+        v-for="t in (['default', 'main', 'smaltt', 'kervo'] as const)"
         :key="t"
         class="themebar__pill"
         :class="{ 'themebar__pill--active': activeTheme === t }"
@@ -1377,11 +1375,40 @@ const AckDialog = {
         :title="`${drawerPlacement.charAt(0).toUpperCase() + drawerPlacement.slice(1)} Drawer`"
         @close="drawerOpen = false"
       >
-        <p style="margin: 0 0 1rem">This is a slide-in drawer from the <strong>{{ drawerPlacement }}</strong>.</p>
-        <p class="muted" style="font-size: 0.875rem; margin: 0">Press Escape, click the backdrop, or the X button to close.</p>
+        <div class="stack">
+          <p style="margin: 0">
+            Narrow the catalog by fulfillment state and warehouse.
+          </p>
+          <AgalaFormField label="Warehouse">
+            <AgalaSelect
+              v-model="searchCountry"
+              :options="countryOptions"
+              placeholder="All warehouses"
+            />
+          </AgalaFormField>
+          <AgalaFormField
+            label="SKU or product"
+            helper="Partial matches are supported."
+          >
+            <AgalaInput placeholder="Search inventory…" />
+          </AgalaFormField>
+          <AgalaAlert
+            variant="info"
+            title="184 products available"
+          >
+            Filters apply to the current warehouse view.
+          </AgalaAlert>
+        </div>
         <template #footer="{ close }">
-          <AgalaButton variant="outline" size="sm" @click="close">Cancel</AgalaButton>
-          <AgalaButton size="sm" @click="drawerOpen = false">Save</AgalaButton>
+          <AgalaButton
+            variant="ghost"
+            @click="close"
+          >
+            Cancel
+          </AgalaButton>
+          <AgalaButton @click="drawerOpen = false">
+            Apply filters
+          </AgalaButton>
         </template>
       </AgalaDrawer>
     </section>
@@ -1524,7 +1551,7 @@ const AckDialog = {
           theme by setting <code>data-theme</code> on the root element.
         </AgalaAccordionItem>
         <AgalaAccordionItem value="q3" title="Can I use a custom theme?">
-          Absolutely. Override any token in your project's CSS. The Forja theme above is an example — one CSS file
+          Absolutely. Override any token in your project's CSS. The named themes above demonstrate how one CSS file
           changes the entire look of the library.
         </AgalaAccordionItem>
         <AgalaAccordionItem value="q4" title="Disabled item (cannot open)" :disabled="true">
@@ -1635,7 +1662,7 @@ const AckDialog = {
         </template>
       </AgalaCard>
 
-      <h2 style="margin-top: 1.5rem">Card — Accent Borders</h2>
+      <h2 style="margin-top: 1.5rem">Card — Inset Accents</h2>
       <div class="row" style="align-items: flex-start">
         <AgalaCard accent="top" accent-color="primary" style="width: 180px">
           <template #header>Top Primary</template>
@@ -1937,6 +1964,25 @@ const AckDialog = {
         <AgalaAlert variant="success" flat>Changes saved.</AgalaAlert>
         <AgalaAlert variant="warning" flat>Session expires in 5 minutes.</AgalaAlert>
         <AgalaAlert variant="danger" flat>Connection lost. Reconnecting…</AgalaAlert>
+      </div>
+
+      <h2 style="margin-top: 1.5rem">
+        Alert — Icon control
+      </h2>
+      <div class="stack" style="max-width: 600px">
+        <AgalaAlert
+          variant="info"
+          icon="bell"
+          title="Notifications paused"
+        >
+          Re-enable notifications when the maintenance window ends.
+        </AgalaAlert>
+        <AgalaAlert
+          variant="warning"
+          :icon="false"
+        >
+          Inventory counts have not been reconciled today.
+        </AgalaAlert>
       </div>
     </section>
 

@@ -127,7 +127,7 @@ interface ChartDataset {
 
 Themes are automatic. `useChartTheme` reads `--agala-*` HSL tokens from `document.documentElement` at runtime and passes them to ECharts.
 
-- Responds to `data-theme` attribute changes (e.g. `data-theme="forja"`)
+- Responds to supported `data-theme` changes such as `main`, `smaltt`, and `kervo`
 - Responds to `prefers-color-scheme: dark` media query
 - Uses `MutationObserver` + `matchMedia` for reactivity
 - Colors are read fresh on each chart render — no caching

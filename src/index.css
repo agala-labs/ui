@@ -1,5 +1,7 @@
 @import './lib/tokens.css';
-@import './lib/themes/forja.css';
+@import './lib/themes/main.css';
+@import './lib/themes/smaltt.css';
+@import './lib/themes/kervo.css';
 
 * {
   box-sizing: border-box;
