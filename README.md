@@ -1,73 +1,67 @@
-# React + TypeScript + Vite
+# Agala UI
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Agala is a Vue 3 component system with scoped CSS, semantic HSL design tokens, accessible interaction patterns, and an optional ECharts companion package.
 
-Currently, two official plugins are available:
+## Packages
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- `@el-agala/ui` — forms, navigation, overlays, data display, layout primitives, tokens, themes, and date utilities.
+- `@el-agala/charts` — line, bar, pie, scatter, radar, gauge, and stacked charts powered by Apache ECharts.
 
-## React Compiler
+## Local documentation
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+The VitePress site includes getting-started guidance, theming, accessibility, the complete component API catalog, live examples, and the charts gallery.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run docs:build
+npm run docs:preview
 ```
+
+The original all-components stress-test surface remains available to maintainers:
+
+```bash
+npm run playground:dev
+```
+
+## Library development
+
+```bash
+npm run lint
+npm run build:lib
+npm run build --workspace @el-agala/charts
+```
+
+The UI package is ESM and requires Vue `^3.3.0` as a peer dependency. Charts are published separately and depend on `echarts` and `vue-echarts`.
+
+## Usage
+
+```ts
+import { createApp } from 'vue'
+import { AgalaUI } from '@el-agala/ui'
+import '@el-agala/ui/reset.css'
+import App from './App.vue'
+
+createApp(App).use(AgalaUI).mount('#app')
+```
+
+```vue
+<script setup lang="ts">
+import { BaseChart } from '@el-agala/charts'
+</script>
+
+<template>
+  <BaseChart
+    type="line"
+    :labels="['Jan', 'Feb', 'Mar']"
+    :datasets="[{ name: 'Revenue', data: [120, 180, 240] }]"
+  />
+</template>
+```
+
+## License
+
+MIT
