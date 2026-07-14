@@ -1,14 +1,14 @@
 ---
 name: agala-ui
 description: >
-  Expert knowledge for working on or consuming @el-agala/ui, the Agala Vue 3
-  component library. Use when the user mentions Agala UI, @el-agala/ui,
+  Expert knowledge for working on or consuming @el-agala/ui, the Agala Labs Vue 3
+  component library. Use when the user mentions Agala UI, Agala Labs UI, @el-agala/ui,
   the UI package in this repo, its design tokens, or any Agala component.
 ---
 
-# Agala UI
+# Agala Labs UI
 
-`@el-agala/ui` is a Vue 3 + TypeScript component library built with Vite, scoped CSS, HSL design tokens, and accessible primitives. Vue is the peer dependency (`^3.3.0`); current source also uses `date-fns` for date utilities and calendar/date components.
+`@el-agala/ui` is the currently published name of Agala Labs UI, a Vue 3 + TypeScript component library built with Vite, scoped CSS, HSL design tokens, and accessible primitives. The intended future package name is `@agala-labs/ui`; use `@el-agala/ui` in executable examples until the package migration occurs. Vue is the peer dependency (`^3.3.0`); current source also uses `date-fns` for date utilities and calendar/date components.
 
 ## First Checks
 
@@ -26,7 +26,7 @@ description: >
 - Component CSS stays in `<style scoped>`.
 - Prefer component-level CSS custom properties with token fallbacks, e.g. `--agala-btn-radius`, `--agala-input-bg`.
 - Dark mode is handled in tokens via `@media (prefers-color-scheme: dark)`.
-- Custom themes use attributes such as `html[data-theme="forja"]`; `src/lib/themes/forja.css` is the local theme example.
+- Shipped themes use `html[data-theme="main|smaltt|kervo"]`; Smaltt also supports `data-theme="esmaltt"` for compatibility.
 - Focus rings use `box-shadow` and `--agala-ring`; disabled states should combine native `disabled`/ARIA with `pointer-events: none` and reduced opacity.
 
 ## Imports
@@ -37,6 +37,16 @@ import '@el-agala/ui/reset.css'
 
 app.use(AgalaUI)
 ```
+
+Named themes are optional CSS imports:
+
+```ts
+import '@el-agala/ui/themes/main.css'
+
+document.documentElement.dataset.theme = 'main'
+```
+
+Available theme entry points are `main.css`, `smaltt.css`, and `kervo.css` under `@el-agala/ui/themes/`. The default token stylesheet remains automatic light/dark; named product themes are fixed light themes.
 
 All public component names use the `Agala` prefix. Internal implementation files may use unprefixed local imports.
 
@@ -77,17 +87,17 @@ Internal source composables include `useSelectFilter`, `useChipDisplay`, `useKey
 - `AgalaModal`: `v-model:open`, `title`, `size sm|md|lg|xl|full`, `dismissible`, `escapeCloses`, `hideHeader`; footer slot receives `{ close }`.
 - `modalManager.open(component, options)`: requires one root `AgalaModalProvider`.
 - `toastManager.show(options)`: requires one root `AgalaToastProvider`; variants `default|success|warning|danger`, `duration: 0` means persistent.
-- `AgalaDrawer`: controlled with `:open` and `@close`; `placement left|right|top|bottom`, `size`, `title`, `dismissible`, `escapeCloses`; slots `header`, default, `footer` with `{ close }`.
+- `AgalaDrawer`: controlled with `:open` and `@close`; `placement left|right|top|bottom`, viewport-clamped `size`, `title`, `dismissible`, `escapeCloses`; slots `header`, default, `footer` with `{ close }`. It traps and restores focus, locks background scroll, and scrolls its body independently from header/footer.
 - `AgalaFileUpload`: `v-model` `FileItem[]`, `variant dropzone|inline`, `accept`, `multiple`, `maxSize`, `maxFiles`, labels/text props; emits `change`, `remove`, `error`.
 - `AgalaSidebar`: either pass structured `items` or use slots. Supports `v-model:collapsed`, `v-model:open`, `v-model:activeValue`, `v-model:expanded`, `defaultExpanded`, `indent compact|comfortable`, `responsive`, `width`, `collapsedWidth`; emits `select`. Tree items support `children`, badges, dots, icons, hrefs, disabled state.
 - `AgalaSidebarItem`: `icon`, `label`, `active`, `badge`, `badgeVariant`, `dot`, `dotVariant`, `disabled`; slots `icon` and default.
 - `AgalaSidebarToggle`: emits `click`; props `ariaExpanded`, `ariaControls`, `ariaLabel`.
 - `AgalaListGroup`: `variant divided|cards`, `gap`, `borderless`, `dividers`; `AgalaListGroupItem` has label/subtitle/icon/badge/actionIcon/radius and `leading`, default, `trailing`, `badge` slots.
-- `AgalaCard`: `padding none|sm|md|lg`, `headerVariant default|compact`, `accent top|left|right|bottom`, `accentColor`; slots `header`, default, `footer`.
+- `AgalaCard`: quiet outlined content container with no default elevation; `padding none|sm|md|lg`, `headerVariant default|compact`, `accent top|left|right|bottom`, `accentColor`; slots `header`, default, `footer`. Accents render as short inset edge markers rather than full-edge borders.
 - `AgalaStat`: `label`, `value`, `trend`, `trendLabel`, `icon`, `iconBg`, `layout vertical|row|inline`, `bordered`, `labelTransform`.
 - `AgalaBadge`: `variant default|secondary|outline|subtle|success|warning|danger`, `size sm|md`, `dot`, `color`.
 - `AgalaTag`: `label`, `variant default|primary|secondary|success|warning|danger|outline`, `size sm|md`, `removable`, `disabled`, `color`; emits `remove` and `click`.
-- `AgalaAlert`: `variant info|success|warning|danger`, `title`, `dismissible`, `flat`, `icon?: string|false`; default slot for body. Dismissal is internal and does not emit.
+- `AgalaAlert`: neutral message surface with semantic outline/icon treatment; `variant info|success|warning|danger`, `title`, `dismissible`, `flat`, `icon?: string|false`; default slot for body. Set `icon=false` to hide the icon. Dismissal is internal and does not emit.
 - `AgalaProgress`: `variant linear|circular`, `value`, `size sm|md|lg`, `color primary|success|warning|danger`, `indeterminate`.
 - `AgalaAvatar`: `src`, `alt`, `fallback`, `size xs|sm|md|lg|xl`, `shape circle|rounded|square`.
 - `AgalaAccordion`/`AgalaAccordionItem`: `multiple`; items use `value`, `title`, `disabled`.
@@ -111,6 +121,7 @@ Prefer existing icons and boolean/string icon props over adding icon slots unles
 - When using `useDropdownPosition`, recompute after `nextTick()` and `requestAnimationFrame()` on open, and pass a floating ref for second-pass collision handling.
 - `usePopoverBehavior` centralizes outside-click, scroll-close, and resize-reposition behavior. Call it in `<script setup>`, not inside callbacks.
 - Layout responsiveness should be CSS-first. Use `useMediaQuery` only for JS enhancements such as closing mobile drawers or scrolling active tabs.
+- At 320px and wider, components must not create document-level horizontal overflow. Tables and long tab strips may scroll inside their own bounds; teleported popovers must remain within an 8px viewport margin.
 
 ## Build And Verification
 

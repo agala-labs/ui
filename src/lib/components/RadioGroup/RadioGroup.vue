@@ -86,6 +86,7 @@ function select(option: RadioOption) {
   gap: 0.5rem;
   cursor: pointer;
   user-select: none;
+  min-width: 0;
 }
 
 .radioItemDisabled {
@@ -152,5 +153,6 @@ function select(option: RadioOption) {
   font-size: var(--agala-font-size-base);
   color: hsl(var(--agala-foreground));
   line-height: var(--agala-line-height-normal);
+  overflow-wrap: anywhere;
 }
 </style>

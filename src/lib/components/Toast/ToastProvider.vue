@@ -18,13 +18,15 @@ import { toastManager } from './ToastManager'
 <style scoped>
 .toastContainer {
   position: fixed;
-  bottom: 1.5rem;
-  right: 1.5rem;
+  right: max(0.75rem, env(safe-area-inset-right));
+  bottom: max(0.75rem, env(safe-area-inset-bottom));
+  width: min(24rem, calc(100vw - 1.5rem));
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   z-index: var(--agala-z-modal);
   pointer-events: none;
+  align-items: flex-end;
 }
 
 .toastContainer > :deep(*) {

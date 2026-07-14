@@ -718,6 +718,7 @@ watch(highlightedIdx, () => {
 
 /* ── Dropdown ── */
 .dropdown {
+  box-sizing: border-box;
   z-index: var(--agala-z-dropdown);
   display: flex;
   flex-direction: column;

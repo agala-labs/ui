@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { nextTick, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
+import { useBodyScrollLock } from '../../composables/useBodyScrollLock'
 import { AgalaIcon } from '../AgalaIcon'
 import type { ModalSize } from './types'
 
@@ -12,6 +13,7 @@ const props = withDefaults(defineProps<{
   escapeCloses?: boolean
 }>(), {
   size: 'md',
+  title: undefined,
   hideHeader: false,
   dismissible: true,
   escapeCloses: true,
@@ -19,9 +21,19 @@ const props = withDefaults(defineProps<{
 
 const emit = defineEmits<{
   close: []
+  'update:open': [value: boolean]
 }>()
 
 const dialogRef = ref<HTMLElement | null>(null)
+const isOpen = computed(() => props.open)
+let previouslyFocused: HTMLElement | null = null
+
+useBodyScrollLock(isOpen)
+
+function requestClose() {
+  emit('update:open', false)
+  emit('close')
+}
 
 const sizeMap: Record<ModalSize, string> = {
   sm: 'dialogSm',
@@ -35,26 +47,65 @@ function handleBackdropClick(e: MouseEvent) {
   const target = e.target as HTMLElement
   const current = e.currentTarget as HTMLElement
   if (target === current && props.dismissible) {
-    emit('close')
+    requestClose()
   }
 }
 
 function handleKeyDown(e: KeyboardEvent) {
   if (e.key === 'Escape' && props.escapeCloses) {
     e.preventDefault()
-    emit('close')
+    requestClose()
+    return
+  }
+
+  if (e.key !== 'Tab') return
+  const focusable = getFocusableElements()
+  if (focusable.length === 0) {
+    e.preventDefault()
+    dialogRef.value?.focus()
+    return
+  }
+
+  const first = focusable[0]
+  const last = focusable[focusable.length - 1]
+  if (e.shiftKey && (document.activeElement === first || document.activeElement === dialogRef.value)) {
+    e.preventDefault()
+    last?.focus()
+  } else if (!e.shiftKey && document.activeElement === last) {
+    e.preventDefault()
+    first?.focus()
   }
 }
 
+function getFocusableElements() {
+  if (!dialogRef.value) return []
+  return Array.from(dialogRef.value.querySelectorAll<HTMLElement>(
+    'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+  )).filter(element => !element.hidden && element.getAttribute('aria-hidden') !== 'true')
+}
+
 watch(() => props.open, async (open) => {
-  if (!open) return
+  if (open) {
+    previouslyFocused = document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : null
+    await nextTick()
+    const autofocus = dialogRef.value?.querySelector<HTMLElement>('[autofocus]')
+    ;(autofocus || getFocusableElements()[0] || dialogRef.value)?.focus({ preventScroll: true })
+    return
+  }
+
   await nextTick()
-  dialogRef.value?.focus()
+  if (previouslyFocused?.isConnected) previouslyFocused.focus({ preventScroll: true })
+  previouslyFocused = null
 })
 </script>
 
 <template>
-  <Teleport to="body" v-if="open">
+  <Teleport
+    v-if="open"
+    to="body"
+  >
     <div
       class="overlay"
       role="presentation"
@@ -66,18 +117,30 @@ watch(() => props.open, async (open) => {
         :class="[ 'dialog', sizeMap[size] ].filter(Boolean).join(' ')"
         role="dialog"
         aria-modal="true"
+        :aria-label="title || 'Dialog'"
         tabindex="-1"
       >
-        <div v-if="!hideHeader" class="header">
-          <h2 v-if="title" class="title">{{ title }}</h2>
+        <div
+          v-if="!hideHeader"
+          class="header"
+        >
+          <h2
+            v-if="title"
+            class="title"
+          >
+            {{ title }}
+          </h2>
           <span v-else />
           <button
             type="button"
             class="closeBtn"
-            @click="$emit('close')"
             aria-label="Close dialog"
+            @click="requestClose"
           >
-            <AgalaIcon name="x" :size="16" />
+            <AgalaIcon
+              name="x"
+              :size="16"
+            />
           </button>
         </div>
 
@@ -85,8 +148,14 @@ watch(() => props.open, async (open) => {
           <slot />
         </div>
 
-        <div v-if="$slots.footer" class="footer">
-          <slot name="footer" :close="() => emit('close')" />
+        <div
+          v-if="$slots.footer"
+          class="footer"
+        >
+          <slot
+            name="footer"
+            :close="requestClose"
+          />
         </div>
       </div>
     </div>
@@ -104,6 +173,7 @@ watch(() => props.open, async (open) => {
   padding: 1.5rem;
   background-color: hsl(var(--agala-overlay) / 0.4);
   animation: fadeIn 180ms ease-out;
+  overscroll-behavior: contain;
 }
 
 @keyframes fadeIn {
@@ -184,6 +254,7 @@ watch(() => props.open, async (open) => {
   min-height: 0;
   padding: 1.25rem;
   overflow-y: auto;
+  overscroll-behavior: contain;
   font-size: var(--agala-font-size-base);
   line-height: var(--agala-line-height-relaxed);
   color: hsl(var(--agala-card-foreground));
@@ -202,7 +273,11 @@ watch(() => props.open, async (open) => {
 
 @media (max-width: 639px) {
   .overlay {
-    padding: 1rem;
+    padding:
+      max(0.75rem, env(safe-area-inset-top))
+      max(0.75rem, env(safe-area-inset-right))
+      max(0.75rem, env(safe-area-inset-bottom))
+      max(0.75rem, env(safe-area-inset-left));
   }
 
   .dialogSm,
@@ -210,15 +285,15 @@ watch(() => props.open, async (open) => {
   .dialogLg,
   .dialogXl {
     width: 100%;
-    max-width: calc(100vw - 2rem);
-    max-height: calc(100vh - 2rem);
-    max-height: calc(100dvh - 2rem);
+    max-width: calc(100vw - 1.5rem);
+    max-height: calc(100vh - 1.5rem);
+    max-height: calc(100dvh - 1.5rem);
   }
 
   .dialogFull {
-    max-width: calc(100vw - 2rem);
-    height: calc(100vh - 2rem);
-    height: calc(100dvh - 2rem);
+    max-width: calc(100vw - 1.5rem);
+    height: calc(100vh - 1.5rem);
+    height: calc(100dvh - 1.5rem);
   }
 
   .header {
@@ -234,9 +309,20 @@ watch(() => props.open, async (open) => {
     padding: 0.75rem 1rem;
   }
 
+  .footer > :deep(*) {
+    flex: 1 1 auto;
+  }
+
   @keyframes dialogIn {
     from { opacity: 0; transform: scale(0.96) translateY(4px); }
     to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay,
+  .dialog {
+    animation-duration: 1ms;
   }
 }
 </style>

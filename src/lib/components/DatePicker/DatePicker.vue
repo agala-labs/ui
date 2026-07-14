@@ -733,6 +733,7 @@ watch([viewYear, viewMonth], () => {
 
 /* ── Dropdown ── */
 .dropdown {
+  box-sizing: border-box;
   z-index: var(--agala-z-dropdown);
   display: flex;
   flex-direction: column;
@@ -742,7 +743,9 @@ watch([viewYear, viewMonth], () => {
   border: var(--agala-border-width) solid hsl(var(--agala-border));
   border-radius: calc(var(--agala-radius) - 2px);
   box-shadow: var(--agala-shadow-md);
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 0.5rem;
 }
 

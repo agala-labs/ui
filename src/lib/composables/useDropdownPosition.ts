@@ -34,7 +34,7 @@ export function useDropdownPosition(
     // Determine dropdown width
     let ddWidth: number
     if (opts.width !== 'auto') {
-      ddWidth = rect.width
+      ddWidth = Math.min(rect.width, viewportW - margin * 2)
     } else {
       ddWidth = 280
     }
@@ -60,9 +60,11 @@ export function useDropdownPosition(
       position: 'fixed',
       top: `${top}px`,
       left: `${left}px`,
+      maxWidth: `calc(100vw - ${margin * 2}px)`,
+      maxHeight: `calc(100dvh - ${margin * 2}px)`,
     }
     if (opts.width !== 'auto') {
-      style.width = `${rect.width}px`
+      style.width = `${ddWidth}px`
     }
 
     // Apply first-pass style
@@ -73,7 +75,7 @@ export function useDropdownPosition(
       requestAnimationFrame(() => {
         const ddEl = floatingRef.value
         if (!ddEl) return
-        const ddHeight = ddEl.offsetHeight
+        const ddHeight = Math.min(ddEl.offsetHeight, viewportH - margin * 2)
         const bottomEdge = top + ddHeight
 
         if (bottomEdge > viewportH - margin) {

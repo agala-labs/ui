@@ -158,6 +158,8 @@ watch(isOpen, (open) => {
   top: calc(100% + 4px);
   z-index: var(--agala-z-dropdown);
   min-width: 10rem;
+  max-width: calc(100vw - 1rem);
+  max-height: calc(100dvh - 1rem);
   padding: 0.25rem;
   background-color: hsl(var(--agala-popover));
   color: hsl(var(--agala-popover-foreground));
@@ -166,6 +168,8 @@ watch(isOpen, (open) => {
   box-shadow: var(--agala-shadow-md);
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .menuBottomEnd   { right: 0; }
@@ -186,6 +190,7 @@ watch(isOpen, (open) => {
   font-size: var(--agala-font-size-base);
   line-height: var(--agala-line-height-normal);
   text-align: left;
+  overflow-wrap: anywhere;
   cursor: pointer;
   transition: background-color var(--agala-transition-fast), color var(--agala-transition-fast);
 }
@@ -220,5 +225,11 @@ watch(isOpen, (open) => {
   height: var(--agala-border-width);
   background-color: hsl(var(--agala-border));
   margin: 0.25rem 0;
+}
+
+@media (max-width: 639px) {
+  .menuItem {
+    min-height: 2.5rem;
+  }
 }
 </style>

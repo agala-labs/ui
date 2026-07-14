@@ -54,7 +54,8 @@ const iconMap: Record<ToastVariant, IconName> = {
   display: flex;
   align-items: center;
   gap: 0.625rem;
-  min-width: 18rem;
+  width: min(24rem, calc(100vw - 1.5rem));
+  min-width: 0;
   max-width: 24rem;
   padding: 0.75rem 1rem;
   border-radius: var(--agala-radius);
@@ -83,7 +84,12 @@ const iconMap: Record<ToastVariant, IconName> = {
 
 .toastIcon { flex-shrink: 0; }
 
-.toastMessage { flex: 1; line-height: var(--agala-line-height-normal); }
+.toastMessage {
+  min-width: 0;
+  flex: 1;
+  overflow-wrap: anywhere;
+  line-height: var(--agala-line-height-normal);
+}
 
 .toastAction {
   flex-shrink: 0;
@@ -117,9 +123,34 @@ const iconMap: Record<ToastVariant, IconName> = {
 }
 .toastClose:hover { opacity: 1; }
 
+.toastAction:focus-visible,
+.toastClose:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px hsl(var(--agala-ring) / 0.35);
+}
+
 /* Variants — icon color only */
 .toastDefault .toastIcon { color: hsl(var(--agala-primary)); }
 .toastSuccess .toastIcon { color: hsl(var(--agala-success)); }
 .toastWarning .toastIcon { color: hsl(var(--agala-warning)); }
 .toastDanger  .toastIcon { color: hsl(var(--agala-danger)); }
+
+@media (max-width: 359px) {
+  .toast {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    padding: 0.75rem;
+  }
+
+  .toastAction {
+    margin-left: 1.625rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast,
+  .toastLeaving {
+    animation-duration: 1ms;
+  }
+}
 </style>

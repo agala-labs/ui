@@ -526,6 +526,7 @@ function handlePopoverKeyDown(e: KeyboardEvent) {
 
 /* ─── Dropdown / Popover ─── */
 .dropdown {
+  box-sizing: border-box;
   z-index: var(--agala-z-dropdown);
   width: 280px;
   padding: 0.75rem;
@@ -538,6 +539,9 @@ function handlePopoverKeyDown(e: KeyboardEvent) {
   flex-direction: column;
   gap: 0.75rem;
   outline: none;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 /* ─── Presets ─── */
@@ -638,12 +642,6 @@ function handlePopoverKeyDown(e: KeyboardEvent) {
 
 /* ─── Responsive ─── */
 @media (max-width: 359px) {
-  .dropdown {
-    width: calc(100vw - 1rem);
-    left: 0.5rem;
-    max-width: 280px;
-  }
-
   .presets {
     grid-template-columns: repeat(6, 1fr);
   }

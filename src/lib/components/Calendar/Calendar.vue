@@ -319,11 +319,13 @@ function handleSlotSelect(payload: { start: string; end: string }) {
 
 .calendarNav {
   display: flex;
+  min-width: 0;
   align-items: center;
   gap: 0.25rem;
 }
 
 .calendarTitle {
+  min-width: 0;
   font-size: var(--agala-calendar-title-size, var(--agala-font-size-lg));
   font-weight: var(--agala-calendar-title-weight, var(--agala-font-weight-semibold));
   color: hsl(var(--agala-foreground));
@@ -335,6 +337,13 @@ function handleSlotSelect(payload: { start: string; end: string }) {
   display: flex;
   align-items: center;
   gap: var(--agala-calendar-views-gap, 0.25rem);
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.calendarViews::-webkit-scrollbar {
+  display: none;
 }
 
 .viewLabel {
@@ -344,6 +353,34 @@ function handleSlotSelect(payload: { start: string; end: string }) {
 @media (min-width: 768px) {
   .viewLabel {
     display: inline;
+  }
+}
+
+@media (max-width: 639px) {
+  .calendarHeader {
+    align-items: stretch;
+    padding: 0.625rem;
+  }
+
+  .calendarNav {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .calendarTitle {
+    flex: 1;
+    overflow: hidden;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .calendarViews {
+    width: 100%;
+  }
+
+  .calendarViews > :deep(*) {
+    flex: 1 0 auto;
   }
 }
 

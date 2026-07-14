@@ -120,6 +120,14 @@ function handleKeyDown(e: KeyboardEvent) {
 <style scoped>
 .segControl {
   display: inline-flex;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+
+.segControl::-webkit-scrollbar {
+  display: none;
 }
 
 .segControlDisabled {
@@ -227,5 +235,11 @@ function handleKeyDown(e: KeyboardEvent) {
 .segOptionDisabled {
   opacity: 0.4;
   pointer-events: none;
+}
+
+@media (max-width: 639px) {
+  .segOption {
+    min-width: max-content;
+  }
 }
 </style>

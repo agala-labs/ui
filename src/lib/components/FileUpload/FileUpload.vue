@@ -597,4 +597,18 @@ function statusColor(status: FileStatus): string {
   opacity: 0.4;
   cursor: not-allowed;
 }
+
+@media (max-width: 359px) {
+  .fileUpload__zone {
+    padding: 1rem;
+  }
+
+  .fileUpload__inlineControl {
+    width: 100%;
+  }
+
+  .fileUpload__inlineSummary {
+    flex: 1;
+  }
+}
 </style>

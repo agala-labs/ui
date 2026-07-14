@@ -110,7 +110,7 @@ export const components: ComponentMeta[] = [
     slug: 'alert', name: 'Alert', exports: ['AgalaAlert'], description: 'Communicates contextual status or a recoverable issue.',
     props: [p('variant', "'info' | 'success' | 'warning' | 'danger'", 'Semantic status.', "'info'"), p('title', 'string', 'Optional heading.'), p('dismissible', 'boolean', 'Shows an internal close action.', 'false'), p('flat', 'boolean', 'Removes the bordered surface.', 'false'), p('icon', 'string | false', 'Overrides or hides the icon.'), p('class', 'string', 'Consumer override class.')],
     slots: ['default — alert body'], accessibility: 'Uses semantic status styling; urgent messages should be announced by the consuming workflow when appropriate.',
-    snippet: `<AgalaAlert variant="warning" title="Review required">Two records need attention.</AgalaAlert>`,
+    snippet: `<AgalaAlert variant="warning" title="Sync delayed">Review the connection before retrying.</AgalaAlert>`,
   },
   {
     slug: 'badge', name: 'Badge', exports: ['AgalaBadge'], description: 'Labels compact status or metadata.',
@@ -120,14 +120,14 @@ export const components: ComponentMeta[] = [
   },
   {
     slug: 'drawer', name: 'Drawer', exports: ['AgalaDrawer'], description: 'Presents a focused task from an edge of the viewport.',
-    props: [p('open', 'boolean', 'Required controlled visibility.'), p('title', 'string', 'Drawer heading.'), p('placement', "'left' | 'right' | 'top' | 'bottom'", 'Viewport edge.', "'right'"), p('size', 'string', 'CSS size value.'), p('dismissible', 'boolean', 'Allows outside-click dismissal.', 'true'), p('escapeCloses', 'boolean', 'Allows Escape dismissal.', 'true'), p('class', 'string', 'Consumer override class.')],
-    events: ['close'], slots: ['header', 'default', 'footer — receives { close }'], accessibility: 'Traps focus while open, restores focus on close, and labels the dialog from its title.',
-    snippet: `<AgalaDrawer :open="open" title="Filters" @close="open = false">…</AgalaDrawer>`,
+    props: [p('open', 'boolean', 'Required controlled visibility.'), p('title', 'string', 'Visible and accessible drawer heading.'), p('placement', "'left' | 'right' | 'top' | 'bottom'", 'Viewport edge.', "'right'"), p('size', 'string', 'CSS size value, clamped to the viewport.'), p('dismissible', 'boolean', 'Allows backdrop dismissal and shows the close button.', 'true'), p('escapeCloses', 'boolean', 'Allows Escape dismissal independently.', 'true'), p('class', 'string', 'Consumer override class.')],
+    events: ['close'], slots: ['header', 'default', 'footer — receives { close }'], accessibility: 'Traps focus while open, restores the opener, locks background scrolling, and respects reduced motion.',
+    snippet: `<AgalaDrawer :open="open" title="Inventory filters" @close="open = false">…</AgalaDrawer>`,
   },
   {
     slug: 'modal', name: 'Modal', exports: ['AgalaModal', 'AgalaModalProvider', 'modalManager'], description: 'Presents a blocking decision either declaratively or through the modal manager.',
     props: [p('open', 'boolean', 'Visibility used by v-model:open.'), p('title', 'string', 'Dialog heading.'), p('size', "'sm' | 'md' | 'lg' | 'xl' | 'full'", 'Dialog width.', "'md'"), p('dismissible', 'boolean', 'Allows outside-click dismissal.', 'true'), p('escapeCloses', 'boolean', 'Allows Escape dismissal.', 'true'), p('hideHeader', 'boolean', 'Hides the built-in header.', 'false')],
-    events: ['update:open(value: boolean)'], slots: ['default', 'footer — receives { close }'], accessibility: 'Traps and restores focus. Mount exactly one ModalProvider when using modalManager.',
+    events: ['update:open(value: boolean)', 'close'], slots: ['default', 'footer — receives { close }'], accessibility: 'Traps and restores focus. Mount exactly one ModalProvider when using modalManager.',
     snippet: `<AgalaModal v-model:open="open" title="Archive record">Confirm the action.</AgalaModal>`,
   },
   {
@@ -229,7 +229,7 @@ export const components: ComponentMeta[] = [
     slug: 'card', name: 'Card', exports: ['AgalaCard'], description: 'Groups one coherent piece of content with optional header, footer, and accent.',
     props: [p('padding', "'none' | 'sm' | 'md' | 'lg'", 'Internal spacing.', "'md'"), p('headerVariant', "'default' | 'compact'", 'Header density.', "'default'"), p('accent', "'top' | 'left' | 'right' | 'bottom'", 'Accent edge.'), p('accentColor', 'string', 'Accent CSS color.'), p('class', 'string', 'Consumer override class.')],
     slots: ['header', 'default', 'footer'], accessibility: 'Cards are visual grouping only; use headings and semantic elements inside them.',
-    snippet: `<AgalaCard accent="top"><template #header>Usage</template>Card content</AgalaCard>`,
+    snippet: `<AgalaCard accent="top"><template #header>Warehouse sync</template>184 items are up to date.</AgalaCard>`,
   },
   {
     slug: 'center', name: 'Center', exports: ['AgalaCenter'], description: 'Centers content along both axes.',

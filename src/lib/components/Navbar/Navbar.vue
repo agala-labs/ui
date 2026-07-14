@@ -50,16 +50,29 @@ const props = defineProps<NavbarProps>()
 }
 
 @media (max-width: 639px) {
+  .navbar {
+    padding: var(--agala-navbar-mobile-padding, 0 0.75rem);
+    gap: 0.625rem;
+  }
+
   .navbarBrand {
     flex-shrink: 1;
   }
 }
 
 .navbarNav {
+  min-width: 0;
   flex: 1;
   display: flex;
   align-items: center;
   gap: 0.25rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+
+.navbarNav::-webkit-scrollbar {
+  display: none;
 }
 
 .navbarActions {
