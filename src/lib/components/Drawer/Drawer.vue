@@ -225,6 +225,7 @@ onUnmounted(() => bodyResizeObserver?.disconnect())
 }
 
 .drawer {
+  box-sizing: border-box;
   display: flex;
   min-width: 0;
   min-height: 0;
