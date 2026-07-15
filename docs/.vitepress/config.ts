@@ -45,7 +45,7 @@ export default defineConfig({
   title: 'Agala Labs UI',
   description: 'Accessible Vue 3 components and charts from Agala Labs, built on semantic design tokens.',
   cleanUrls: true,
-  lastUpdated: true,
+  lastUpdated: process.env.DOCS_DISABLE_GIT !== '1',
   head: [
     ['link', { rel: 'icon', type: 'image/png', href: '/brand/agala-labs-icon.png' }],
     ['script', {}, "try{const theme=localStorage.getItem('agala-docs-theme')||'main';if(theme==='default')document.documentElement.removeAttribute('data-theme');else document.documentElement.dataset.theme=theme}catch{document.documentElement.dataset.theme='main'}"],
@@ -58,9 +58,8 @@ export default defineConfig({
       { text: 'Guide', link: '/guide/getting-started' },
       { text: 'Components', link: '/components/' },
       { text: 'Charts', link: '/charts/' },
-      { text: 'Playground', link: '/playground' },
     ],
-    socialLinks: [{ icon: 'github', link: 'https://github.com/el-agala/ui' }],
+    socialLinks: [{ icon: 'github', link: 'https://github.com/agala-labs/ui' }],
     sidebar: {
       '/guide/': [
         { text: 'Introduction', items: [

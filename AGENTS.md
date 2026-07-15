@@ -2,7 +2,7 @@ Agala Labs UI - Agent Instructions
 
 ## Project Overview
 
-**Agala Labs UI** (`@el-agala/ui`, intended future name `@agala-labs/ui`) is a Vue 3 component library with scoped CSS, semantic HSL design tokens, accessible primitives, and a companion charts workspace package.
+**Agala Labs UI** (`@agala-labs/ui`) is a Vue 3 component library with scoped CSS, semantic HSL design tokens, accessible primitives, and a companion charts workspace package.
 
 - **Tech stack:** Vue 3 + TypeScript + Vite + scoped CSS. No CSS Modules.
 - **Runtime:** Vue peer dependency (`^3.3.0`); current source also uses `date-fns` for date/calendar utilities.
@@ -32,10 +32,6 @@ src/
 │       ├── Toast/
 │       ├── Sidebar/
 │       └── ...
-├── playground/
-│   └── Playground.vue
-├── main.ts
-└── index.css
 
 packages/
 └── charts/
@@ -96,8 +92,8 @@ Public utilities currently exported from `src/lib/index.ts` are `useMediaQuery` 
 
 The versioned consumer guidance shipped with this repository lives in:
 
-- `skills/agala-ui/SKILL.md` for `@el-agala/ui`.
-- `skills/agala-charts/SKILL.md` for `@el-agala/charts`.
+- `skills/agala-ui/SKILL.md` for `@agala-labs/ui`.
+- `skills/agala-charts/SKILL.md` for `@agala-labs/charts`.
 
 Update the affected skill in the same change whenever consumer-visible behavior changes. This includes adding, removing, or renaming components; changing props, defaults, emits, slots, `v-model` contracts, exports, plugin registration, icons, tokens, themes, public utilities, chart inputs, accessibility behavior, responsive behavior, or documented limitations.
 
@@ -146,7 +142,6 @@ npm run lint
 ## Dev Environment Notes
 
 - This is a Vite library-mode project.
-- `Playground.vue` is a dev/demo surface and may use relative imports.
 - `dist/` is generated output.
 - Do not revert unrelated local changes; this repo is actively edited.
 

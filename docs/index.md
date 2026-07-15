@@ -39,13 +39,11 @@ features:
 
 ## Two packages, one visual language
 
-Install only what your product needs. `@el-agala/ui` remains a focused Vue component library, while `@el-agala/charts` ships separately with its ECharts runtime.
-
-> **Package naming:** Agala Labs UI is intended to move to `@agala-labs/ui`. Until that migration happens, install and import the currently published `@el-agala/ui` package shown below.
+Install only what your product needs. `@agala-labs/ui` remains a focused Vue component library, while `@agala-labs/charts` ships separately with its ECharts runtime.
 
 ```bash
-npm install @el-agala/ui
-npm install @el-agala/charts echarts vue-echarts
+npm install @agala-labs/ui
+npm install @agala-labs/charts echarts vue-echarts
 ```
 
 <ThemeControls />

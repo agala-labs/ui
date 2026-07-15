@@ -45,16 +45,16 @@ The default theme responds to `prefers-color-scheme: dark`. Consumers do not nee
 Named product themes ship as optional CSS entry points. Import the palette you need after the library, then apply its HTML data attribute:
 
 ```ts
-import '@el-agala/ui/themes/main.css'
+import '@agala-labs/ui/themes/main.css'
 
 document.documentElement.setAttribute('data-theme', 'main')
 ```
 
 | Theme | Import | Selector | Character |
 | --- | --- | --- | --- |
-| Main | `@el-agala/ui/themes/main.css` | `main` | Agala Labs navy and electric blue |
-| Smaltt | `@el-agala/ui/themes/smaltt.css` | `smaltt` or `esmaltt` | Warm clinical canvas and teal |
-| Kervo | `@el-agala/ui/themes/kervo.css` | `kervo` | Operational navy and bright blue |
+| Main | `@agala-labs/ui/themes/main.css` | `main` | Agala Labs navy and electric blue |
+| Smaltt | `@agala-labs/ui/themes/smaltt.css` | `smaltt` or `esmaltt` | Warm clinical canvas and teal |
+| Kervo | `@agala-labs/ui/themes/kervo.css` | `kervo` | Operational navy and bright blue |
 
 For example, the Kervo theme can be selected with:
 

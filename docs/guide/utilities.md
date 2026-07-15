@@ -11,7 +11,7 @@ The package root exports one responsive composable and focused date helpers. Oth
 Use CSS for layout whenever possible. `useMediaQuery` is useful when viewport state must affect behavior, such as closing an overlay.
 
 ```ts
-import { useMediaQuery } from '@el-agala/ui'
+import { useMediaQuery } from '@agala-labs/ui'
 
 const { matches: isMobile } = useMediaQuery('(max-width: 639px)')
 ```
@@ -34,7 +34,7 @@ import {
   addDays,
   getMonthGrid,
   getWeekDays,
-} from '@el-agala/ui'
+} from '@agala-labs/ui'
 ```
 
 These helpers use the same date handling as `AgalaDatePicker` and `AgalaCalendar`. Prefer them when an application needs matching ISO formatting or calendar-grid behavior.

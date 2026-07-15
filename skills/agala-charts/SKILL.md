@@ -1,22 +1,22 @@
 ---
 name: agala-charts
 description: >
-  Expert knowledge of @el-agala/charts — an ECharts-based chart component
-  library for Vue 3, sibling to @el-agala/ui. Powered by Apache ECharts 5
+  Expert knowledge of @agala-labs/charts — an ECharts-based chart component
+  library for Vue 3, sibling to @agala-labs/ui. Powered by Apache ECharts 5
   + vue-echarts 7. Exposes 8 chart types with HSL theme integration.
   Auto-triggered when the user mentions "el-agala/charts", "agala charts",
   "BaseChart", or "charts library".
 ---
 
-# @el-agala/charts — Chart Components
+# @agala-labs/charts — Chart Components
 
-> Copy-paste this entire block into any AI assistant to teach it how to use `@el-agala/charts`.
+> Copy-paste this entire block into any AI assistant to teach it how to use `@agala-labs/charts`.
 
 ---
 
 ## Overview
 
-`@el-agala/charts` is a Vue 3 chart component library built on Apache ECharts 5 + vue-echarts 7. It lives in the same monorepo as `@el-agala/ui` but ships as a separate npm package to keep the UI library zero-dep.
+`@agala-labs/charts` is a Vue 3 chart component library built on Apache ECharts 5 + vue-echarts 7. It lives in the same monorepo as `@agala-labs/ui` but ships as a separate npm package to keep the UI library zero-dep.
 
 **Key principles:**
 - 8 chart types: line, bar, pie, scatter, radar, gauge, stacked area, stacked bar
@@ -31,7 +31,7 @@ description: >
 ## Installation
 
 ```bash
-npm install @el-agala/charts echarts vue
+npm install @agala-labs/charts echarts vue
 ```
 
 No providers or wrappers needed — just import and use.
@@ -42,7 +42,7 @@ No providers or wrappers needed — just import and use.
 
 ```vue
 <script setup lang="ts">
-import { BaseChart } from '@el-agala/charts'
+import { BaseChart } from '@agala-labs/charts'
 </script>
 
 <template>
@@ -151,7 +151,7 @@ Chart series colors are derived from theme tokens automatically. No manual color
 ### useChartTheme
 
 ```ts
-import { useChartTheme } from '@el-agala/charts'
+import { useChartTheme } from '@agala-labs/charts'
 
 const { getBaseOption } = useChartTheme()
 const option = getBaseOption('line')
@@ -197,7 +197,7 @@ make release-charts
 ## File Structure
 
 ```
-@el-agala/charts/
+@agala-labs/charts/
   dist/
     agala-charts.es.js     ← ESM bundle
     index.d.ts             ← TypeScript declarations
@@ -212,8 +212,8 @@ make release-charts
 
 ```ts
 // Recommended import style
-import { BaseChart, useChartTheme } from '@el-agala/charts'
-import type { ChartDataset } from '@el-agala/charts'
+import { BaseChart, useChartTheme } from '@agala-labs/charts'
+import type { ChartDataset } from '@agala-labs/charts'
 ```
 
 ---
@@ -222,6 +222,6 @@ import type { ChartDataset } from '@el-agala/charts'
 
 - No animation control props (uses ECharts defaults)
 - No responsive height (use CSS or wrapper)
-- No built-in loading skeleton (wrap in a container with Skeleton from `@el-agala/ui`)
+- No built-in loading skeleton (wrap in a container with Skeleton from `@agala-labs/ui`)
 - No multi-axis support in v1
 - Gauge tooltip is intentionally disabled (detail already shows the value)

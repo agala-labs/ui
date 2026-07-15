@@ -4,15 +4,15 @@ outline: deep
 
 # Agala Charts
 
-`@el-agala/charts` is the ECharts-powered companion to Agala UI. It ships separately so applications that do not visualize data avoid the chart runtime.
+`@agala-labs/charts` is the ECharts-powered companion to Agala UI. It ships separately so applications that do not visualize data avoid the chart runtime.
 
 ```bash
-npm install @el-agala/charts echarts vue-echarts
+npm install @agala-labs/charts echarts vue-echarts
 ```
 
 ```vue
 <script setup lang="ts">
-import { BaseChart } from '@el-agala/charts'
+import { BaseChart } from '@agala-labs/charts'
 </script>
 
 <template>

@@ -1,6 +1,6 @@
 .PHONY: bump-charts publish-charts release-charts
 
-# Bump @el-agala/charts version, commit, and tag.
+# Bump @agala-labs/charts version, commit, and tag.
 # Usage:
 #   make bump-charts          # patch bump (default)
 #   make bump-charts BUMP=minor
@@ -11,9 +11,9 @@ bump-charts:
 	git add packages/charts/package.json package-lock.json && \
 	git commit -m "chore(charts): release $$V" && \
 	git tag "charts-$$V" && \
-	echo "Bumped @el-agala/charts $$V"
+	echo "Bumped @agala-labs/charts $$V"
 
-# Build and publish @el-agala/charts (handles auth yourself).
+# Build and publish @agala-labs/charts (handles auth yourself).
 publish-charts:
 	cd packages/charts && npm run build && npm publish
 

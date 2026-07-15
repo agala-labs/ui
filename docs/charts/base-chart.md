@@ -4,7 +4,7 @@ outline: deep
 
 # BaseChart API
 
-`BaseChart` is the only chart component currently exported from `@el-agala/charts`.
+`BaseChart` is the only chart component currently exported from `@agala-labs/charts`.
 
 ## Props
 

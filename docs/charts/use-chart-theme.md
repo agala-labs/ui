@@ -7,7 +7,7 @@ outline: deep
 `useChartTheme` is exported for custom ECharts visualizations that should match Agala without using `BaseChart`.
 
 ```ts
-import { useChartTheme } from '@el-agala/charts'
+import { useChartTheme } from '@agala-labs/charts'
 
 const { getBaseOption, getColorPalette } = useChartTheme()
 

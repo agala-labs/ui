@@ -1,21 +1,21 @@
 ---
 name: agala-ui
 description: >
-  Expert knowledge for working on or consuming @el-agala/ui, the Agala Labs Vue 3
-  component library. Use when the user mentions Agala UI, Agala Labs UI, @el-agala/ui,
+  Expert knowledge for working on or consuming @agala-labs/ui, the Agala Labs Vue 3
+  component library. Use when the user mentions Agala UI, Agala Labs UI, @agala-labs/ui,
   the UI package in this repo, its design tokens, or any Agala component.
 ---
 
 # Agala Labs UI
 
-`@el-agala/ui` is the currently published name of Agala Labs UI, a Vue 3 + TypeScript component library built with Vite, scoped CSS, HSL design tokens, and accessible primitives. The intended future package name is `@agala-labs/ui`; use `@el-agala/ui` in executable examples until the package migration occurs. Vue is the peer dependency (`^3.3.0`); current source also uses `date-fns` for date utilities and calendar/date components.
+`@agala-labs/ui` is Agala Labs' Vue 3 + TypeScript component library, built with Vite, scoped CSS, HSL design tokens, and accessible primitives. Vue is the peer dependency (`^3.3.0`); current source also uses `date-fns` for date utilities and calendar/date components.
 
 ## First Checks
 
 - Read local source before changing APIs; this library is active and component behavior can drift.
 - Public entry point: `src/lib/index.ts`.
 - Plugin registration: `src/lib/plugin.ts`.
-- Global tokens: `src/lib/tokens.css`; optional reset export: `@el-agala/ui/reset.css`.
+- Global tokens: `src/lib/tokens.css`; optional reset export: `@agala-labs/ui/reset.css`.
 - Components live in `src/lib/components/<Component>/` with `<Component>.vue`, `types.ts`, and `index.ts`.
 - Use `<script setup lang="ts">`, `withDefaults(defineProps<Props>(), ...)`, typed `defineEmits`, and scoped plain CSS.
 - Do not introduce utility CSS frameworks, CSS Modules, or extra runtime dependencies without explicit approval.
@@ -32,8 +32,8 @@ description: >
 ## Imports
 
 ```ts
-import { AgalaButton, AgalaCard, AgalaUI } from '@el-agala/ui'
-import '@el-agala/ui/reset.css'
+import { AgalaButton, AgalaCard, AgalaUI } from '@agala-labs/ui'
+import '@agala-labs/ui/reset.css'
 
 app.use(AgalaUI)
 ```
@@ -41,12 +41,12 @@ app.use(AgalaUI)
 Named themes are optional CSS imports:
 
 ```ts
-import '@el-agala/ui/themes/main.css'
+import '@agala-labs/ui/themes/main.css'
 
 document.documentElement.dataset.theme = 'main'
 ```
 
-Available theme entry points are `main.css`, `smaltt.css`, and `kervo.css` under `@el-agala/ui/themes/`. The default token stylesheet remains automatic light/dark; named product themes are fixed light themes.
+Available theme entry points are `main.css`, `smaltt.css`, and `kervo.css` under `@agala-labs/ui/themes/`. The default token stylesheet remains automatic light/dark; named product themes are fixed light themes.
 
 All public component names use the `Agala` prefix. Internal implementation files may use unprefixed local imports.
 
@@ -64,7 +64,7 @@ Currently exported and globally registered:
 
 ## Public Utilities
 
-Exported from `@el-agala/ui`:
+Exported from `@agala-labs/ui`:
 
 - `useMediaQuery`
 - Date helpers: `parseDate`, `formatISODate`, `formatISODateTime`, `formatTime`, `formatTime24`, `formatDateLabel`, `formatMonthYear`, `formatFullDate`, `isSameDay`, `isToday`, `startOfWeek`, `addDays`, `getMonthGrid`, `getWeekDays`

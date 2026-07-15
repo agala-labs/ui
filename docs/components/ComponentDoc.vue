@@ -14,7 +14,7 @@ const component = computed(() => componentMap[props.slug])
     class="component-doc"
   >
     <p class="component-doc__eyebrow">
-      @el-agala/ui
+      @agala-labs/ui
     </p>
     <h1>{{ component.name }}</h1>
     <p class="component-doc__lead">
@@ -31,7 +31,7 @@ const component = computed(() => componentMap[props.slug])
     <h2 id="import">
       Import
     </h2>
-    <pre><code>import { {{ component.exports.join(', ') }} } from '@el-agala/ui'</code></pre>
+    <pre><code>import { {{ component.exports.join(', ') }} } from '@agala-labs/ui'</code></pre>
 
     <h2 id="api">
       API

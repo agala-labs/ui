@@ -4,7 +4,7 @@ outline: deep
 
 # Components
 
-The complete `@el-agala/ui` catalog is organized by the user problem each component solves. Every page includes a live example, copyable usage, current public API, events, slots, and accessibility notes.
+The complete `@agala-labs/ui` catalog is organized by the user problem each component solves. Every page includes a live example, copyable usage, current public API, events, slots, and accessibility notes.
 
 ## Forms
 

@@ -11,7 +11,6 @@ export default defineConfig({
       tsconfigPath: './tsconfig.app.json',
       outDir: 'dist',
       entryRoot: 'src/lib',
-      exclude: ['**/playground/**', '**/main.ts'],
     }),
     libInjectCss(),
   ],

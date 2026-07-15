@@ -5,10 +5,10 @@
  * render with correct sizing and consistent base styles.
  *
  * Usage:
- *   import '@el-agala/ui/reset.css'
+ *   import '@agala-labs/ui/reset.css'
  *
  * Or in your global CSS:
- *   @import '@el-agala/ui/reset.css';
+ *   @import '@agala-labs/ui/reset.css';
  */
 
 /* ── Box model ── */
