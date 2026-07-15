@@ -31,11 +31,28 @@ npm run build --workspace @agala-labs/charts
 
 The UI package is ESM and requires Vue `^3.3.0` as a peer dependency. Charts are published separately and depend on `echarts` and `vue-echarts`.
 
-Release tags publish one package at a time: `v0.32.0` publishes UI and
-`charts-v0.1.3` publishes charts. Once both versions exist on npm, the release
-pipeline publishes `ghcr.io/agala-labs/ui-docs:<commit-sha>` and deploys it to
-`ui.agala.com.ar`. A manual rerun of the docs deployment at an earlier commit
-is deploy-only and rolls the site back to that already-built immutable image.
+Package publication stays local. Build and publish UI first, then charts:
+
+```bash
+npm run build:lib
+npm publish --access public
+
+npm run build --workspace @agala-labs/charts
+npm publish --access public --workspace @agala-labs/charts
+```
+
+Deprecate the legacy scope once the new packages are confirmed:
+
+```bash
+npm deprecate '@el-agala/ui@*' 'Package moved to @agala-labs/ui. Install the new scope for future releases.'
+npm deprecate '@el-agala/charts@*' 'Package moved to @agala-labs/charts. Install the new scope for future releases.'
+```
+
+After both versions exist on npm, push `v0.32.0` or `charts-v0.1.3` to trigger
+the only deployment pipeline: it publishes
+`ghcr.io/agala-labs/ui-docs:<commit-sha>` and deploys it to
+`ui.agala.com.ar`. A manual rerun at an earlier commit is deploy-only and rolls
+the site back to that already-built immutable image.
 
 ## Usage
 
