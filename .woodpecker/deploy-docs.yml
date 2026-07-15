@@ -13,8 +13,10 @@ steps:
       - event: tag
     image: node:22-alpine
     commands:
-      - npm view "@agala-labs/ui@$(node -p \"require('./package.json').version\")" version
-      - npm view "@agala-labs/charts@$(node -p \"require('./packages/charts/package.json').version\")" version
+      - UI_VERSION=$(node -p 'require("./package.json").version')
+      - CHARTS_VERSION=$(node -p 'require("./packages/charts/package.json").version')
+      - npm view "@agala-labs/ui@${UI_VERSION}" version
+      - npm view "@agala-labs/charts@${CHARTS_VERSION}" version
 
   - name: build-and-push
     when:
