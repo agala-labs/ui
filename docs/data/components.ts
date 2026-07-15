@@ -102,8 +102,8 @@ export const components: ComponentMeta[] = [
   },
   {
     slug: 'segmented-control', name: 'Segmented Control', exports: ['AgalaSegmentedControl'], description: 'Switches between a small set of peer views or modes.',
-    props: [p('options', 'SegmentedControlOption[]', 'Required choices.'), p('modelValue', 'string', 'Selected value.'), p('size', "'sm' | 'md' | 'lg'", 'Control size.', "'md'"), p('disabled', 'boolean', 'Disables all choices.', 'false'), p('class', 'string', 'Consumer override class.')],
-    events: ['update:modelValue(value: string)'], accessibility: 'Uses radio semantics so the choices behave as one mutually exclusive group.',
+    props: [p('options', 'SegmentedControlOption[]', 'Choices support label, icon, semantic variant, and disabled state.'), p('modelValue', 'string', 'Selected value.'), p('size', "'sm' | 'md' | 'lg'", 'Control size.', "'md'"), p('block', 'boolean', 'Fills the container and shares width across options.', 'false'), p('ariaLabel', 'string', 'Accessible group name.', "'Options'"), p('disabled', 'boolean', 'Disables all choices.', 'false'), p('class', 'string', 'Consumer override class.')],
+    events: ['update:modelValue(value: string)'], slots: ['option-<value> — receives { option, selected }'], accessibility: 'Uses a named horizontal radiogroup. Arrow keys and Home/End move focus and selection while skipping disabled choices.',
     snippet: `<AgalaSegmentedControl v-model="view" :options="views" />`,
   },
   {
@@ -197,20 +197,20 @@ export const components: ComponentMeta[] = [
   },
   {
     slug: 'table', name: 'Table', exports: ['AgalaTable'], description: 'Displays sortable, selectable tabular records with loading and empty states.',
-    props: [p('columns', 'TableColumn[]', 'Required column definitions.'), p('rows', 'Record<string, unknown>[]', 'Required records.'), p('rowKey', 'string', 'Unique record key.'), p('variant', "'default' | 'clean' | 'minimal'", 'Visual density.'), p('selectable', 'boolean', 'Enables row selection.', 'false'), p('selectedRows', 'string[]', 'Selected keys.'), p('sortKey / sortDir', "string / 'asc' | 'desc'", 'Controlled sorting.'), p('loading', 'boolean', 'Shows loading rows.', 'false'), p('emptyMessage', 'string', 'Empty collection copy.')],
-    events: ['update:selectedRows', 'update:sortKey', 'update:sortDir', 'row-click(row)'], slots: ['cell-<key>', 'empty', 'footer'], accessibility: 'Uses semantic table markup and keyboard-reachable selection controls.',
+    props: [p('columns', 'TableColumn[]', 'Definitions support width, minWidth, alignment, and sorting.'), p('rows', 'Record<string, unknown>[]', 'Required records.'), p('rowKey', 'string', 'Unique record key.'), p('variant', "'default' | 'clean' | 'minimal'", 'Border and surface treatment.'), p('density', "'comfortable' | 'compact'", 'Row spacing.', "'comfortable'"), p('selectable', 'boolean', 'Enables row selection.', 'false'), p('selectedRows', 'string[]', 'Selected keys.'), p('sortKey / sortDir', "string / 'asc' | 'desc'", 'Controlled sorting.'), p('interactiveRows', 'boolean', 'Adds keyboard row activation.', 'false'), p('stickyHeader / stickyFirstColumn', 'boolean', 'Pins context inside the table scroller.', 'false'), p('loading / loadingRows', 'boolean / number', 'Shows a deterministic loading layout.', 'false / 5'), p('emptyMessage', 'string', 'Empty collection copy.')],
+    events: ['update:selectedRows', 'update:sortKey', 'update:sortDir', 'row-click(row)'], slots: ['cell-<key>', 'empty', 'footer'], accessibility: 'Uses semantic table markup, announces sorting and selection, and makes rows keyboard-operable only when interactiveRows is enabled.',
     snippet: `<AgalaTable :columns="columns" :rows="members" row-key="id" />`,
   },
   {
     slug: 'tabs', name: 'Tabs', exports: ['AgalaTabs'], description: 'Switches among related panels while preserving context.',
     props: [p('tabs', 'TabItem[]', 'Required tab definitions.'), p('modelValue', 'string', 'Required active tab.'), p('variant', "'underline' | 'pills'", 'Visual treatment.', "'underline'"), p('class', 'string', 'Consumer override class.')],
-    events: ['update:modelValue(value: string)'], slots: ['panel-<value>'], accessibility: 'Implements tablist, tab, and tabpanel relationships with keyboard navigation.',
+    events: ['update:modelValue(value: string)'], slots: ['panel-<value>', 'tab-<value> — receives { tab, active }'], accessibility: 'Implements tablist, tab, and tabpanel relationships. Arrow keys, Home, and End move focus and skip disabled tabs.',
     snippet: `<AgalaTabs v-model="tab" :tabs="tabs"><template #panel-overview>Overview</template></AgalaTabs>`,
   },
   {
     slug: 'calendar', name: 'Calendar', exports: ['AgalaCalendar'], description: 'Displays events in month, week, day, or list views and supports time-slot selection.',
     props: [p('events', 'CalendarEvent[]', 'Event collection.'), p('view', "'month' | 'week' | 'day' | 'list'", 'Current view.'), p('currentDate', 'string', 'ISO focus date.'), p('availableViews', 'CalendarView[]', 'Enabled views.'), p('dayStart / dayEnd', 'string', 'Visible HH:MM bounds.'), p('snapMinutes', 'number', 'Slot selection interval.', '30'), p('hideHeader', 'boolean', 'Hides built-in controls.', 'false')],
-    events: ['update:view', 'update:currentDate', 'select(event)', 'day-click(date)', 'slot-select({ start, end })'], slots: ['header', 'event', 'empty-day'], accessibility: 'Grid selection supports keyboard navigation; event controls expose titles and time context.',
+    events: ['update:view', 'update:currentDate', 'select(event)', 'day-click(date)', 'slot-select({ start, end })'], slots: ['header', 'event — receives { event, view, presentation, timeLabel, isCompact }', 'empty-day'], accessibility: 'Grid selection supports keyboard navigation; event controls expose full titles, time context, and consistent focus behavior in every view.',
     snippet: `<AgalaCalendar v-model:view="view" v-model:current-date="date" :events="events" />`,
   },
   {

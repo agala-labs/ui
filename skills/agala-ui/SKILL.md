@@ -56,7 +56,7 @@ Provider components are exported as `AgalaModalProvider` and `AgalaToastProvider
 
 Currently exported and globally registered:
 
-- Form/input: `AgalaButton`, `AgalaInput`, `AgalaFormField`, `AgalaSelect`, `AgalaCreatableSelect`, `AgalaDatePicker`, `AgalaColorPicker`, `AgalaCheckbox`, `AgalaRadioGroup`, `AgalaTextarea`, `AgalaToggle`, `AgalaFileUpload`
+- Form/input: `AgalaButton`, `AgalaInput`, `AgalaFormField`, `AgalaSelect`, `AgalaCreatableSelect`, `AgalaDatePicker`, `AgalaColorPicker`, `AgalaCheckbox`, `AgalaRadioGroup`, `AgalaTextarea`, `AgalaToggle`, `AgalaFileUpload`, `AgalaSegmentedControl`
 - Feedback/overlay: `AgalaAlert`, `AgalaBadge`, `AgalaDrawer`, `AgalaModal`, `AgalaModalProvider`, `AgalaToastProvider`, `AgalaTooltip`, `AgalaProgress`, `AgalaSkeleton`, `AgalaEmptyState`, `AgalaDevEnvBanner`
 - Navigation/data: `AgalaAccordion`, `AgalaAccordionItem`, `AgalaDropdownMenu`, `AgalaNavbar`, `AgalaPagination`, `AgalaSidebar`, `AgalaSidebarGroup`, `AgalaSidebarItem`, `AgalaSidebarToggle`, `AgalaTable`, `AgalaTabs`
 - Layout/display: `AgalaAvatar`, `AgalaCard`, `AgalaCenter`, `AgalaDivider`, `AgalaHStack`, `AgalaListGroup`, `AgalaListGroupItem`, `AgalaSpacer`, `AgalaStack`, `AgalaStat`, `AgalaTag`, `AgalaVStack`
@@ -80,15 +80,16 @@ Internal source composables include `useSelectFilter`, `useChipDisplay`, `useKey
 - `AgalaCreatableSelect`: multi-select chips with `options`, `v-model`, `creatable`, `labelKey`, `idKey`, `maxDisplayed`, `debounce`; emits `create` and `search`.
 - `AgalaDatePicker`: `v-model`, `size`, `min`, `max`, `clearable`, `inline`, `highlightDates`, `displayMonth`; emits `update:displayMonth`.
 - `AgalaColorPicker`: `v-model` hex string, `size`, `clearable`, `error`, `errorMessage`, visual square/hue controls, presets, manual hex input.
-- `AgalaCalendar`: `events`, `v-model:view`, `v-model:currentDate`, `availableViews`, `hideHeader`, `dayStart`, `dayEnd`, `snapMinutes`; views `month|week|day|list`; emits `select`, `day-click`, `slot-select`; slots `header`, `event`, `empty-day`.
-- `AgalaTable`: `columns`, `rows`, `selectable`, `v-model:selectedRows`, `v-model:sortKey`, `v-model:sortDir`, `loading`, `emptyMessage`, `rowKey`, `variant default|clean|minimal`; slots `cell-<key>`, `empty`, `footer`; emits `row-click`.
-- `AgalaTabs`: `tabs`, `v-model`, `variant underline|pills`; panel slots are named `panel-<value>`.
+- `AgalaCalendar`: `events`, `v-model:view`, `v-model:currentDate`, `availableViews`, `hideHeader`, `dayStart`, `dayEnd`, `snapMinutes`; views `month|week|day|list`; emits `select`, `day-click`, `slot-select`; slots `header`, `empty-day`, and `event`, which receives `{ event, view, presentation, timeLabel, isCompact }`. Event content must not add nested interactive controls because the library retains the event button shell.
+- `AgalaTable`: `columns`, `rows`, `selectable`, `v-model:selectedRows`, `v-model:sortKey`, `v-model:sortDir`, `loading`, `loadingRows`, `emptyMessage`, `rowKey`, `variant default|clean|minimal`, `density comfortable|compact`, `stickyHeader`, `stickyFirstColumn`, and `interactiveRows`; columns support `width` and `minWidth`; slots `cell-<key>`, `empty`, `footer`; emits `row-click`.
+- `AgalaTabs`: `tabs`, `v-model`, `variant underline|pills`; panel slots are named `panel-<value>` and custom labels use `tab-<value>` with `{ tab, active }`. Custom labels must not contain interactive controls.
 - `AgalaPagination`: `v-model`, `total`, `pageSize`, `siblingCount`, `showEdges`; compact mobile layout.
 - `AgalaModal`: `v-model:open`, `title`, `size sm|md|lg|xl|full`, `dismissible`, `escapeCloses`, `hideHeader`; footer slot receives `{ close }`.
 - `modalManager.open(component, options)`: requires one root `AgalaModalProvider`.
 - `toastManager.show(options)`: requires one root `AgalaToastProvider`; variants `default|success|warning|danger`, `duration: 0` means persistent.
 - `AgalaDrawer`: controlled with `:open` and `@close`; `placement left|right|top|bottom`, viewport-clamped `size`, `title`, `dismissible`, `escapeCloses`; slots `header`, default, `footer` with `{ close }`. It traps and restores focus, locks background scroll, and scrolls its body independently from header/footer.
 - `AgalaFileUpload`: `v-model` `FileItem[]`, `variant dropzone|inline`, `accept`, `multiple`, `maxSize`, `maxFiles`, labels/text props; emits `change`, `remove`, `error`.
+- `AgalaSegmentedControl`: `options`, `v-model`, `size sm|md|lg`, `block`, `ariaLabel`, and `disabled`; options support `icon`, semantic `variant`, and per-option disabled state; custom labels use `option-<value>` with `{ option, selected }` and must not contain interactive controls.
 - `AgalaSidebar`: either pass structured `items` or use slots. Supports `v-model:collapsed`, `v-model:open`, `v-model:activeValue`, `v-model:expanded`, `defaultExpanded`, `indent compact|comfortable`, `responsive`, `width`, `collapsedWidth`; emits `select`. Tree items support `children`, badges, dots, icons, hrefs, disabled state.
 - `AgalaSidebarItem`: `icon`, `label`, `active`, `badge`, `badgeVariant`, `dot`, `dotVariant`, `disabled`; slots `icon` and default.
 - `AgalaSidebarToggle`: emits `click`; props `ariaExpanded`, `ariaControls`, `ariaLabel`.

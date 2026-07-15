@@ -6,6 +6,7 @@ export interface TableColumn {
   label: string
   sortable?: boolean
   width?: string
+  minWidth?: string
   align?: ColumnAlign
 }
 
@@ -20,5 +21,10 @@ export interface TableProps {
   emptyMessage?: string
   rowKey?: string
   variant?: 'default' | 'clean' | 'minimal'
+  density?: 'comfortable' | 'compact'
+  stickyHeader?: boolean
+  stickyFirstColumn?: boolean
+  interactiveRows?: boolean
+  loadingRows?: number
   class?: string
 }

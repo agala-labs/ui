@@ -15,6 +15,7 @@ import {
   minutesToTimeString,
 } from './utils'
 import { useGridSelection } from '../../composables/useGridSelection'
+import CalendarEventCard from './CalendarEventCard.vue'
 
 const props = withDefaults(defineProps<{
   events: CalendarEvent[]
@@ -37,16 +38,6 @@ const emit = defineEmits<{
   'day-click': [date: string]
   'slot-select': [payload: { start: string; end: string }]
 }>()
-
-// Token color map
-const tokenColorMap: Record<string, string> = {
-  primary: 'eventPrimary',
-  danger: 'eventDanger',
-  success: 'eventSuccess',
-  warning: 'eventWarning',
-  secondary: 'eventSecondary',
-  accent: 'eventAccent',
-}
 
 // Current time
 const now = ref(new Date())
@@ -107,7 +98,7 @@ const gridSelection = useGridSelection({
 
 function handleMouseDown(e: MouseEvent) {
   // If clicking on an event, let the event handle it
-  if ((e.target as HTMLElement).closest('.event')) return
+  if ((e.target as HTMLElement).closest('[data-calendar-event]')) return
   gridSelection.startSelection(e)
 }
 
@@ -173,25 +164,12 @@ const positionedEvents = computed(() => {
   return result
 })
 
-// Helpers
-function eventClasses(event: CalendarEvent): string[] {
-  const classes: string[] = ['event']
-  if (event.color && tokenColorMap[event.color]) {
-    classes.push(tokenColorMap[event.color])
-  }
-  return classes
-}
-
 function eventStyle(item: {
   event: CalendarEvent
   position: { top: number; height: number }
   overlap: { column: number; totalColumns: number } | undefined
 }): Record<string, string> {
   const style: Record<string, string> = {}
-
-  if (item.event.color && !tokenColorMap[item.event.color]) {
-    style.borderLeftColor = item.event.color
-  }
 
   style.top = `${item.position.top}px`
   style.height = `${Math.max(item.position.height, 28)}px`
@@ -239,20 +217,18 @@ function formatSelectionTime(minutes: number): string {
     <div v-if="allDayEvents.length" class="allDayHeader">
       <div class="timeAxisLabel">All day</div>
       <div class="allDayEvents">
-        <button
+        <CalendarEventCard
           v-for="event in allDayEvents"
           :key="event.id"
-          class="allDayEvent"
-          :class="event.color && tokenColorMap[event.color]"
-          :style="event.color && !tokenColorMap[event.color] ? {
-            backgroundColor: `${event.color}20`,
-            color: event.color,
-            borderLeft: `3px solid ${event.color}`,
-          } : {}"
-          @click.stop="emit('select', event)"
+          :event="event"
+          presentation="all-day"
+          :show-time="false"
+          @select="emit('select', $event)"
         >
-          {{ event.title }}
-        </button>
+          <template v-if="$slots.event" #default="slotProps">
+            <slot name="event" v-bind="{ ...slotProps, view: 'day' }" />
+          </template>
+        </CalendarEventCard>
       </div>
     </div>
 
@@ -319,23 +295,21 @@ function formatSelectionTime(minutes: number): string {
         </div>
 
         <!-- Events -->
-        <button
+        <CalendarEventCard
           v-for="item in positionedEvents"
           :key="item.event.id"
-          :class="eventClasses(item.event)"
+          :event="item.event"
+          presentation="time-grid"
+          :time-label="formatEventTimeRange(item.event)"
+          :show-time="eventShowTime(item.position.height)"
+          :show-subtitle="eventShowSubtitle(item.position.height)"
           :style="eventStyle(item)"
-          @click.stop="emit('select', item.event)"
+          @select="emit('select', $event)"
         >
-          <div class="eventContent">
-            <div v-if="eventShowTime(item.position.height)" class="eventTime">
-              {{ formatEventTimeRange(item.event) }}
-            </div>
-            <div class="eventTitle">{{ item.event.title }}</div>
-            <div v-if="eventShowSubtitle(item.position.height) && item.event.subtitle" class="eventSubtitle">
-              {{ item.event.subtitle }}
-            </div>
-          </div>
-        </button>
+          <template v-if="$slots.event" #default="slotProps">
+            <slot name="event" v-bind="{ ...slotProps, view: 'day' }" />
+          </template>
+        </CalendarEventCard>
       </div>
     </div>
   </div>

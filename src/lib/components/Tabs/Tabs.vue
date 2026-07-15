@@ -16,39 +16,86 @@ const emit = defineEmits<{
 idCounter += 1
 const uid = `tabs-${idCounter}`
 
-const { matches: isMobile } = useMediaQuery('(max-width: 639px)')
-const activeTabRef = ref<HTMLElement | null>(null)
+const { matches: reduceMotion } = useMediaQuery('(prefers-reduced-motion: reduce)')
 const tabListRef = ref<HTMLElement | null>(null)
+const tabRefs = new Map<string, HTMLElement>()
+const canScrollStart = ref(false)
+const canScrollEnd = ref(false)
+let resizeObserver: ResizeObserver | undefined
 
-function setActiveTabRef(el: Element | null) {
-  activeTabRef.value = el as HTMLElement | null
+function setTabRef(value: string, el: unknown) {
+  if (el instanceof HTMLElement) tabRefs.set(value, el)
+  else tabRefs.delete(value)
 }
-const hasOverflow = ref(false)
 
 function checkOverflow() {
-  if (tabListRef.value) {
-    hasOverflow.value = tabListRef.value.scrollWidth > tabListRef.value.clientWidth
-  }
+  const list = tabListRef.value
+  if (!list) return
+  const tolerance = 2
+  canScrollStart.value = list.scrollLeft > tolerance
+  canScrollEnd.value = list.scrollLeft + list.clientWidth < list.scrollWidth - tolerance
 }
 
 onMounted(() => {
   checkOverflow()
-  window.addEventListener('resize', checkOverflow)
+  if (typeof ResizeObserver !== 'undefined' && tabListRef.value) {
+    resizeObserver = new ResizeObserver(checkOverflow)
+    resizeObserver.observe(tabListRef.value)
+  }
 })
 
 onUnmounted(() => {
-  window.removeEventListener('resize', checkOverflow)
+  resizeObserver?.disconnect()
 })
 
-watch(() => props.tabs, checkOverflow, { deep: true })
+watch(() => props.tabs, () => nextTick(checkOverflow), { deep: true })
 
 watch(() => props.modelValue, () => {
-  if (isMobile.value) {
-    nextTick(() => {
-      activeTabRef.value?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' })
+  nextTick(() => {
+    tabRefs.get(props.modelValue)?.scrollIntoView({
+      behavior: reduceMotion.value ? 'auto' : 'smooth',
+      inline: 'nearest',
+      block: 'nearest',
     })
-  }
+    checkOverflow()
+  })
 })
+
+function safeId(value: string) {
+  return encodeURIComponent(value).replaceAll('%', '-')
+}
+
+function tabId(value: string) {
+  return `${uid}-tab-${safeId(value)}`
+}
+
+function panelId(value: string) {
+  return `${uid}-panel-${safeId(value)}`
+}
+
+function focusAndSelect(tab: TabItem) {
+  emit('update:modelValue', tab.value)
+  nextTick(() => {
+    tabRefs.get(tab.value)?.focus({ preventScroll: true })
+    tabRefs.get(tab.value)?.scrollIntoView({
+      behavior: reduceMotion.value ? 'auto' : 'smooth',
+      inline: 'nearest',
+      block: 'nearest',
+    })
+    checkOverflow()
+  })
+}
+
+const overflowCls = computed(() => [
+  'tabListShell',
+  canScrollStart.value ? 'canScrollStart' : undefined,
+  canScrollEnd.value ? 'canScrollEnd' : undefined,
+].filter(Boolean).join(' '))
+
+const tabListCls = computed(() => [
+  'tabList',
+  props.variant === 'pills' ? 'tabsPills' : undefined,
+].filter(Boolean).join(' '))
 
 const enabledTabs = computed(() => props.tabs.filter(t => !t.disabled))
 
@@ -76,7 +123,7 @@ function handleKeyDown(e: KeyboardEvent, currentValue: string) {
     next = tabs.length - 1
   }
 
-  if (next !== -1) emit('update:modelValue', tabs[next].value)
+  if (next !== -1) focusAndSelect(tabs[next])
 }
 
 function tabCls(tab: TabItem) {
@@ -89,36 +136,42 @@ function tabCls(tab: TabItem) {
 </script>
 
 <template>
-    <div :class="['tabs', props.variant === 'pills' ? 'tabsPills' : undefined, props.class].filter(Boolean).join(' ')">
-    <div
-      ref="tabListRef"
-      :class="['tabList', { 'tabList--scrollable': hasOverflow }]"
-      role="tablist"
-      aria-orientation="horizontal"
-    >
-      <button
-        v-for="tab in tabs"
-        :key="tab.value"
-        :id="`${uid}-tab-${tab.value}`"
-        :aria-controls="`${uid}-panel-${tab.value}`"
-        :aria-selected="modelValue === tab.value"
-        :disabled="tab.disabled"
-        :tabindex="modelValue === tab.value ? 0 : -1"
-        :class="tabCls(tab)"
-        :ref="modelValue === tab.value ? setActiveTabRef : undefined"
-        role="tab"
-        type="button"
-        @click="select(tab)"
-        @keydown="handleKeyDown($event, tab.value)"
+  <div :class="['tabs', props.class].filter(Boolean).join(' ')">
+    <div :class="overflowCls">
+      <div
+        ref="tabListRef"
+        :class="tabListCls"
+        role="tablist"
+        aria-orientation="horizontal"
+        @scroll="checkOverflow"
       >
-        {{ tab.label }}
-      </button>
+        <button
+          v-for="tab in tabs"
+          :id="tabId(tab.value)"
+          :key="tab.value"
+          :ref="el => setTabRef(tab.value, el)"
+          :aria-controls="$slots[`panel-${tab.value}`] ? panelId(tab.value) : undefined"
+          :aria-label="tab.label"
+          :aria-selected="modelValue === tab.value"
+          :disabled="tab.disabled"
+          :tabindex="modelValue === tab.value ? 0 : -1"
+          :class="tabCls(tab)"
+          role="tab"
+          type="button"
+          @click="select(tab)"
+          @keydown="handleKeyDown($event, tab.value)"
+        >
+          <slot :name="`tab-${tab.value}`" :tab="tab" :active="modelValue === tab.value">
+            {{ tab.label }}
+          </slot>
+        </button>
+      </div>
     </div>
 
     <div
       v-if="$slots[`panel-${modelValue}`]"
-      :id="`${uid}-panel-${modelValue}`"
-      :aria-labelledby="`${uid}-tab-${modelValue}`"
+      :id="panelId(modelValue)"
+      :aria-labelledby="tabId(modelValue)"
       class="tabPanel"
       role="tabpanel"
       tabindex="0"
@@ -136,8 +189,14 @@ function tabCls(tab: TabItem) {
 }
 
 /* Tab strip */
+.tabListShell {
+  min-width: 0;
+}
+
 .tabList {
   display: flex;
+  width: 100%;
+  box-sizing: border-box;
   border-bottom: var(--agala-tab-list-border, var(--agala-border-width) solid hsl(var(--agala-border)));
   gap: var(--agala-tab-gap, 0);
   padding: var(--agala-tab-list-padding, 0);
@@ -199,19 +258,31 @@ function tabCls(tab: TabItem) {
     overflow-x: auto;
     overflow-y: hidden;
     scrollbar-width: none;
+    min-height: 2.75rem;
   }
 
   .tabList::-webkit-scrollbar {
     display: none;
   }
 
-  .tabList.tabList--scrollable {
-    mask-image: linear-gradient(to right, transparent, black 0.75rem, black calc(100% - 0.75rem), transparent);
-    -webkit-mask-image: linear-gradient(to right, transparent, black 0.75rem, black calc(100% - 0.75rem), transparent);
+  .canScrollEnd:not(.canScrollStart) .tabList {
+    mask-image: linear-gradient(to right, black calc(100% - 1rem), transparent);
+    -webkit-mask-image: linear-gradient(to right, black calc(100% - 1rem), transparent);
+  }
+
+  .canScrollStart:not(.canScrollEnd) .tabList {
+    mask-image: linear-gradient(to right, transparent, black 1rem);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 1rem);
+  }
+
+  .canScrollStart.canScrollEnd .tabList {
+    mask-image: linear-gradient(to right, transparent, black 1rem, black calc(100% - 1rem), transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 1rem, black calc(100% - 1rem), transparent);
   }
 
   .tabBtn {
     flex-shrink: 0;
+    min-height: 2.75rem;
   }
 }
 
@@ -223,6 +294,7 @@ function tabCls(tab: TabItem) {
   background: hsl(var(--agala-muted) / 0.5);
   border-radius: var(--agala-radius);
   width: fit-content;
+  max-width: 100%;
 }
 .tabsPills .tabBtn {
   border-bottom: none;
@@ -234,5 +306,11 @@ function tabCls(tab: TabItem) {
   color: hsl(var(--agala-foreground));
   box-shadow: var(--agala-shadow-xs);
   border-bottom: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tabBtn {
+    transition: none;
+  }
 }
 </style>

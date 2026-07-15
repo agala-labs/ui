@@ -2,6 +2,7 @@
 import { ref, computed, watch, nextTick } from 'vue'
 import type { CalendarEvent } from './types'
 import { getMonthGrid, getDayEvents, isSameDay, toISODate, parseISO, formatEventTime } from './utils'
+import CalendarEventCard from './CalendarEventCard.vue'
 
 /* ── Props / Emits ── */
 const props = withDefaults(defineProps<{
@@ -25,7 +26,6 @@ const emit = defineEmits<{
 
 /* ── Constants ── */
 const WEEKDAYS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
-const KNOWN_TOKENS = ['primary', 'secondary', 'muted', 'danger', 'warning', 'success', 'accent']
 const MAX_VISIBLE = 3
 
 /* ── State ── */
@@ -91,24 +91,6 @@ const weeks = computed((): DayCellData[][] => {
 })
 
 /* ── Helpers ── */
-function colorClass(color?: string): string | undefined {
-  if (!color) return undefined
-  if (KNOWN_TOKENS.includes(color)) {
-    return `event${color.charAt(0).toUpperCase()}${color.slice(1)}`
-  }
-  return undefined
-}
-
-function eventStyle(event: CalendarEvent): Record<string, string> | undefined {
-  const cls = colorClass(event.color)
-  if (cls) return undefined
-  return {
-    backgroundColor: `${event.color}20`,
-    color: event.color,
-    borderLeft: `3px solid ${event.color}`,
-  }
-}
-
 function dayCellClass(cell: DayCellData): string {
   return [
     'dayCell',
@@ -122,8 +104,7 @@ function handleDayClick(cell: DayCellData) {
   emit('day-click', cell.iso)
 }
 
-function handleEventClick(event: CalendarEvent, e: MouseEvent) {
-  e.stopPropagation()
+function handleEventClick(event: CalendarEvent) {
   emit('select', event)
 }
 
@@ -223,47 +204,51 @@ function handleGridKeyDown(e: KeyboardEvent) {
 
           <div class="eventsArea">
             <!-- All-day events -->
-            <button
+            <CalendarEventCard
               v-for="event in cell.visibleAllDay"
               :key="event.id"
-              type="button"
-              class="eventBar allDayBar"
-              :class="[colorClass(event.color)]"
-              :style="eventStyle(event)"
-              tabindex="0"
-              @click.stop="handleEventClick(event, $event)"
+              :event="event"
+              presentation="all-day"
+              :time-label="formatEventTime(event)"
+              :show-time="false"
+              @select="handleEventClick"
             >
-              <span class="eventBarText">{{ event.title }}</span>
-            </button>
+              <template v-if="$slots.event" #default="slotProps">
+                <slot name="event" v-bind="{ ...slotProps, view: 'month' }" />
+              </template>
+            </CalendarEventCard>
 
             <!-- Timed events: desktop bars -->
-            <button
+            <CalendarEventCard
               v-for="event in cell.visibleTimed"
               :key="event.id"
-              type="button"
-              class="eventBar timedBarDesktop"
-              :class="[colorClass(event.color)]"
-              :style="eventStyle(event)"
-              tabindex="0"
-              @click.stop="handleEventClick(event, $event)"
+              class="timedBarDesktop"
+              :event="event"
+              presentation="month"
+              :time-label="formatEventTime(event)"
+              :show-subtitle="false"
+              @select="handleEventClick"
             >
-              <span class="eventTime">{{ formatEventTime(event) }}</span>
-              <span class="eventBarText">{{ event.title }}</span>
-            </button>
+              <template v-if="$slots.event" #default="slotProps">
+                <slot name="event" v-bind="{ ...slotProps, view: 'month' }" />
+              </template>
+            </CalendarEventCard>
 
             <!-- Timed events: mobile dots -->
             <div class="timedDotsMobile">
-              <button
+              <CalendarEventCard
                 v-for="event in cell.visibleTimed"
                 :key="event.id"
-                type="button"
-                class="eventDot"
-                :class="[colorClass(event.color)]"
-                :style="event.color && !colorClass(event.color) ? { backgroundColor: event.color } : {}"
-                tabindex="0"
-                :aria-label="event.title"
-                @click.stop="handleEventClick(event, $event)"
-              />
+                :event="event"
+                presentation="month"
+                :time-label="formatEventTime(event)"
+                compact
+                @select="handleEventClick"
+              >
+                <template v-if="$slots.event" #default="slotProps">
+                  <slot name="event" v-bind="{ ...slotProps, view: 'month' }" />
+                </template>
+              </CalendarEventCard>
             </div>
 
             <button

@@ -13,8 +13,10 @@ import {
   parseISO,
   parseTime,
   minutesToTimeString,
+  formatEventTimeRange,
 } from './utils'
 import { useGridSelection } from '../../composables/useGridSelection'
+import CalendarEventCard from './CalendarEventCard.vue'
 
 const props = withDefaults(defineProps<{
   events: CalendarEvent[]
@@ -79,7 +81,7 @@ const selections = Array.from({ length: 7 }, (_, i) => createSelectionForDay(i))
 const anySelecting = computed(() => selections.some(s => s.isSelecting.value))
 
 function handleGridMouseDown(e: MouseEvent, dayIndex: number) {
-  if ((e.target as HTMLElement).closest('.event')) return
+  if ((e.target as HTMLElement).closest('[data-calendar-event]')) return
   selections[dayIndex].startSelection(e)
 }
 
@@ -196,21 +198,7 @@ const timedEventsByDay = computed(() => {
 })
 
 /* ─── Helpers ─── */
-const tokenColors = ['primary', 'danger', 'success', 'warning', 'secondary', 'accent']
-
-function getEventClasses(event: CalendarEvent, isShort: boolean): string[] {
-  const classes = ['event']
-  if (event.color && tokenColors.includes(event.color)) {
-    classes.push(
-      `event${event.color.charAt(0).toUpperCase() + event.color.slice(1)}`,
-    )
-  }
-  if (isShort) classes.push('eventShort')
-  return classes
-}
-
 function getEventStyle(
-  event: CalendarEvent,
   top: number,
   height: number,
   column: number,
@@ -221,9 +209,6 @@ function getEventStyle(
     height: `${Math.max(height, 28)}px`,
     left: `${(column / totalColumns) * 100 + 0.5}%`,
     width: `${(1 / totalColumns) * 100 - 1}%`,
-  }
-  if (event.color && !tokenColors.includes(event.color)) {
-    style.borderLeftColor = event.color
   }
   return style
 }
@@ -241,30 +226,8 @@ function formatHourLabel(hour: number): string {
   return formatTimeLabel(d)
 }
 
-function handleEventClick(event: CalendarEvent, e: MouseEvent) {
-  e.stopPropagation()
+function handleEventClick(event: CalendarEvent) {
   emit('select', event)
-}
-
-function getAllDayEventClasses(event: CalendarEvent): string[] {
-  const classes = ['allDayEvent']
-  if (event.color && tokenColors.includes(event.color)) {
-    classes.push(
-      `event${event.color.charAt(0).toUpperCase() + event.color.slice(1)}`,
-    )
-  }
-  return classes
-}
-
-function getAllDayEventStyle(event: CalendarEvent): Record<string, string> | undefined {
-  if (event.color && !tokenColors.includes(event.color)) {
-    return {
-      backgroundColor: `${event.color}20`,
-      color: event.color,
-      borderLeft: `3px solid ${event.color}`,
-    }
-  }
-  return undefined
 }
 </script>
 
@@ -307,18 +270,18 @@ function getAllDayEventStyle(event: CalendarEvent): Record<string, string> | und
         </div>
 
         <div class="allDayCell">
-          <button
+          <CalendarEventCard
             v-for="event in allDayEventsByDay[dayIndex]"
             :key="event.id"
-            type="button"
-            class="allDayEvent"
-            :class="getAllDayEventClasses(event)"
-            :style="getAllDayEventStyle(event)"
-            tabindex="0"
-            @click="handleEventClick(event, $event)"
+            :event="event"
+            presentation="all-day"
+            :show-time="false"
+            @select="handleEventClick"
           >
-            {{ event.title }}
-          </button>
+            <template v-if="$slots.event" #default="slotProps">
+              <slot name="event" v-bind="{ ...slotProps, view: 'week' }" />
+            </template>
+          </CalendarEventCard>
         </div>
 
         <div
@@ -361,30 +324,26 @@ function getAllDayEventStyle(event: CalendarEvent): Record<string, string> | und
             </span>
           </div>
 
-          <button
+          <CalendarEventCard
             v-for="eventInfo in timedEventsByDay[dayIndex]"
             :key="eventInfo.event.id"
-            type="button"
-            class="event"
-            :class="getEventClasses(eventInfo.event, eventInfo.isShort)"
+            :event="eventInfo.event"
+            presentation="time-grid"
+            :time-label="formatEventTimeRange(eventInfo.event)"
+            :show-time="!eventInfo.isShort"
+            :show-subtitle="eventInfo.showSubtitle"
             :style="getEventStyle(
-              eventInfo.event,
               eventInfo.top,
               eventInfo.height,
               eventInfo.column,
               eventInfo.totalColumns,
             )"
-            tabindex="0"
-            @click="handleEventClick(eventInfo.event, $event)"
+            @select="handleEventClick"
           >
-            <span class="eventTitle">{{ eventInfo.event.title }}</span>
-            <span
-              v-if="eventInfo.event.subtitle && eventInfo.showSubtitle"
-              class="eventSubtitle"
-            >
-              {{ eventInfo.event.subtitle }}
-            </span>
-          </button>
+            <template v-if="$slots.event" #default="slotProps">
+              <slot name="event" v-bind="{ ...slotProps, view: 'week' }" />
+            </template>
+          </CalendarEventCard>
 
           <div
             v-if="currentTimeData && currentTimeData.dayIndex === dayIndex"

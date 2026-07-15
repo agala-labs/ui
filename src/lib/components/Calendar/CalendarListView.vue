@@ -11,6 +11,7 @@ import {
   toISODate,
 } from './utils'
 import { formatDateLabel } from '../../composables/useDateUtils'
+import CalendarEventCard from './CalendarEventCard.vue'
 
 const props = withDefaults(
   defineProps<{
@@ -74,32 +75,6 @@ function getRelativeBadge(
   }
 
   return null
-}
-
-const tokenColors = new Set([
-  'primary',
-  'danger',
-  'success',
-  'warning',
-  'secondary',
-  'accent',
-])
-
-function getAccentClass(color?: string): string | undefined {
-  if (!color || !tokenColors.has(color)) return undefined
-  return `accent${color.charAt(0).toUpperCase() + color.slice(1)}`
-}
-
-function getAccentStyle(
-  color?: string,
-): Record<string, string> | undefined {
-  if (!color || tokenColors.has(color)) return undefined
-  return { borderLeftColor: color }
-}
-
-function getBadgeClass(badge: string | null): string | undefined {
-  if (!badge) return undefined
-  return badge === 'Now' ? 'badgeNow' : 'badgeSoon'
 }
 
 /* ── computed data ── */
@@ -225,35 +200,19 @@ const totalEvents = computed(() => {
             <!-- Event card -->
             <div
               role="listitem"
-              class="eventCard"
-              :class="[getAccentClass(event.color)]"
-              :style="getAccentStyle(event.color)"
-              tabindex="0"
-              @click="emit('select', event)"
-              @keydown.enter.prevent="emit('select', event)"
-              @keydown.space.prevent="emit('select', event)"
+              class="eventListItem"
             >
-              <div class="timeColumn">
-                <div class="timeStart">
-                  {{ event.allDay ? 'All day' : safeFormatTime(event.start) }}
-                </div>
-              </div>
-
-              <div class="eventContent">
-                <div class="eventTitleRow">
-                  <span class="eventTitle">{{ event.title }}</span>
-                  <span
-                    v-if="event.badge"
-                    class="eventBadge"
-                    :class="getBadgeClass(event.badge)"
-                  >
-                    {{ event.badge }}
-                  </span>
-                </div>
-                <div v-if="event.subtitle" class="eventSubtitle">
-                  {{ event.subtitle }}
-                </div>
-              </div>
+              <CalendarEventCard
+                :event="event"
+                presentation="list"
+                :time-label="event.allDay ? 'All day' : safeFormatTime(event.start)"
+                :badge="event.badge"
+                @select="emit('select', $event)"
+              >
+                <template v-if="$slots.event" #default="slotProps">
+                  <slot name="event" v-bind="{ ...slotProps, view: 'list' }" />
+                </template>
+              </CalendarEventCard>
             </div>
           </template>
         </div>

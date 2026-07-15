@@ -9,17 +9,21 @@ const text = ref('')
 const checked = ref(true)
 const toggle = ref(true)
 const choice = ref('pro')
+const segmentView = ref('board:active')
 const date = ref('2026-07-10')
 const color = ref('#4f46e5')
 const selected = ref('ar')
 const selectedMany = ref<string[]>(['vue'])
 const page = ref(3)
 const tab = ref('overview')
+const selectedTableRows = ref<string[]>(['1'])
+const tableSortKey = ref('name')
+const tableSortDir = ref<'asc' | 'desc'>('asc')
 const modalOpen = ref(false)
 const drawerOpen = ref(false)
 const markdown = ref('Build interfaces with **semantic tokens** and accessible Vue components.')
 const files = ref<FileItem[]>([])
-const calendarView = ref<'month' | 'week' | 'day' | 'list'>('month')
+const calendarView = ref<'month' | 'week' | 'day' | 'list'>('day')
 const calendarDate = ref('2026-07-10')
 const sidebarActive = ref('overview')
 const sidebarExpanded = ref<string[]>(['workspace'])
@@ -35,15 +39,27 @@ const skills = [
 const radioOptions = [
   { value: 'starter', label: 'Starter' }, { value: 'pro', label: 'Professional' }, { value: 'enterprise', label: 'Enterprise' },
 ]
+const segmentOptions = [
+  { value: 'board:active', label: 'Board', icon: 'grid' as const },
+  { value: 'timeline', label: 'Timeline', icon: 'clock' as const, disabled: true },
+  { value: 'list', label: 'List', icon: 'list' as const },
+]
 const tableColumns = [
-  { key: 'name', label: 'Member', sortable: true }, { key: 'role', label: 'Role' }, { key: 'status', label: 'Status' },
+  { key: 'name', label: 'Member', sortable: true, minWidth: '9rem' },
+  { key: 'role', label: 'Role', minWidth: '7.5rem' },
+  { key: 'status', label: 'Status', minWidth: '6rem' },
 ]
 const tableRows = [
   { id: '1', name: 'Ada Lovelace', role: 'Owner', status: 'Active' },
   { id: '2', name: 'Grace Hopper', role: 'Maintainer', status: 'Active' },
   { id: '3', name: 'Edsger Dijkstra', role: 'Reviewer', status: 'Invited' },
 ]
-const tabs = [{ value: 'overview', label: 'Overview' }, { value: 'activity', label: 'Activity' }]
+const tabs = [
+  { value: 'overview', label: 'Overview' },
+  { value: 'activity', label: 'Activity' },
+  { value: 'milestones', label: 'Milestones' },
+  { value: 'settings', label: 'Settings', disabled: true },
+]
 const menuItems = [
   { label: 'Edit', icon: 'pencil' as const, onClick: () => undefined },
   { separator: true },
@@ -56,8 +72,10 @@ const sideItems = [{ label: 'Workspace', items: [
   ] },
 ] }]
 const events = [
-  { id: '1', title: 'Design review', start: '2026-07-10T10:00:00', end: '2026-07-10T11:00:00', color: 'primary' },
-  { id: '2', title: 'Release', start: '2026-07-14T14:00:00', end: '2026-07-14T15:00:00', color: 'success' },
+  { id: '1', title: 'Design review', subtitle: 'Checkout handoff', start: '2026-07-10T10:00:00', end: '2026-07-10T11:00:00', color: 'primary' },
+  { id: '2', title: 'Release readiness', subtitle: 'API and web', start: '2026-07-10T10:30:00', end: '2026-07-10T12:00:00', color: 'success' },
+  { id: '3', title: 'Team planning', start: '2026-07-10T14:00:00', end: '2026-07-10T14:30:00', color: 'warning' },
+  { id: '4', title: 'Launch window', start: '2026-07-10T00:00:00', end: '2026-07-10T23:59:00', allDay: true, color: 'secondary' },
 ]
 </script>
 
@@ -155,9 +173,15 @@ const events = [
     />
     <AgalaSegmentedControl
       v-else-if="slug === 'segmented-control'"
-      v-model="choice"
-      :options="radioOptions"
-    />
+      v-model="segmentView"
+      :options="segmentOptions"
+      aria-label="View mode"
+      block
+    >
+      <template #option-list>
+        <span class="segment-label">List <span class="segment-count">12</span></span>
+      </template>
+    </AgalaSegmentedControl>
     <div
       v-else-if="slug === 'alert'"
       class="preview-stack"
@@ -361,9 +385,15 @@ const events = [
     </div>
     <AgalaTable
       v-else-if="slug === 'table'"
+      v-model:selected-rows="selectedTableRows"
+      v-model:sort-key="tableSortKey"
+      v-model:sort-dir="tableSortDir"
       :columns="tableColumns"
       :rows="tableRows"
       row-key="id"
+      selectable
+      interactive-rows
+      sticky-first-column
     >
       <template #cell-status="{ value }">
         <AgalaBadge :variant="value === 'Active' ? 'success' : 'warning'">
@@ -375,11 +405,17 @@ const events = [
       v-else-if="slug === 'tabs'"
       v-model="tab"
       :tabs="tabs"
+      variant="pills"
     >
+      <template #tab-activity>
+        <span class="tab-label">Activity <span class="tab-count">12</span></span>
+      </template>
       <template #panel-overview>
         <p>Project health and recent milestones.</p>
       </template><template #panel-activity>
         <p>Recent workspace activity.</p>
+      </template><template #panel-milestones>
+        <p>Delivery milestones and upcoming release gates.</p>
       </template>
     </AgalaTabs>
     <div
@@ -390,6 +426,8 @@ const events = [
         v-model:view="calendarView"
         v-model:current-date="calendarDate"
         :events="events"
+        day-start="09:00"
+        day-end="18:00"
       />
     </div>
     <AgalaListGroup v-else-if="slug === 'list-group'">
@@ -537,7 +575,11 @@ const events = [
 .preview-row { display: flex; align-items: center; flex-wrap: wrap; gap: 0.75rem; }
 .preview-grow { display: flex; flex: 1; flex-direction: column; gap: 0.6rem; }
 .sidebar-demo { height: 20rem; overflow: hidden; border: 1px solid hsl(var(--agala-border)); border-radius: var(--agala-radius); }
-.calendar-demo { min-width: 0; overflow-x: auto; }
+.calendar-demo { min-width: 0; height: 32rem; overflow: hidden; }
+.tab-label { display: inline-flex; align-items: center; gap: 0.4rem; }
+.tab-count { display: inline-flex; min-width: 1.25rem; height: 1.25rem; align-items: center; justify-content: center; border-radius: 999px; background: hsl(var(--agala-primary) / 0.12); color: hsl(var(--agala-primary)); font-size: 0.6875rem; font-weight: var(--agala-font-weight-semibold); }
+.segment-label { display: inline-flex; min-width: 0; align-items: center; gap: 0.3rem; }
+.segment-count { display: inline-flex; min-width: 1.15rem; height: 1.15rem; align-items: center; justify-content: center; border-radius: 999px; background: hsl(var(--agala-primary) / 0.12); color: hsl(var(--agala-primary)); font-size: 0.625rem; font-weight: var(--agala-font-weight-semibold); }
 .center-demo { height: 10rem; border: 1px dashed hsl(var(--agala-border)); }
 .icon-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
 .icon-grid span { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; }
