@@ -7,9 +7,6 @@ when:
       - refs/tags/charts-v*
   - event: manual
 
-depends_on:
-  - verify
-
 steps:
   - name: require-published-packages
     when:
