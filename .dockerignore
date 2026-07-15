@@ -1,0 +1,9 @@
+.git
+.agala-plans
+dist
+docs/.vitepress/cache
+docs/.vitepress/dist
+node_modules
+playwright-report
+test-results
+tests

@@ -1,0 +1,27 @@
+name: verify
+
+when:
+  - event: [push, pull_request, tag, manual]
+
+steps:
+  - name: verify
+    image: mcr.microsoft.com/playwright:v1.61.1-noble
+    commands:
+      - npm ci --ignore-scripts
+      - npm run lint
+      - npm run build:lib
+      - npm run build --workspace @agala-labs/charts
+      - npm run docs:build
+      - npm run test:consumer
+      - npm run test:mobile
+      - npm pack --dry-run
+      - npm pack --dry-run --workspace @agala-labs/charts
+
+  - name: verify-docs-image
+    image: woodpeckerci/plugin-docker-buildx
+    settings:
+      dry_run: true
+      repo: ghcr.io/agala-labs/ui-docs
+      tags: verify-${CI_COMMIT_SHA}
+      build_args:
+        - VCS_REF=${CI_COMMIT_SHA}
