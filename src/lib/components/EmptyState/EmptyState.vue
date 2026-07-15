@@ -1,11 +1,15 @@
 <script setup lang="ts">
 import type { EmptyStateProps } from './types'
 
-const props = defineProps<EmptyStateProps>()
+const props = withDefaults(defineProps<EmptyStateProps>(), {
+  size: 'default',
+})
 </script>
 
 <template>
-  <div :class="['emptyState', props.class].filter(Boolean).join(' ')">
+  <div
+    :class="['emptyState', `emptyState${props.size === 'compact' ? 'Compact' : 'Default'}`, props.class].filter(Boolean).join(' ')"
+  >
     <div v-if="$slots.icon" class="emptyIcon">
       <slot name="icon" />
     </div>
@@ -59,11 +63,41 @@ const props = defineProps<EmptyStateProps>()
   font-family: var(--agala-font-sans);
   font-size: var(--agala-empty-description-size, var(--agala-font-size-base));
   color: hsl(var(--agala-muted-foreground));
-  max-width: var(--agala-empty-description-max-width, 36ch);
+  max-width: min(100%, var(--agala-empty-description-max-width, 36ch));
   line-height: var(--agala-line-height-relaxed);
+  overflow-wrap: anywhere;
 }
 
 .emptyAction {
   margin-top: 0.75rem;
+  max-width: 100%;
+}
+
+.emptyStateCompact {
+  padding: var(--agala-empty-padding, 1rem);
+  gap: var(--agala-empty-gap, 0.5rem);
+}
+
+.emptyStateCompact .emptyIcon {
+  margin-bottom: 0;
+  font-size: var(--agala-empty-icon-size, 1.75rem);
+}
+
+.emptyStateCompact .emptyIconDefault svg {
+  display: block;
+  width: 1em;
+  height: 1em;
+}
+
+.emptyStateCompact .emptyTitle {
+  font-size: var(--agala-empty-title-size, var(--agala-font-size-base));
+}
+
+.emptyStateCompact .emptyDescription {
+  font-size: var(--agala-empty-description-size, var(--agala-font-size-sm));
+}
+
+.emptyStateCompact .emptyAction {
+  margin-top: 0.25rem;
 }
 </style>

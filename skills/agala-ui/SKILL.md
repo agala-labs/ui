@@ -93,12 +93,12 @@ Internal source composables include `useSelectFilter`, `useChipDisplay`, `useKey
 - `AgalaSidebar`: either pass structured `items` or use slots. Supports `v-model:collapsed`, `v-model:open`, `v-model:activeValue`, `v-model:expanded`, `defaultExpanded`, `indent compact|comfortable`, `responsive`, `width`, `collapsedWidth`; emits `select`. Tree items support `children`, badges, dots, icons, hrefs, disabled state.
 - `AgalaSidebarItem`: `icon`, `label`, `active`, `badge`, `badgeVariant`, `dot`, `dotVariant`, `disabled`; slots `icon` and default.
 - `AgalaSidebarToggle`: emits `click`; props `ariaExpanded`, `ariaControls`, `ariaLabel`.
-- `AgalaListGroup`: `variant divided|cards`, `gap`, `borderless`, `dividers`; `AgalaListGroupItem` has label/subtitle/icon/badge/actionIcon/radius and `leading`, default, `trailing`, `badge` slots.
+- `AgalaListGroup`: `variant divided|cards`, `gap`, `borderless`, `dividers`; `AgalaListGroupItem` has label/subtitle/icon/badge/actionIcon/radius, semantic `badgeVariant default|primary|success|warning|danger`, and `leading`, default, `trailing`, `badge` slots. The badge and trailing slots override the built-in badge treatment.
 - `AgalaCard`: quiet outlined content container with no default elevation; `padding none|sm|md|lg`, `headerVariant default|compact`, `accent top|left|right|bottom`, `accentColor`; slots `header`, default, `footer`. Accents render as short inset edge markers rather than full-edge borders.
-- `AgalaStat`: `label`, `value`, `trend`, `trendLabel`, `icon`, `iconBg`, `layout vertical|row|inline`, `bordered`, `labelTransform`.
+- `AgalaStat`: `label`, `value`, neutral `secondaryValue`, `trend`, `trendLabel`, `icon`, `iconBg`, `layout vertical|row|inline`, `bordered`, `labelTransform`. Secondary values render before trends without sign or percentage formatting and can be themed with `--agala-stat-secondary-size`, `--agala-stat-secondary-color`, and `--agala-stat-secondary-weight`.
 - `AgalaBadge`: `variant default|secondary|outline|subtle|success|warning|danger`, `size sm|md`, `dot`, `color`.
 - `AgalaTag`: `label`, `variant default|primary|secondary|success|warning|danger|outline`, `size sm|md`, `removable`, `disabled`, `color`; emits `remove` and `click`.
-- `AgalaAlert`: neutral message surface with semantic outline/icon treatment; `variant info|success|warning|danger`, `title`, `dismissible`, `flat`, `icon?: string|false`; default slot for body. Set `icon=false` to hide the icon. Dismissal is internal and does not emit.
+- `AgalaAlert`: borderless neutral notice with a subtle semantic icon treatment and `variant info|success|warning|danger`, `title`, `dismissible`, `flat`, `icon?: string|false`; slots are default body and `action`. Set `icon=false` to hide the icon. Actions align to the end on wide layouts and wrap below the message under 639px. Dismissal is internal and does not emit.
 - `AgalaProgress`: `variant linear|circular`, `value`, `size sm|md|lg`, `color primary|success|warning|danger`, `indeterminate`.
 - `AgalaAvatar`: `src`, `alt`, `fallback`, `size xs|sm|md|lg|xl`, `shape circle|rounded|square`.
 - `AgalaAccordion`/`AgalaAccordionItem`: `multiple`; items use `value`, `title`, `disabled`.
@@ -107,7 +107,7 @@ Internal source composables include `useSelectFilter`, `useChipDisplay`, `useKey
 - `AgalaNavbar`: slots `brand`, default nav content, `actions`.
 - Layout primitives: `AgalaStack` supports `direction`, `gap`, `align`, `justify`, `wrap`, `as`; `AgalaHStack` and `AgalaVStack` omit `direction`; `AgalaSpacer` flexes; `AgalaCenter` centers; `AgalaDivider` supports `orientation`, `label`, `labelPosition`.
 - `AgalaSkeleton`: `variant line|circle|rect`, `width`, `height`.
-- `AgalaEmptyState`: required `title`, optional `description`; slots `icon`, `action`.
+- `AgalaEmptyState`: required `title`, optional `description`, `size default|compact`; slots `icon`, `action`. Compact mode is intended for tables, drawers, split panes, and secondary panels.
 - `AgalaDevEnvBanner`: dismissible warning banner with `text`.
 
 ## Icon System

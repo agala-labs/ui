@@ -3,6 +3,7 @@ export type StatTrend = 'up' | 'down' | 'neutral'
 export interface StatProps {
   label: string
   value: string | number
+  secondaryValue?: string | number
   trend?: number
   trendLabel?: string
   icon?: string

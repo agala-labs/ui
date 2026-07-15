@@ -32,7 +32,7 @@ test.describe('default-theme component baselines', () => {
   }
 })
 
-const criticalPages = ['calendar', 'table', 'tabs', 'segmented-control', 'markdown-editor', 'sidebar'] as const
+const criticalPages = ['alert', 'calendar', 'table', 'tabs', 'segmented-control', 'markdown-editor', 'sidebar'] as const
 
 for (const theme of themes) {
   test.describe(`${theme} critical visual surfaces`, () => {
@@ -57,6 +57,120 @@ for (const theme of themes) {
 }
 
 test.describe('refined component interactions', () => {
+  test('list group applies semantic badges and preserves slot and keyboard behavior', async ({ page }) => {
+    await openWithTheme(page, '/components/list-group')
+
+    const variants = ['default', 'primary', 'success', 'warning', 'danger'] as const
+    const tokenByVariant = {
+      default: '--agala-primary',
+      primary: '--agala-primary',
+      success: '--agala-success',
+      warning: '--agala-warning',
+      danger: '--agala-danger',
+    } as const
+
+    for (const variant of variants) {
+      const badge = page.locator(`.list-demo-${variant} .listBadgeInner--${variant}`)
+      await expect(badge).toHaveCount(1)
+
+      const expectedColor = await page.evaluate((token) => {
+        const probe = document.createElement('span')
+        probe.style.color = `hsl(var(${token}))`
+        document.body.append(probe)
+        const color = getComputedStyle(probe).color
+        probe.remove()
+        return color
+      }, tokenByVariant[variant])
+      await expect(badge).toHaveCSS('color', expectedColor)
+    }
+
+    await expect(page.locator('.list-demo-custom-badge .custom-list-badge')).toHaveCount(1)
+    await expect(page.locator('.list-demo-custom-badge .listBadgeInner')).toHaveCount(0)
+    await expect(page.locator('.list-demo-custom-trailing .custom-list-trailing')).toHaveCount(1)
+    await expect(page.locator('.list-demo-custom-trailing .listBadgeInner')).toHaveCount(0)
+
+    const defaultItem = page.locator('.list-demo-default')
+    await defaultItem.focus()
+    await defaultItem.press('Enter')
+    await defaultItem.press('Space')
+    await expect(page.locator('.interaction-status')).toHaveText('Activations: 2')
+
+    const disabledItem = page.locator('.list-demo-disabled')
+    await expect(disabledItem).toHaveAttribute('tabindex', '-1')
+    await expect(disabledItem).toHaveAttribute('aria-disabled', 'true')
+    await disabledItem.dispatchEvent('click')
+    await expect(page.locator('.interaction-status')).toHaveText('Activations: 2')
+  })
+
+  test('alert action is reachable and the notice treatment stays borderless', async ({ page }) => {
+    await openWithTheme(page, '/components/alert')
+
+    const plainAlert = page.getByRole('alert').first()
+    await expect(plainAlert.locator(':scope > .alert__content')).toHaveCount(1)
+    await expect(plainAlert.locator('.alert__message')).toHaveCount(0)
+    await expect(plainAlert).toHaveCSS('border-left-width', '0px')
+
+    const actionable = page.locator('.alert-action-demo')
+    await expect(actionable.locator('.alert__action')).toHaveCount(1)
+    const retry = actionable.getByRole('button', { name: 'Retry' })
+    await retry.focus()
+    await expect(retry).toBeFocused()
+    await retry.press('Enter')
+    await expect(actionable.getByRole('button', { name: 'Retry (1)' })).toBeVisible()
+    await expect(actionable.locator('.alert__icon')).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+
+    const flat = page.locator('.alert-flat-action-demo')
+    await expect(flat.locator('.alert__action')).toHaveCount(1)
+    await expect(flat).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+
+    if ((page.viewportSize()?.width ?? 0) >= 640) {
+      const alignment = await actionable.evaluate((element) => {
+        const content = element.querySelector('.alert__content')?.getBoundingClientRect()
+        const action = element.querySelector('.alert__action')?.getBoundingClientRect()
+        if (!content || !action) return Number.POSITIVE_INFINITY
+        return Math.abs((content.top + content.height / 2) - (action.top + action.height / 2))
+      })
+      expect(alignment).toBeLessThanOrEqual(1)
+    }
+
+    await expectNoDocumentOverflow(page)
+  })
+
+  test('stat renders neutral secondary values before trends in every layout', async ({ page }) => {
+    await openWithTheme(page, '/components/stat')
+
+    await expect(page.locator('.stat-secondary-row .statSecondary')).toHaveText('$280,000')
+    await expect(page.locator('.stat-secondary-inline-zero .statSecondary')).toHaveText('0')
+    await expect(page.locator('.stat-secondary-empty .statSecondary')).toHaveText('')
+
+    const combined = page.locator('.stat-secondary-with-trend')
+    await expect(combined.locator('.statSecondary')).toHaveText('Across 18 teams')
+    expect(await combined.evaluate((element) => {
+      const secondary = element.querySelector('.statSecondary')
+      const trend = element.querySelector('.trend')
+      return Boolean(secondary && trend && (secondary.compareDocumentPosition(trend) & Node.DOCUMENT_POSITION_FOLLOWING))
+    })).toBe(true)
+
+    const trendOnly = page.locator('.agala-doc-grid > .stat').first()
+    await expect(trendOnly.locator('.statSecondary')).toHaveCount(0)
+    await expect(trendOnly.locator('.trendText')).toContainText('+12.4%')
+  })
+
+  test('empty state supports default and compact custom-slot layouts', async ({ page }) => {
+    await openWithTheme(page, '/components/empty-state')
+
+    const defaultState = page.locator('.empty-demo-default')
+    const compactState = page.locator('.empty-demo-compact')
+    await expect(defaultState).toHaveClass(/emptyStateDefault/)
+    await expect(compactState).toHaveClass(/emptyStateCompact/)
+    await expect(defaultState.locator('.emptyIcon svg')).toHaveCount(1)
+    await expect(compactState.locator('.emptyIcon svg')).toHaveCount(1)
+    await expect(defaultState.locator('.emptyAction button')).toHaveCount(1)
+    await expect(compactState.locator('.emptyAction button')).toHaveCount(1)
+    expect(await compactState.locator('.emptyDescription').evaluate(element => element.scrollWidth <= element.clientWidth + 1)).toBe(true)
+    await expectNoDocumentOverflow(page)
+  })
+
   test('table exposes deterministic sort, selection, and interactive rows', async ({ page }) => {
     await openWithTheme(page, '/components/table')
 

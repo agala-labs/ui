@@ -34,6 +34,11 @@ function handleKeydown(e: KeyboardEvent) {
 }
 
 const iconName = computed(() => props.icon as IconName | undefined)
+
+const badgeCls = computed(() => [
+  'listBadgeInner',
+  `listBadgeInner--${props.badgeVariant}`,
+])
 </script>
 
 <template>
@@ -61,7 +66,12 @@ const iconName = computed(() => props.icon as IconName | undefined)
 
     <slot name="trailing">
       <slot name="badge">
-        <span v-if="badge" class="listBadgeInner">{{ badge }}</span>
+        <span
+          v-if="badge"
+          :class="badgeCls"
+        >
+          {{ badge }}
+        </span>
       </slot>
       <AgalaIcon v-if="actionIcon" :name="actionIcon as IconName" :size="14" class="listChevron" />
     </slot>
@@ -163,11 +173,34 @@ const iconName = computed(() => props.icon as IconName | undefined)
   height: 1.25rem;
   padding: 0 0.375rem;
   border-radius: 99px;
-  background: var(--agala-list-badge-bg, hsl(var(--agala-primary) / 0.1));
-  color: var(--agala-list-badge-color, hsl(var(--agala-primary)));
   font-size: 0.6875rem;
   font-weight: var(--agala-font-weight-semibold);
   line-height: 1;
+}
+
+.listBadgeInner--default {
+  background: var(--agala-list-badge-bg, hsl(var(--agala-primary) / 0.1));
+  color: var(--agala-list-badge-color, hsl(var(--agala-primary)));
+}
+
+.listBadgeInner--primary {
+  background: hsl(var(--agala-primary) / 0.15);
+  color: hsl(var(--agala-primary));
+}
+
+.listBadgeInner--success {
+  background: hsl(var(--agala-success) / 0.15);
+  color: hsl(var(--agala-success));
+}
+
+.listBadgeInner--warning {
+  background: hsl(var(--agala-warning) / 0.15);
+  color: hsl(var(--agala-warning));
+}
+
+.listBadgeInner--danger {
+  background: hsl(var(--agala-danger) / 0.15);
+  color: hsl(var(--agala-danger));
 }
 
 .listChevron {

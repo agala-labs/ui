@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { toastManager } from '@ui'
+import { AgalaIcon, toastManager } from '@ui'
 import type { FileItem } from '@ui'
 
 defineProps<{ slug: string }>()
@@ -27,6 +27,8 @@ const calendarView = ref<'month' | 'week' | 'day' | 'list'>('day')
 const calendarDate = ref('2026-07-10')
 const sidebarActive = ref('overview')
 const sidebarExpanded = ref<string[]>(['workspace'])
+const alertRetryCount = ref(0)
+const listActivations = ref(0)
 
 const options = [
   { value: 'ar', label: 'Argentina', subtitle: 'South America' },
@@ -192,10 +194,35 @@ const events = [
       >
         Reconnect the warehouse before accepting new orders.
       </AgalaAlert><AgalaAlert
-        variant="success"
-        title="Catalog synchronized"
+        class="alert-action-demo"
+        variant="danger"
+        title="Could not load inventory"
+        dismissible
       >
-        184 items were updated at 14:32.
+        Check the connection and try again.
+        <template #action>
+          <AgalaButton
+            variant="outline"
+            size="sm"
+            @click="alertRetryCount++"
+          >
+            Retry<span v-if="alertRetryCount"> ({{ alertRetryCount }})</span>
+          </AgalaButton>
+        </template>
+      </AgalaAlert><AgalaAlert
+        class="alert-flat-action-demo"
+        variant="warning"
+        flat
+      >
+        Export is taking longer than expected.
+        <template #action>
+          <AgalaButton
+            variant="ghost"
+            size="sm"
+          >
+            View activity
+          </AgalaButton>
+        </template>
       </AgalaAlert>
     </div>
     <div
@@ -319,17 +346,48 @@ const events = [
         height="7rem"
       />
     </div>
-    <AgalaEmptyState
+    <div
       v-else-if="slug === 'empty-state'"
-      title="No projects"
-      description="Create your first project to start organizing work."
+      class="agala-doc-grid"
     >
-      <template #action>
-        <AgalaButton icon="plus">
-          Create project
-        </AgalaButton>
-      </template>
-    </AgalaEmptyState>
+      <AgalaEmptyState
+        class="empty-demo-default"
+        title="No projects"
+        description="Create your first project to start organizing work."
+      >
+        <template #icon>
+          <AgalaIcon
+            name="inbox"
+            :size="40"
+          />
+        </template>
+        <template #action>
+          <AgalaButton icon="plus">
+            Create project
+          </AgalaButton>
+        </template>
+      </AgalaEmptyState><AgalaEmptyState
+        class="empty-demo-compact"
+        size="compact"
+        title="No matching records"
+        description="No results match this unusually-specific-operational-filter-value-that-must-wrap-inside-a-narrow-panel."
+      >
+        <template #icon>
+          <AgalaIcon
+            name="search"
+            :size="28"
+          />
+        </template>
+        <template #action>
+          <AgalaButton
+            variant="ghost"
+            size="sm"
+          >
+            Clear filters
+          </AgalaButton>
+        </template>
+      </AgalaEmptyState>
+    </div>
     <AgalaDevEnvBanner
       v-else-if="slug === 'dev-env-banner'"
       text="Preview environment — data resets daily."
@@ -430,22 +488,67 @@ const events = [
         day-end="18:00"
       />
     </div>
-    <AgalaListGroup v-else-if="slug === 'list-group'">
-      <AgalaListGroupItem
-        label="Invoices"
-        subtitle="12 open"
-        icon="document"
-        badge="12"
-      /><AgalaListGroupItem
-        label="Payment methods"
-        subtitle="Visa ending in 4242"
-        icon="credit-card"
-      /><AgalaListGroupItem
-        label="Delete workspace"
-        icon="trash"
-        variant="danger"
-      />
-    </AgalaListGroup>
+    <div
+      v-else-if="slug === 'list-group'"
+      class="preview-stack"
+    >
+      <p
+        class="interaction-status"
+        aria-live="polite"
+      >
+        Activations: {{ listActivations }}
+      </p>
+      <AgalaListGroup>
+        <AgalaListGroupItem
+          class="list-demo-default"
+          label="Default queue"
+          badge="8"
+          @click="listActivations++"
+        /><AgalaListGroupItem
+          class="list-demo-primary"
+          label="In progress"
+          badge="12"
+          badge-variant="primary"
+        /><AgalaListGroupItem
+          class="list-demo-success"
+          label="Completed"
+          badge="24"
+          badge-variant="success"
+        /><AgalaListGroupItem
+          class="list-demo-warning"
+          label="Needs review"
+          badge="3"
+          badge-variant="warning"
+        /><AgalaListGroupItem
+          class="list-demo-danger"
+          label="Failed"
+          badge="2"
+          badge-variant="danger"
+        /><AgalaListGroupItem
+          class="list-demo-custom-badge"
+          label="Custom badge slot"
+          badge="ignored"
+        >
+          <template #badge>
+            <span class="custom-list-badge">Custom</span>
+          </template>
+        </AgalaListGroupItem><AgalaListGroupItem
+          class="list-demo-custom-trailing"
+          label="Custom trailing slot"
+          badge="ignored"
+        >
+          <template #trailing>
+            <span class="custom-list-trailing">Details</span>
+          </template>
+        </AgalaListGroupItem><AgalaListGroupItem
+          class="list-demo-disabled"
+          label="Disabled queue"
+          badge="1"
+          disabled
+          @click="listActivations++"
+        />
+      </AgalaListGroup>
+    </div>
     <div
       v-else-if="slug === 'avatar'"
       class="preview-row"
@@ -534,11 +637,35 @@ const events = [
         icon="trending-up"
         bordered
       /><AgalaStat
+        class="stat-secondary-row"
+        label="Require action"
+        value="4"
+        secondary-value="$280,000"
+        layout="row"
+        icon="alert-triangle"
+        icon-bg="danger"
+        bordered
+      /><AgalaStat
+        class="stat-secondary-inline-zero"
+        label="Pending"
+        value="12"
+        :secondary-value="0"
+        layout="inline"
+        bordered
+      /><AgalaStat
+        class="stat-secondary-with-trend"
         label="Active members"
         value="1,284"
+        secondary-value="Across 18 teams"
         :trend="-2.1"
         trend-label="vs last month"
         icon="users"
+        bordered
+      /><AgalaStat
+        class="stat-secondary-empty"
+        label="Empty supporting value"
+        value="0"
+        secondary-value=""
         bordered
       />
     </div>

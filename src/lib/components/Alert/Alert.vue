@@ -11,6 +11,11 @@ const props = withDefaults(defineProps<AlertProps>(), {
   icon: undefined,
 })
 
+defineSlots<{
+  default?: () => unknown
+  action?: () => unknown
+}>()
+
 const dismissed = ref(false)
 
 const iconMap: Record<AlertVariant, IconName> = {
@@ -46,7 +51,31 @@ const cls = computed(() => [
         :size="16"
       />
     </span>
-    <div class="alert__content">
+    <template v-if="$slots.action">
+      <div class="alert__message">
+        <div class="alert__content">
+          <h4
+            v-if="props.title && !props.flat"
+            class="alert__title"
+          >
+            {{ props.title }}
+          </h4>
+          <div
+            v-if="$slots.default"
+            class="alert__body"
+          >
+            <slot />
+          </div>
+        </div>
+        <div class="alert__action">
+          <slot name="action" />
+        </div>
+      </div>
+    </template>
+    <div
+      v-else
+      class="alert__content"
+    >
       <h4
         v-if="props.title && !props.flat"
         class="alert__title"
@@ -80,11 +109,11 @@ const cls = computed(() => [
   display: flex;
   flex-direction: row;
   align-items: flex-start;
-  gap: var(--agala-alert-gap, 0.75rem);
-  padding: var(--agala-alert-padding, 0.875rem 1rem);
-  border: var(--agala-alert-border-width, var(--agala-border-width)) solid var(--agala-alert-border-color, hsl(var(--alert-accent) / 0.28));
+  gap: var(--agala-alert-gap, 0.625rem);
+  padding: var(--agala-alert-padding, 0.75rem 0.875rem);
+  border: 0;
   border-radius: var(--agala-alert-radius, var(--agala-radius-md));
-  background: var(--agala-alert-bg, hsl(var(--agala-card)));
+  background: var(--agala-alert-bg, hsl(var(--agala-muted) / 0.45));
   box-shadow: var(--agala-alert-shadow, none);
   font-family: var(--agala-font-sans);
 }
@@ -112,13 +141,13 @@ const cls = computed(() => [
   background: transparent;
   border: 0;
   border-radius: 0;
-  padding: var(--agala-alert-flat-padding, 0.25rem 0);
-  gap: var(--agala-alert-flat-gap, 0.5rem);
+  padding: var(--agala-alert-flat-padding, 0.25rem 0.875rem);
+  gap: var(--agala-alert-flat-gap, 0.625rem);
 }
 .alert--flat .alert__icon {
-  width: 1rem;
-  height: 1rem;
-  margin-top: 0.125rem;
+  width: var(--agala-alert-icon-size, 1.5rem);
+  height: var(--agala-alert-icon-size, 1.5rem);
+  margin-top: 0;
   border: 0;
   border-radius: 0;
   background: transparent;
@@ -134,13 +163,21 @@ const cls = computed(() => [
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: var(--agala-alert-icon-size, 1.75rem);
-  height: var(--agala-alert-icon-size, 1.75rem);
+  width: var(--agala-alert-icon-size, 1.5rem);
+  height: var(--agala-alert-icon-size, 1.5rem);
   margin-top: 0;
   border: 0;
-  border-radius: var(--agala-alert-icon-radius, var(--agala-radius-md));
-  background: hsl(var(--alert-accent));
-  color: hsl(var(--alert-accent-foreground));
+  border-radius: 999px;
+  background: hsl(var(--alert-accent) / 0.1);
+  color: hsl(var(--alert-accent));
+}
+
+.alert__message {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--agala-alert-action-gap, 0.75rem);
+  min-width: 0;
 }
 
 .alert__content {
@@ -171,6 +208,14 @@ const cls = computed(() => [
   color: hsl(var(--agala-muted-foreground));
 }
 
+.alert__action {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  max-width: 100%;
+  margin-inline-start: auto;
+}
+
 .alert__dismiss {
   flex-shrink: 0;
   display: inline-flex;
@@ -198,5 +243,18 @@ const cls = computed(() => [
 .alert__dismiss:focus-visible {
   outline: none;
   box-shadow: 0 0 0 2px hsl(var(--agala-ring));
+}
+
+@media (max-width: 639px) {
+  .alert__message {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--agala-alert-action-mobile-gap, 0.5rem);
+  }
+
+  .alert__action {
+    align-self: flex-start;
+    margin-inline-start: 0;
+  }
 }
 </style>

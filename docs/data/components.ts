@@ -108,9 +108,9 @@ export const components: ComponentMeta[] = [
   },
   {
     slug: 'alert', name: 'Alert', exports: ['AgalaAlert'], description: 'Communicates contextual status or a recoverable issue.',
-    props: [p('variant', "'info' | 'success' | 'warning' | 'danger'", 'Semantic status.', "'info'"), p('title', 'string', 'Optional heading.'), p('dismissible', 'boolean', 'Shows an internal close action.', 'false'), p('flat', 'boolean', 'Removes the bordered surface.', 'false'), p('icon', 'string | false', 'Overrides or hides the icon.'), p('class', 'string', 'Consumer override class.')],
-    slots: ['default — alert body'], accessibility: 'Uses semantic status styling; urgent messages should be announced by the consuming workflow when appropriate.',
-    snippet: `<AgalaAlert variant="warning" title="Sync delayed">Review the connection before retrying.</AgalaAlert>`,
+    props: [p('variant', "'info' | 'success' | 'warning' | 'danger'", 'Semantic status.', "'info'"), p('title', 'string', 'Optional heading.'), p('dismissible', 'boolean', 'Shows an internal close action.', 'false'), p('flat', 'boolean', 'Removes the neutral surface and radius.', 'false'), p('icon', 'string | false', 'Overrides or hides the icon.'), p('class', 'string', 'Consumer override class.')],
+    slots: ['default — alert body', 'action — recovery or follow-up control'], accessibility: 'Uses semantic status styling; action controls remain in normal keyboard order. Urgent messages should be announced by the consuming workflow when appropriate.',
+    snippet: `<AgalaAlert variant="danger" title="Could not load"><template #default>Try again.</template><template #action><AgalaButton size="sm" variant="outline">Retry</AgalaButton></template></AgalaAlert>`,
   },
   {
     slug: 'badge', name: 'Badge', exports: ['AgalaBadge'], description: 'Labels compact status or metadata.',
@@ -156,9 +156,9 @@ export const components: ComponentMeta[] = [
   },
   {
     slug: 'empty-state', name: 'Empty State', exports: ['AgalaEmptyState'], description: 'Explains an empty collection and offers the next useful action.',
-    props: [p('title', 'string', 'Required state title.'), p('description', 'string', 'Supporting explanation.'), p('class', 'string', 'Consumer override class.')],
+    props: [p('title', 'string', 'Required state title.'), p('description', 'string', 'Supporting explanation.'), p('size', "'default' | 'compact'", 'Presentation density.', "'default'"), p('class', 'string', 'Consumer override class.')],
     slots: ['icon', 'action'], accessibility: 'Keep the title explicit and ensure the action is reachable in normal reading order.',
-    snippet: `<AgalaEmptyState title="No projects" description="Create a project to get started."><template #action><AgalaButton>Create project</AgalaButton></template></AgalaEmptyState>`,
+    snippet: `<AgalaEmptyState size="compact" title="No results" description="Try another filter."><template #action><AgalaButton size="sm" variant="ghost">Clear filters</AgalaButton></template></AgalaEmptyState>`,
   },
   {
     slug: 'dev-env-banner', name: 'Dev Environment Banner', exports: ['AgalaDevEnvBanner'], description: 'Warns users that they are viewing a non-production environment.',
@@ -215,7 +215,7 @@ export const components: ComponentMeta[] = [
   },
   {
     slug: 'list-group', name: 'List Group', exports: ['AgalaListGroup', 'AgalaListGroupItem'], description: 'Displays scan-friendly related records or actions.',
-    props: [p('variant', "'divided' | 'cards'", 'Group presentation.', "'divided'"), p('gap', 'string', 'Custom gap.'), p('borderless / dividers', 'boolean', 'Border controls.'), p('label', 'string', 'Required item label.'), p('subtitle', 'string', 'Item supporting copy.'), p('icon / actionIcon', 'string', 'Agala icon names.'), p('badge', 'string | number', 'Trailing count/status.'), p('disabled', 'boolean', 'Disables an item.', 'false')],
+    props: [p('variant', "'divided' | 'cards'", 'Group presentation.', "'divided'"), p('gap', 'string', 'Custom gap.'), p('borderless / dividers', 'boolean', 'Border controls.'), p('label', 'string', 'Required item label.'), p('subtitle', 'string', 'Item supporting copy.'), p('icon / actionIcon', 'string', 'Agala icon names.'), p('badge', 'string | number', 'Trailing count/status.'), p('badgeVariant', "'default' | 'primary' | 'success' | 'warning' | 'danger'", 'Built-in badge semantic treatment.', "'default'"), p('disabled', 'boolean', 'Disables an item.', 'false')],
     slots: ['ListGroup: default', 'ListGroupItem: leading, default, trailing, badge'], accessibility: 'Choose semantic content inside each item and label action icons.',
     snippet: `<AgalaListGroup><AgalaListGroupItem label="Invoices" subtitle="12 open" icon="document" /></AgalaListGroup>`,
   },
@@ -255,9 +255,9 @@ export const components: ComponentMeta[] = [
   },
   {
     slug: 'stat', name: 'Stat', exports: ['AgalaStat'], description: 'Displays a key metric with optional trend and icon.',
-    props: [p('label', 'string', 'Required metric label.'), p('value', 'string | number', 'Required metric value.'), p('trend', 'number', 'Signed trend value.'), p('trendLabel', 'string', 'Trend context.'), p('icon', 'string', 'Agala icon name.'), p('iconBg', "'primary' | 'danger' | 'success' | 'warning' | 'info'", 'Icon surface.'), p('layout', "'vertical' | 'row' | 'inline'", 'Content arrangement.', "'vertical'"), p('bordered', 'boolean', 'Adds a border.', 'false'), p('labelTransform', 'string', 'CSS text transform override.')],
+    props: [p('label', 'string', 'Required metric label.'), p('value', 'string | number', 'Required metric value.'), p('secondaryValue', 'string | number', 'Neutral supporting value rendered before any trend.'), p('trend', 'number', 'Signed trend value.'), p('trendLabel', 'string', 'Trend context.'), p('icon', 'string', 'Agala icon name.'), p('iconBg', "'primary' | 'danger' | 'success' | 'warning' | 'info'", 'Icon surface.'), p('layout', "'vertical' | 'row' | 'inline'", 'Content arrangement.', "'vertical'"), p('bordered', 'boolean', 'Adds a border.', 'false'), p('labelTransform', 'string', 'CSS text transform override.')],
     accessibility: 'Trend direction is conveyed by signed text and labels as well as color/icon.',
-    snippet: `<AgalaStat label="Monthly revenue" value="$24,800" :trend="12.4" trend-label="vs last month" />`,
+    snippet: `<AgalaStat label="Require action" value="4" secondary-value="$280,000" layout="row" />`,
   },
   {
     slug: 'tag', name: 'Tag', exports: ['AgalaTag'], description: 'Represents a compact label that may be interactive or removable.',

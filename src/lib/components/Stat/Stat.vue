@@ -61,6 +61,12 @@ const statCls = computed(() => [
       <div class="statBody">
         <span class="statLabel" :style="labelTransform ? { textTransform: labelTransform } : undefined">{{ label }}</span>
         <span class="statValue">{{ value }}</span>
+        <span
+          v-if="secondaryValue !== undefined"
+          class="statSecondary"
+        >
+          {{ secondaryValue }}
+        </span>
         <div v-if="trend !== undefined" :class="['trend', trendCls]">
           <svg
             v-if="trendDir !== 'neutral'"
@@ -87,6 +93,12 @@ const statCls = computed(() => [
     <template v-else-if="isInline">
       <span class="statLabel" :style="labelTransform ? { textTransform: labelTransform } : undefined">{{ label }}:</span>
       <span class="statValue">{{ value }}</span>
+      <span
+        v-if="secondaryValue !== undefined"
+        class="statSecondary"
+      >
+        {{ secondaryValue }}
+      </span>
       <div v-if="trend !== undefined" :class="['trend', trendCls]">
         <svg
           v-if="trendDir !== 'neutral'"
@@ -112,6 +124,12 @@ const statCls = computed(() => [
     <template v-else>
       <span class="statLabel" :style="labelTransform ? { textTransform: labelTransform } : undefined">{{ label }}</span>
       <span class="statValue">{{ value }}</span>
+      <span
+        v-if="secondaryValue !== undefined"
+        class="statSecondary"
+      >
+        {{ secondaryValue }}
+      </span>
       <div v-if="trend !== undefined" :class="['trend', trendCls]">
         <svg
           v-if="trendDir !== 'neutral'"
@@ -171,6 +189,16 @@ const statCls = computed(() => [
   color: var(--agala-stat-value-color, hsl(var(--agala-foreground)));
   line-height: 1;
   margin: 0.25rem 0;
+}
+
+.statSecondary {
+  min-width: 0;
+  font-family: var(--agala-font-sans);
+  font-size: var(--agala-stat-secondary-size, var(--agala-font-size-sm));
+  font-weight: var(--agala-stat-secondary-weight, var(--agala-font-weight-normal));
+  line-height: var(--agala-line-height-normal);
+  color: var(--agala-stat-secondary-color, hsl(var(--agala-muted-foreground)));
+  overflow-wrap: anywhere;
 }
 
 .trend {

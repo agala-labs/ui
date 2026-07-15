@@ -107,6 +107,12 @@ Keep skill content aligned with the current source and public docs:
 
 ## Build & Publish
 
+### Version Ownership
+
+- Do not edit the `version` field in `package.json` or `package-lock.json` as part of feature, fix, or release implementation work.
+- Package version bumps are maintainer-owned. The maintainer runs `npm version <version>` manually when the release is ready.
+- Leave package metadata at its current version unless the maintainer explicitly asks for the version command to be run.
+
 ### Scripts
 
 ```bash
@@ -146,4 +152,4 @@ npm run lint
 - Do not revert unrelated local changes; this repo is actively edited.
 
 ---
-*Last updated: 2026-07-14*
+*Last updated: 2026-07-15*
