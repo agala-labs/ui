@@ -2,7 +2,7 @@
 import { ref, computed, watch, nextTick, onMounted } from 'vue'
 import { AgalaIcon } from '../AgalaIcon'
 import Input from '../Input/Input.vue'
-import { useDropdownPosition } from '../../composables/useDropdownPosition'
+import { useFloatingOverlay } from '../../composables/useFloatingOverlay'
 import { usePopoverBehavior } from '../../composables/usePopoverBehavior'
 import ColorSquare from './ColorSquare.vue'
 import HueSlider from './HueSlider.vue'
@@ -34,15 +34,17 @@ const wrapperRef = ref<HTMLDivElement>()
 const floatingRef = ref<HTMLDivElement>()
 const colorSquareRef = ref<InstanceType<typeof ColorSquare>>()
 
-/* ─── Popover positioning ─── */
-const { dropdownStyle, recompute } = useDropdownPosition(triggerRef, floatingRef, { width: 'auto' })
-
 /* ─── State ─── */
 const isOpen = ref(false)
 const internalColor = ref<HSL>({ h: 0, s: 0, l: 100 })
 const hexInputText = ref('')
 const hexError = ref(false)
 const presetColors = ref<string[]>([])
+
+/* ─── Popover positioning ─── */
+const { floatingStyles } = useFloatingOverlay(triggerRef, floatingRef, isOpen, {
+  placement: 'bottom-start',
+})
 
 /* ─── Presets (on mount) ─── */
 const TOKEN_NAMES = [
@@ -141,7 +143,6 @@ function open() {
   syncFromModel()
   isOpen.value = true
   nextTick(() => {
-    requestAnimationFrame(() => recompute())
     colorSquareRef.value?.$el?.focus?.({ preventScroll: true })
   })
 }
@@ -256,7 +257,7 @@ function handleClear() {
 }
 
 /* ─── Popover behavior (click-outside, scroll-close, resize-reposition) ─── */
-usePopoverBehavior(isOpen, wrapperRef, floatingRef, () => close(), recompute)
+usePopoverBehavior(isOpen, wrapperRef, floatingRef, () => close())
 
 /* ─── Tab trapping ─── */
 function handlePopoverKeyDown(e: KeyboardEvent) {
@@ -318,12 +319,12 @@ function handlePopoverKeyDown(e: KeyboardEvent) {
     <p v-if="error && errorMessage" class="errorMsg">{{ errorMessage }}</p>
 
     <!-- Popover -->
-    <Teleport to="body">
       <div
         v-if="isOpen"
         ref="floatingRef"
         class="dropdown"
-        :style="dropdownStyle"
+        popover="manual"
+        :style="floatingStyles"
         role="dialog"
         aria-label="Color picker"
         @keydown="handlePopoverKeyDown"
@@ -386,7 +387,6 @@ function handlePopoverKeyDown(e: KeyboardEvent) {
           </button>
         </div>
       </div>
-    </Teleport>
   </div>
 </template>
 
@@ -526,9 +526,14 @@ function handlePopoverKeyDown(e: KeyboardEvent) {
 
 /* ─── Dropdown / Popover ─── */
 .dropdown {
+  position: fixed;
+  inset: auto;
+  margin: 0;
   box-sizing: border-box;
   z-index: var(--agala-z-dropdown);
   width: 280px;
+  max-width: var(--agala-floating-available-width, calc(100vw - 1rem));
+  max-height: var(--agala-floating-available-height, calc(100dvh - 1rem));
   padding: 0.75rem;
   background: hsl(var(--agala-popover));
   color: hsl(var(--agala-popover-foreground));
@@ -540,6 +545,7 @@ function handlePopoverKeyDown(e: KeyboardEvent) {
   gap: 0.75rem;
   outline: none;
   overflow-x: hidden;
+  overflow-y: auto;
   overflow-y: auto;
   overscroll-behavior: contain;
 }

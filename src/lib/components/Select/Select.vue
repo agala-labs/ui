@@ -6,7 +6,7 @@ import {
   nextTick,
 } from 'vue'
 import { AgalaIcon } from '../AgalaIcon'
-import { useDropdownPosition } from '../../composables/useDropdownPosition'
+import { useFloatingOverlay } from '../../composables/useFloatingOverlay'
 import { usePopoverBehavior } from '../../composables/usePopoverBehavior'
 import type { SelectOption, SelectSize } from './types'
 
@@ -137,8 +137,11 @@ const activeDescendant = computed(() => {
   return undefined
 })
 
-/* ─── Fixed dropdown positioning (escapes overflow) ─── */
-const { dropdownStyle, recompute } = useDropdownPosition(rowRef, floatingRef)
+/* ─── Top-layer floating positioning ─── */
+const { floatingStyles } = useFloatingOverlay(rowRef, floatingRef, isOpen, {
+  placement: 'bottom-start',
+  matchReferenceWidth: true,
+})
 
 /* ─── Class helpers ─── */
 const triggerRowCls = computed(() => [
@@ -209,7 +212,6 @@ function openDropdown() {
   isOpen.value = true
   query.value = ''
   highlightedIdx.value = 0
-  nextTick(() => requestAnimationFrame(() => recompute()))
 }
 
 function findNextIndex(start: number, dir: 1 | -1): number {
@@ -363,7 +365,7 @@ function handleSearchKeyDown(e: KeyboardEvent) {
 }
 
 /* ─── Watches ─── */
-usePopoverBehavior(isOpen, wrapperRef, floatingRef, () => closeDropdown(), recompute)
+usePopoverBehavior(isOpen, wrapperRef, floatingRef, () => closeDropdown())
 
 // Focus search input when opening
 watch(isOpen, (open) => {
@@ -446,8 +448,7 @@ watch(highlightedIdx, () => {
       </span>
     </div>
 
-    <Teleport to="body">
-      <div v-if="isOpen" ref="floatingRef" class="dropdown" :style="dropdownStyle">
+      <div v-if="isOpen" ref="floatingRef" class="dropdown" popover="manual" :style="floatingStyles">
         <div v-if="searchable" class="searchWrapper">
           <input
             ref="searchRef"
@@ -513,7 +514,6 @@ watch(highlightedIdx, () => {
           </template>
         </ul>
       </div>
-    </Teleport>
 
     <p v-if="errorMessage" class="errorMessage">{{ errorMessage }}</p>
   </div>
@@ -718,11 +718,15 @@ watch(highlightedIdx, () => {
 
 /* ── Dropdown ── */
 .dropdown {
+  position: fixed;
+  inset: auto;
+  margin: 0;
   box-sizing: border-box;
   z-index: var(--agala-z-dropdown);
   display: flex;
   flex-direction: column;
-  max-height: min(24rem, 60vh);
+  max-width: var(--agala-floating-available-width, calc(100vw - 1rem));
+  max-height: min(24rem, 60vh, var(--agala-floating-available-height, 60vh));
   background-color: hsl(var(--agala-popover));
   color: hsl(var(--agala-popover-foreground));
   border: var(--agala-border-width) solid hsl(var(--agala-border));

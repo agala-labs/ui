@@ -1,7 +1,11 @@
 import { watch, type Ref } from 'vue'
 
+export interface PopoverBehaviorOptions {
+  closeOnScroll?: boolean
+}
+
 /**
- * Shared popover behavior: click-outside close, scroll close, resize reposition.
+ * Shared popover behavior: click-outside close and optional scroll close.
  *
  * Must be called inside a component's `<script setup>` block.
  *
@@ -9,14 +13,14 @@ import { watch, type Ref } from 'vue'
  * @param wrapperRef   Ref to the trigger/wrapper element
  * @param floatingRef  Ref to the floating popover element
  * @param close        Callback to close the popover
- * @param recompute    Callback to recompute position (from useDropdownPosition)
+ * @param options      Dismissal options; anchored menus may remain open on scroll
  */
 export function usePopoverBehavior(
   isOpen: Ref<boolean>,
   wrapperRef: Ref<HTMLElement | undefined | null>,
   floatingRef: Ref<HTMLElement | undefined | null>,
   close: () => void,
-  recompute: () => void,
+  options: PopoverBehaviorOptions = {},
 ) {
   watch(isOpen, (open) => {
     if (!open) return
@@ -37,17 +41,15 @@ export function usePopoverBehavior(
       }
     }
 
-    const handleResize = () => recompute()
-
     document.addEventListener('mousedown', handleClick)
-    window.addEventListener('scroll', handleScroll, true)
-    window.addEventListener('resize', handleResize)
+    if (options.closeOnScroll !== false) {
+      window.addEventListener('scroll', handleScroll, true)
+    }
 
     watch(isOpen, (newOpen) => {
       if (!newOpen) {
         document.removeEventListener('mousedown', handleClick)
         window.removeEventListener('scroll', handleScroll, true)
-        window.removeEventListener('resize', handleResize)
       }
     }, { once: true })
   })

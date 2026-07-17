@@ -3,7 +3,7 @@ import { ref, computed, watch, nextTick } from 'vue'
 import { AgalaIcon } from '../AgalaIcon'
 import { useChipDisplay } from '../../composables/useChipDisplay'
 import { useKeyboardNav } from '../../composables/useKeyboardNav'
-import { useDropdownPosition } from '../../composables/useDropdownPosition'
+import { useFloatingOverlay } from '../../composables/useFloatingOverlay'
 import { usePopoverBehavior } from '../../composables/usePopoverBehavior'
 import type { CreatableSelectProps } from './types'
 
@@ -129,7 +129,10 @@ const flatItems = computed<FlatItemEntry[]>(() => {
 })
 
 /* ─── Dropdown position ─── */
-const { dropdownStyle, recompute } = useDropdownPosition(triggerRef, floatingRef)
+const { floatingStyles } = useFloatingOverlay(triggerRef, floatingRef, isOpen, {
+  placement: 'bottom-start',
+  matchReferenceWidth: true,
+})
 
 /* ─── Helpers ─── */
 function updateValue(newValue: string[]) {
@@ -163,7 +166,6 @@ function openDropdown() {
   isOpen.value = true
   query.value = ''
   highlightedIdx.value = 0
-  nextTick(() => requestAnimationFrame(() => recompute()))
 }
 
 function removeLastChip() {
@@ -274,7 +276,7 @@ function handleSearchKeyDown(e: KeyboardEvent) {
 }
 
 /* ─── Watches ─── */
-usePopoverBehavior(isOpen, wrapperRef, floatingRef, () => closeDropdown(), recompute)
+usePopoverBehavior(isOpen, wrapperRef, floatingRef, () => closeDropdown())
 
 // Focus search when opening
 watch(isOpen, (open) => {
@@ -361,12 +363,12 @@ watch(highlightedIdx, () => {
     </div>
 
     <!-- Dropdown -->
-    <Teleport to="body">
       <div
         v-if="isOpen"
         ref="floatingRef"
         class="dropdown"
-        :style="dropdownStyle"
+        popover="manual"
+        :style="floatingStyles"
       >
         <!-- Search -->
         <div class="searchWrapper">
@@ -440,7 +442,6 @@ watch(highlightedIdx, () => {
           </template>
         </ul>
       </div>
-    </Teleport>
   </div>
 </template>
 
@@ -591,11 +592,15 @@ watch(highlightedIdx, () => {
 
 /* ── Dropdown ── */
 .dropdown {
+  position: fixed;
+  inset: auto;
+  margin: 0;
   box-sizing: border-box;
   z-index: var(--agala-z-dropdown);
   display: flex;
   flex-direction: column;
-  max-height: min(24rem, 60vh);
+  max-width: var(--agala-floating-available-width, calc(100vw - 1rem));
+  max-height: min(24rem, 60vh, var(--agala-floating-available-height, 60vh));
   background-color: hsl(var(--agala-popover));
   color: hsl(var(--agala-popover-foreground));
   border: var(--agala-border-width) solid hsl(var(--agala-border));

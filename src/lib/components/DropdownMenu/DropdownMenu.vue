@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 import { AgalaIcon } from '../AgalaIcon'
-import type { DropdownMenuItem, DropdownMenuProps, DropdownMenuPlacement } from './types'
+import { useFloatingOverlay } from '../../composables/useFloatingOverlay'
+import { usePopoverBehavior } from '../../composables/usePopoverBehavior'
+import type { DropdownMenuItem, DropdownMenuProps } from './types'
 
 const props = withDefaults(defineProps<DropdownMenuProps>(), {
   placement: 'bottom-end',
@@ -9,17 +11,13 @@ const props = withDefaults(defineProps<DropdownMenuProps>(), {
 
 const isOpen = ref(false)
 const highlightedIdx = ref(-1)
-const wrapperRef = ref<HTMLElement>()
-
-const placementMap: Record<DropdownMenuPlacement, string> = {
-  'bottom-end':   'menuBottomEnd',
-  'bottom-start': 'menuBottomStart',
-}
-
-const menuCls = computed(() => [
-  'menu',
-  placementMap[props.placement],
-].join(' '))
+const wrapperRef = ref<HTMLElement | null>(null)
+const triggerRef = ref<HTMLElement | null>(null)
+const floatingRef = ref<HTMLElement | null>(null)
+const floatingPlacement = computed(() => props.placement)
+const { floatingStyles } = useFloatingOverlay(triggerRef, floatingRef, isOpen, {
+  placement: floatingPlacement,
+})
 
 /* Only non-separator items can be highlighted */
 const actionIndices = computed(() =>
@@ -93,16 +91,7 @@ function handleKeyDown(e: KeyboardEvent) {
   }
 }
 
-watch(isOpen, (open) => {
-  if (!open) return
-  const handler = (e: MouseEvent) => {
-    if (!wrapperRef.value?.contains(e.target as Node)) close()
-  }
-  document.addEventListener('mousedown', handler)
-  watch(isOpen, (newOpen) => {
-    if (!newOpen) document.removeEventListener('mousedown', handler)
-  }, { once: true })
-})
+usePopoverBehavior(isOpen, wrapperRef, floatingRef, close, { closeOnScroll: false })
 </script>
 
 <template>
@@ -112,11 +101,18 @@ watch(isOpen, (open) => {
     :class="props.class"
     @keydown="handleKeyDown"
   >
-    <div class="trigger" @click="toggle">
+    <div ref="triggerRef" class="trigger" @click="toggle">
       <slot name="trigger" />
     </div>
 
-    <div v-if="isOpen" :class="menuCls" role="menu">
+    <div
+      v-if="isOpen"
+      ref="floatingRef"
+      class="menu"
+      popover="manual"
+      role="menu"
+      :style="floatingStyles"
+    >
       <template v-for="(item, idx) in items" :key="idx">
         <div v-if="item.separator" class="separator" role="separator" />
         <button
@@ -154,12 +150,13 @@ watch(isOpen, (open) => {
 
 /* Menu panel */
 .menu {
-  position: absolute;
-  top: calc(100% + 4px);
+  position: fixed;
+  inset: auto;
+  margin: 0;
   z-index: var(--agala-z-dropdown);
   min-width: 10rem;
-  max-width: calc(100vw - 1rem);
-  max-height: calc(100dvh - 1rem);
+  max-width: min(calc(100vw - 1rem), var(--agala-floating-available-width, calc(100vw - 1rem)));
+  max-height: min(calc(100dvh - 1rem), var(--agala-floating-available-height, calc(100dvh - 1rem)));
   padding: 0.25rem;
   background-color: hsl(var(--agala-popover));
   color: hsl(var(--agala-popover-foreground));
@@ -171,9 +168,6 @@ watch(isOpen, (open) => {
   overflow-y: auto;
   overscroll-behavior: contain;
 }
-
-.menuBottomEnd   { right: 0; }
-.menuBottomStart { left: 0; }
 
 /* Items */
 .menuItem {

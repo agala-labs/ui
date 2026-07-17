@@ -69,14 +69,14 @@ Exported from `@agala-labs/ui`:
 - `useMediaQuery`
 - Date helpers: `parseDate`, `formatISODate`, `formatISODateTime`, `formatTime`, `formatTime24`, `formatDateLabel`, `formatMonthYear`, `formatFullDate`, `isSameDay`, `isToday`, `startOfWeek`, `addDays`, `getMonthGrid`, `getWeekDays`
 
-Internal source composables include `useSelectFilter`, `useChipDisplay`, `useKeyboardNav`, `useDropdownPosition`, `usePopoverBehavior`, and `useGridSelection`. Do not document them as package imports unless `src/lib/index.ts` exports them.
+Internal source composables include `useSelectFilter`, `useChipDisplay`, `useKeyboardNav`, `useFloatingOverlay`, `usePopoverBehavior`, and `useGridSelection`. Do not document them as package imports unless `src/lib/index.ts` exports them.
 
 ## Component API Notes
 
 - `AgalaButton`: `variant` `default|secondary|outline|ghost|danger|link`; `size` `sm|md|lg|icon`; `type`, `loading`, `block`, `icon?: IconName|string`, `disabled`.
 - `AgalaInput`: `v-model`, `size`, `variant` `default|ghost`, `error`, `errorMessage`, `disabled`, `readonly`, `iconStart`, `iconEnd`, `iconEndActionable`, `type`, `placeholder`, `wrapperClass`; password inputs use an eye toggle.
 - `AgalaFormField`: `label`, `helper`, `error`, `disabled`, `htmlFor`, `required`; default slot for the control.
-- `AgalaSelect`: `options`, `v-model`, `multiple`, `searchable`, `clearable`, `loading`, `onSearch`, `maxDisplayed`, `maxSelections`; teleports the popover and supports grouped/subtitled disabled options.
+- `AgalaSelect`: `options`, `v-model`, `multiple`, `searchable`, `clearable`, `loading`, `onSearch`, `maxDisplayed`, `maxSelections`; uses a collision-aware native top-layer listbox and supports grouped/subtitled disabled options.
 - `AgalaCreatableSelect`: multi-select chips with `options`, `v-model`, `creatable`, `labelKey`, `idKey`, `maxDisplayed`, `debounce`; emits `create` and `search`.
 - `AgalaDatePicker`: `v-model`, `size`, `min`, `max`, `clearable`, `inline`, `highlightDates`, `displayMonth`; emits `update:displayMonth`.
 - `AgalaColorPicker`: `v-model` hex string, `size`, `clearable`, `error`, `errorMessage`, visual square/hue controls, presets, manual hex input.
@@ -102,7 +102,7 @@ Internal source composables include `useSelectFilter`, `useChipDisplay`, `useKey
 - `AgalaProgress`: `variant linear|circular`, `value`, `size sm|md|lg`, `color primary|success|warning|danger`, `indeterminate`.
 - `AgalaAvatar`: `src`, `alt`, `fallback`, `size xs|sm|md|lg|xl`, `shape circle|rounded|square`.
 - `AgalaAccordion`/`AgalaAccordionItem`: `multiple`; items use `value`, `title`, `disabled`.
-- `AgalaDropdownMenu`: trigger slot; items have `label`, `icon`, `variant default|danger`, `disabled`, `separator`, `onClick`; placement `bottom-start|bottom-end`.
+- `AgalaDropdownMenu`: trigger slot; items have `label`, `icon`, `variant default|danger`, `disabled`, `separator`, `onClick`; placement `bottom-start|bottom-end` defaults to `bottom-end`. Its native top-layer menu flips vertically, shifts within an 8px viewport margin, and stays anchored during ancestor scrolling.
 - `AgalaTooltip`: default slot trigger, `content`, `placement top|bottom|left|right`, `delay`, `block`.
 - `AgalaNavbar`: slots `brand`, default nav content, `actions`.
 - Layout primitives: `AgalaStack` supports `direction`, `gap`, `align`, `justify`, `wrap`, `as`; `AgalaHStack` and `AgalaVStack` omit `direction`; `AgalaSpacer` flexes; `AgalaCenter` centers; `AgalaDivider` supports `orientation`, `label`, `labelPosition`.
@@ -118,11 +118,11 @@ Prefer existing icons and boolean/string icon props over adding icon slots unles
 
 ## Popover And Responsive Patterns
 
-- Dropdown-like components generally teleport/fix-position floating panels to escape overflow and modal stacking contexts.
-- When using `useDropdownPosition`, recompute after `nextTick()` and `requestAnimationFrame()` on open, and pass a floating ref for second-pass collision handling.
-- `usePopoverBehavior` centralizes outside-click, scroll-close, and resize-reposition behavior. Call it in `<script setup>`, not inside callbacks.
+- Anchored overlays use `@floating-ui/vue` through internal `useFloatingOverlay`, with fixed coordinates, offset/flip/shift/size middleware, automatic scroll/resize updates, and an 8px viewport margin.
+- Floating panels use `popover="manual"` so the browser top layer escapes overflow and stacking contexts without Vue Teleport. Open and close them through the shared composable; keep component-specific dismissal and focus behavior explicit.
+- `usePopoverBehavior` centralizes outside-click and optional scroll-close behavior. Call it in `<script setup>`, not inside callbacks.
 - Layout responsiveness should be CSS-first. Use `useMediaQuery` only for JS enhancements such as closing mobile drawers or scrolling active tabs.
-- At 320px and wider, components must not create document-level horizontal overflow. Tables and long tab strips may scroll inside their own bounds; teleported popovers must remain within an 8px viewport margin.
+- At 320px and wider, components must not create document-level horizontal overflow. Tables and long tab strips may scroll inside their own bounds; top-layer popovers must remain within an 8px viewport margin.
 
 ## Build And Verification
 

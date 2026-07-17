@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { AgalaIcon, toastManager } from '@ui'
 import type { FileItem } from '@ui'
+import DropdownOverlayFixture from './DropdownOverlayFixture.vue'
 
 defineProps<{ slug: string }>()
 
@@ -61,11 +62,6 @@ const tabs = [
   { value: 'activity', label: 'Activity' },
   { value: 'milestones', label: 'Milestones' },
   { value: 'settings', label: 'Settings', disabled: true },
-]
-const menuItems = [
-  { label: 'Edit', icon: 'pencil' as const, onClick: () => undefined },
-  { separator: true },
-  { label: 'Delete', icon: 'trash' as const, variant: 'danger' as const, onClick: () => undefined },
 ]
 const sideItems = [{ label: 'Workspace', items: [
   { value: 'overview', label: 'Overview', icon: 'home' as const },
@@ -405,16 +401,9 @@ const events = [
         Override semantic HSL tokens at the root.
       </AgalaAccordionItem>
     </AgalaAccordion>
-    <AgalaDropdownMenu
+    <DropdownOverlayFixture
       v-else-if="slug === 'dropdown-menu'"
-      :items="menuItems"
-    >
-      <template #trigger>
-        <AgalaButton variant="outline">
-          Actions
-        </AgalaButton>
-      </template>
-    </AgalaDropdownMenu>
+    />
     <AgalaNavbar v-else-if="slug === 'navbar'">
       <template #brand>
         <strong>Agala</strong>

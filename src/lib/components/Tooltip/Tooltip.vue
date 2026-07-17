@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { nextTick, onUnmounted, ref, watch } from 'vue'
+import { arrow } from '@floating-ui/vue'
+import { computed, nextTick, onUnmounted, ref } from 'vue'
+import { useFloatingOverlay } from '../../composables/useFloatingOverlay'
 import type { TooltipProps } from './types'
 
 let idCounter = 0
@@ -12,85 +14,51 @@ const props = withDefaults(defineProps<TooltipProps>(), {
 
 idCounter += 1
 const tooltipId = `agala-tooltip-${idCounter}`
+const rendered = ref(false)
 const visible = ref(false)
 const wrapperRef = ref<HTMLElement | null>(null)
 const tooltipRef = ref<HTMLElement | null>(null)
-const tooltipStyle = ref<Record<string, string>>({})
-const actualPlacement = ref(props.placement)
+const arrowRef = ref<HTMLElement | null>(null)
+const requestedPlacement = computed(() => props.placement)
+const {
+  floatingStyles,
+  middlewareData,
+  placement: actualPlacement,
+} = useFloatingOverlay(wrapperRef, tooltipRef, rendered, {
+  placement: requestedPlacement,
+  gap: 8,
+  middleware: [arrow({ element: arrowRef, padding: 5 })],
+})
+const arrowStyle = computed(() => ({
+  left: middlewareData.value.arrow?.x != null ? `${middlewareData.value.arrow.x}px` : undefined,
+  top: middlewareData.value.arrow?.y != null ? `${middlewareData.value.arrow.y}px` : undefined,
+}))
 let timer: ReturnType<typeof setTimeout> | null = null
+let shouldShow = false
 
 function show() {
+  shouldShow = true
+  if (timer) clearTimeout(timer)
   timer = setTimeout(async () => {
-    visible.value = true
+    if (!shouldShow) return
+    rendered.value = true
     await nextTick()
-    positionTooltip()
+    if (shouldShow) visible.value = true
   }, props.delay)
 }
 
 function hide() {
+  shouldShow = false
   if (timer) { clearTimeout(timer); timer = null }
   visible.value = false
 }
 
-function positionTooltip() {
-  const trigger = wrapperRef.value
-  const tooltip = tooltipRef.value
-  if (!trigger || !tooltip) return
-
-  const triggerRect = trigger.getBoundingClientRect()
-  const tooltipRect = tooltip.getBoundingClientRect()
-  const viewportWidth = document.documentElement.clientWidth
-  const viewportHeight = window.innerHeight
-  const margin = 8
-  const gap = 8
-  let placement = props.placement
-
-  const fits = {
-    top: triggerRect.top - tooltipRect.height - gap >= margin,
-    bottom: triggerRect.bottom + tooltipRect.height + gap <= viewportHeight - margin,
-    left: triggerRect.left - tooltipRect.width - gap >= margin,
-    right: triggerRect.right + tooltipRect.width + gap <= viewportWidth - margin,
-  }
-
-  if (!fits[placement]) {
-    if (placement === 'top' && fits.bottom) placement = 'bottom'
-    else if (placement === 'bottom' && fits.top) placement = 'top'
-    else if (placement === 'left' && fits.right) placement = 'right'
-    else if (placement === 'right' && fits.left) placement = 'left'
-  }
-
-  let left = triggerRect.left + (triggerRect.width - tooltipRect.width) / 2
-  let top = triggerRect.top + (triggerRect.height - tooltipRect.height) / 2
-
-  if (placement === 'top') top = triggerRect.top - tooltipRect.height - gap
-  if (placement === 'bottom') top = triggerRect.bottom + gap
-  if (placement === 'left') left = triggerRect.left - tooltipRect.width - gap
-  if (placement === 'right') left = triggerRect.right + gap
-
-  left = Math.min(Math.max(margin, left), viewportWidth - tooltipRect.width - margin)
-  top = Math.min(Math.max(margin, top), viewportHeight - tooltipRect.height - margin)
-
-  actualPlacement.value = placement
-  tooltipStyle.value = {
-    left: `${Math.round(left)}px`,
-    top: `${Math.round(top)}px`,
-  }
+function handleAfterLeave() {
+  if (!shouldShow) rendered.value = false
 }
-
-watch(visible, (open) => {
-  if (open) {
-    window.addEventListener('resize', positionTooltip)
-    window.addEventListener('scroll', positionTooltip, true)
-  } else {
-    window.removeEventListener('resize', positionTooltip)
-    window.removeEventListener('scroll', positionTooltip, true)
-  }
-})
 
 onUnmounted(() => {
   if (timer) clearTimeout(timer)
-  window.removeEventListener('resize', positionTooltip)
-  window.removeEventListener('scroll', positionTooltip, true)
 })
 </script>
 
@@ -107,24 +75,30 @@ onUnmounted(() => {
   >
     <slot />
 
-    <Teleport to="body">
-      <Transition name="tooltip">
+    <div
+      v-if="rendered"
+      ref="tooltipRef"
+      class="tooltipShell"
+      popover="manual"
+      :style="floatingStyles"
+    >
+      <Transition name="tooltip" @after-leave="handleAfterLeave">
         <div
           v-if="visible"
           :id="tooltipId"
-          ref="tooltipRef"
           :class="['tooltip', `tooltip-${actualPlacement}`]"
-          :style="tooltipStyle"
           role="tooltip"
         >
           {{ content }}
           <span
+            ref="arrowRef"
             :class="['arrow', `arrow-${actualPlacement}`]"
+            :style="arrowStyle"
             aria-hidden="true"
           />
         </div>
       </Transition>
-    </Teleport>
+    </div>
   </div>
 </template>
 
@@ -141,9 +115,23 @@ onUnmounted(() => {
   width: 100%;
 }
 
-.tooltip {
+.tooltipShell {
   position: fixed;
+  inset: auto;
+  width: max-content;
+  height: max-content;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  pointer-events: none;
   z-index: var(--agala-z-dropdown);
+}
+
+.tooltip {
+  position: relative;
   padding: 0.375rem 0.625rem;
   background-color: hsl(var(--agala-foreground));
   color: hsl(var(--agala-background));
@@ -152,7 +140,7 @@ onUnmounted(() => {
   line-height: var(--agala-line-height-normal);
   border-radius: var(--agala-radius-sm);
   width: max-content;
-  max-width: min(18rem, calc(100vw - 1rem));
+  max-width: min(18rem, calc(100vw - 1rem), var(--agala-floating-available-width, calc(100vw - 1rem)));
   white-space: normal;
   overflow-wrap: anywhere;
   pointer-events: none;

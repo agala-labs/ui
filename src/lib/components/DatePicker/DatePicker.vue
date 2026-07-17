@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, nextTick } from 'vue'
 import { AgalaIcon } from '../AgalaIcon'
-import { useDropdownPosition } from '../../composables/useDropdownPosition'
+import { useFloatingOverlay } from '../../composables/useFloatingOverlay'
 import { usePopoverBehavior } from '../../composables/usePopoverBehavior'
 import type { DatePickerSize } from './types'
 
@@ -52,7 +52,9 @@ const triggerRef = ref<HTMLDivElement>()
 const floatingRef = ref<HTMLDivElement>()
 const isYearPanelOpen = ref(false)
 
-const { dropdownStyle, recompute } = useDropdownPosition(triggerRef, floatingRef, { width: 'auto' })
+const { floatingStyles } = useFloatingOverlay(triggerRef, floatingRef, isOpen, {
+  placement: 'bottom-start',
+})
 
 /* Computed */
 const displayValue = computed(() => {
@@ -262,7 +264,6 @@ function open() {
     focusedDate.value = todayISO()
   }
   nextTick(() => {
-    requestAnimationFrame(() => recompute())
     const el = wrapperRef.value?.querySelector('[tabindex="0"]') as HTMLElement | null
     el?.focus({ preventScroll: true })
   })
@@ -434,8 +435,8 @@ watch(isYearPanelOpen, (open) => {
   }
 })
 
-/* click outside + scroll close + resize reposition */
-usePopoverBehavior(isOpen, wrapperRef, floatingRef, () => close(), recompute)
+/* click outside + scroll close */
+usePopoverBehavior(isOpen, wrapperRef, floatingRef, () => close())
 
 /* Watchers for displayMonth */
 watch(() => props.displayMonth, (val) => {
@@ -553,8 +554,7 @@ watch([viewYear, viewMonth], () => {
       </span>
     </div>
 
-    <Teleport to="body">
-      <div v-if="isOpen" ref="floatingRef" class="dropdown" :style="dropdownStyle" id="agala-date-grid" role="grid" aria-label="Calendar" @keydown="handleGridKeyDown">
+      <div v-if="isOpen" ref="floatingRef" class="dropdown" popover="manual" :style="floatingStyles" id="agala-date-grid" role="grid" aria-label="Calendar" @keydown="handleGridKeyDown">
         <div class="header">
           <button type="button" class="navBtn" @click="prevMonth" aria-label="Previous month">
             <AgalaIcon name="chevron" :size="14" />
@@ -638,7 +638,6 @@ watch([viewYear, viewMonth], () => {
           </button>
         </div>
       </div>
-    </Teleport>
 
     <p v-if="errorMessage" class="errorMessage">{{ errorMessage }}</p>
   </div>
@@ -733,11 +732,16 @@ watch([viewYear, viewMonth], () => {
 
 /* ── Dropdown ── */
 .dropdown {
+  position: fixed;
+  inset: auto;
+  margin: 0;
   box-sizing: border-box;
   z-index: var(--agala-z-dropdown);
   display: flex;
   flex-direction: column;
   width: 280px;
+  max-width: var(--agala-floating-available-width, calc(100vw - 1rem));
+  max-height: var(--agala-floating-available-height, calc(100dvh - 1rem));
   background-color: hsl(var(--agala-popover));
   color: hsl(var(--agala-popover-foreground));
   border: var(--agala-border-width) solid hsl(var(--agala-border));

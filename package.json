@@ -54,6 +54,7 @@
     "vue-tsc": "^3.2.8"
   },
   "dependencies": {
+    "@floating-ui/vue": "^2.0.1",
     "date-fns": "^4.1.0",
     "markdown-it": "^14.2.0",
     "vue": "^3.3.0"
