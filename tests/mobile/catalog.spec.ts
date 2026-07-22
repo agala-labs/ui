@@ -83,6 +83,10 @@ test.describe('Kervo semantic contrast', () => {
     await expect(danger).toBeVisible()
     expect(await contrastRatio(danger)).toBeGreaterThanOrEqual(4.5)
 
+    await danger.focus()
+    await expect(danger).toBeFocused()
+    await expect(danger).not.toHaveCSS('box-shadow', 'none')
+
     await danger.hover()
     expect(await contrastRatio(danger)).toBeGreaterThanOrEqual(4.5)
 
