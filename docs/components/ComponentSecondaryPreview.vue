@@ -23,6 +23,7 @@ const calendarView = ref<'list'>('list')
 const calendarDate = ref('2026-07-10')
 const sidebarActive = ref('locations')
 const sidebarExpanded = ref<string[]>(['settings'])
+const kervoSection = ref('inventory-locations')
 const removedTag = ref(false)
 
 const options = [
@@ -63,6 +64,16 @@ const sidebarItems = [{ label: 'Settings', items: [
     { value: 'terminals', label: 'Terminals' },
   ] },
 ] }]
+const kervoSectionItems = [
+  { value: 'general', label: 'General', icon: 'settings' as const },
+  { value: 'payments', label: 'Cobros', icon: 'credit-card' as const },
+  { value: 'fiscal', label: 'Facturación', icon: 'document' as const },
+  { value: 'stores', label: 'Sucursales', icon: 'building' as const },
+  { value: 'inventory-locations', label: 'Ubicaciones', icon: 'archive' as const, badge: 4 },
+  { value: 'registers', label: 'Cajas', icon: 'grid' as const },
+  { value: 'terminal', label: 'Terminal', icon: 'key' as const },
+  { value: 'users', label: 'Usuarios', icon: 'users' as const, disabled: true },
+]
 const events = [
   { id: '1', title: 'Inventory review', start: '2026-07-10T09:30:00', end: '2026-07-10T10:00:00', color: 'primary' },
   { id: '2', title: 'Supplier call', start: '2026-07-10T13:00:00', end: '2026-07-10T14:00:00', color: 'success' },
@@ -353,6 +364,16 @@ function openManagedModal() {
         indent="comfortable"
       />
     </div>
+    <AgalaSectionNav
+      v-else-if="slug === 'section-nav'"
+      v-model="kervoSection"
+      class="section-nav-demo__kervo"
+      :items="kervoSectionItems"
+      variant="plain"
+      density="comfortable"
+      responsive="stack"
+      aria-label="Configuración de Kervo"
+    />
     <AgalaTable
       v-else-if="slug === 'table'"
       :columns="columns"

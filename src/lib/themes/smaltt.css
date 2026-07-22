@@ -50,4 +50,18 @@ html[data-theme="esmaltt"] {
   --agala-font-sans: 'Inter', system-ui, -apple-system, sans-serif;
   --agala-font-display: 'Space Grotesk', 'Inter', system-ui, sans-serif;
   --agala-font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --agala-section-nav-width: 11.25rem;
+  --agala-section-nav-gap: 1px;
+  --agala-section-nav-padding: 0.3rem 0;
+  --agala-section-nav-panel-radius: var(--agala-radius);
+  --agala-section-nav-panel-bg: hsl(var(--agala-card));
+  --agala-section-nav-item-min-height: 2rem;
+  --agala-section-nav-item-padding-inline: 0.75rem;
+  --agala-section-nav-item-radius: 0;
+  --agala-section-nav-font-size: 0.75rem;
+  --agala-section-nav-active-bg: hsl(var(--agala-accent));
+  --agala-section-nav-active-fg: hsl(var(--agala-accent-foreground));
+  --agala-section-nav-indicator: hsl(var(--agala-primary));
+  --agala-section-nav-indicator-size: 2px;
 }

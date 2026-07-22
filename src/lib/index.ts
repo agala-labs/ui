@@ -98,6 +98,9 @@ export type { TableColumn, TableProps, SortDir, ColumnAlign } from './components
 export { default as AgalaTabs } from './components/Tabs/Tabs.vue'
 export type { TabsProps, TabItem } from './components/Tabs'
 
+export { default as AgalaSectionNav } from './components/SectionNav/SectionNav.vue'
+export type { SectionNavProps, SectionNavItem, SectionNavVariant, SectionNavDensity, SectionNavResponsive } from './components/SectionNav'
+
 export { default as AgalaCard } from './components/Card/Card.vue'
 export type { CardProps, CardPadding, CardAccent } from './components/Card'
 

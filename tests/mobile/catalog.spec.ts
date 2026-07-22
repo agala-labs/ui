@@ -49,7 +49,7 @@ const componentSlugs = [
   'toggle', 'file-upload', 'segmented-control', 'alert', 'badge', 'drawer',
   'modal', 'toast', 'tooltip', 'progress', 'skeleton', 'empty-state',
   'dev-env-banner', 'accordion', 'dropdown-menu', 'navbar', 'pagination',
-  'sidebar', 'table', 'tabs', 'calendar', 'list-group', 'avatar', 'card',
+  'sidebar', 'section-nav', 'table', 'tabs', 'calendar', 'list-group', 'avatar', 'card',
   'center', 'divider', 'stack', 'spacer', 'stat', 'tag', 'icon',
 ] as const
 
@@ -121,6 +121,61 @@ test.describe('public component mobile layout', () => {
       await expectNoDocumentOverflow(page)
     })
   }
+})
+
+test.describe('Section Nav', () => {
+  test('matches Smaltt local navigation and emits controlled selection', async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== 'mobile-390', 'Section Nav behavior needs one representative project.')
+    await page.setViewportSize({ width: 1280, height: 900 })
+    await openWithTheme(page, '/components/section-nav', 'smaltt')
+
+    const nav = page.getByRole('navigation', { name: 'Configuración de Smaltt' })
+    await expect(nav).toBeVisible()
+    await expect(nav).toHaveCSS('width', '180px')
+    await expect(nav).toHaveCSS('border-top-style', 'solid')
+    await expect(nav.getByRole('link')).toHaveCount(15)
+    await expect(nav.getByRole('link', { name: 'Clínica', exact: true })).toHaveAttribute('aria-current', 'page')
+
+    await nav.getByRole('link', { name: 'Datos' }).click()
+    await expect(nav.getByRole('link', { name: 'Datos' })).toHaveAttribute('aria-current', 'page')
+    await expect(page.getByText('Selected: datos')).toBeVisible()
+
+    await page.evaluate(() => { document.documentElement.dir = 'rtl' })
+    const indicatorPosition = await nav.getByRole('link', { name: 'Datos' }).evaluate(element =>
+      getComputedStyle(element, '::before').insetInlineStart,
+    )
+    expect(indicatorPosition).toBe('0px')
+  })
+
+  test('renders Kervo as a distinct icon-led button navigation', async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== 'mobile-390', 'Section Nav behavior needs one representative project.')
+    await openWithTheme(page, '/components/section-nav?example=states', 'kervo')
+
+    const nav = page.getByRole('navigation', { name: 'Configuración de Kervo' })
+    await expect(nav).toBeVisible()
+    await expect(nav.getByRole('button')).toHaveCount(8)
+    await expect(nav.getByRole('button', { name: /Ubicaciones/ })).toHaveAttribute('aria-current', 'page')
+    await expect(nav.getByRole('button', { name: 'Usuarios' })).toBeDisabled()
+    await expect(nav.locator('svg')).toHaveCount(8)
+    await expect(nav.getByText('4')).toBeVisible()
+    await expectNoDocumentOverflow(page)
+  })
+
+  test('keeps the long Smaltt set bounded and reveals a newly active item', async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== 'mobile-390', 'Section Nav behavior needs one representative project.')
+    await openWithTheme(page, '/components/section-nav', 'smaltt')
+
+    const nav = page.getByRole('navigation', { name: 'Configuración de Smaltt' })
+    const lastItem = nav.getByRole('link', { name: 'Datos' })
+    await lastItem.click()
+    await expect(lastItem).toHaveAttribute('aria-current', 'page')
+    await expect.poll(() => lastItem.evaluate((item) => {
+      const itemRect = item.getBoundingClientRect()
+      const navRect = item.parentElement!.getBoundingClientRect()
+      return itemRect.left >= navRect.left - 1 && itemRect.right <= navRect.right + 1
+    })).toBe(true)
+    await expectNoDocumentOverflow(page)
+  })
 })
 
 test.describe('Kervo semantic contrast', () => {

@@ -34,6 +34,8 @@ const calendarView = ref<'month' | 'week' | 'day' | 'list'>('day')
 const calendarDate = ref('2026-07-10')
 const sidebarActive = ref('active')
 const sidebarExpanded = ref<string[]>(['workspace'])
+const sectionNavActive = ref('clinica')
+const sectionNavSelection = ref('clinica')
 const alertRetryCount = ref(0)
 const listActivations = ref(0)
 const tagActivations = ref(0)
@@ -86,6 +88,28 @@ const sideItems = [{ label: 'Workspace', items: [
     { value: 'active', label: 'Active projects' }, { value: 'archive', label: 'Archive' },
   ] },
 ] }]
+const smalttSectionItems = [
+  { value: 'clinica', label: 'Clínica', href: '#sec-clinica' },
+  { value: 'landing', label: 'Landing', href: '#sec-landing' },
+  { value: 'whatsapp', label: 'WhatsApp', href: '#sec-whatsapp' },
+  { value: 'google-calendar', label: 'Google Calendar', href: '#sec-google-calendar', badge: 'Beta' },
+  { value: 'mercadopago', label: 'Mercado Pago', href: '#sec-mercadopago' },
+  { value: 'equipo', label: 'Equipo y accesos', href: '#sec-equipo' },
+  { value: 'horarios', label: 'Horarios', href: '#sec-horarios' },
+  { value: 'tipos', label: 'Tipos de turno', href: '#sec-tipos' },
+  { value: 'inventario', label: 'Inventario', href: '#sec-inventario' },
+  { value: 'laboratorio', label: 'Laboratorio', href: '#sec-laboratorio' },
+  { value: 'historia', label: 'Historia clínica', href: '#sec-historia' },
+  { value: 'agenda', label: 'Agenda', href: '#sec-agenda' },
+  { value: 'recordatorios', label: 'Recordatorios', href: '#sec-recordatorios' },
+  { value: 'obras', label: 'Obras sociales', href: '#sec-obras' },
+  { value: 'datos', label: 'Datos', href: '#sec-datos' },
+]
+
+function selectSection(item: { value: string }, event: MouseEvent) {
+  event.preventDefault()
+  sectionNavSelection.value = item.value
+}
 const events = [
   { id: '1', title: 'Design review', subtitle: 'Checkout handoff', start: '2026-07-10T10:00:00', end: '2026-07-10T11:00:00', color: 'primary' },
   { id: '2', title: 'Release readiness', subtitle: 'API and web', start: '2026-07-10T10:30:00', end: '2026-07-10T12:00:00', color: 'success' },
@@ -503,6 +527,16 @@ const events = [
         :items="sideItems"
       />
     </div>
+    <div v-else-if="slug === 'section-nav'" class="section-nav-demo">
+      <AgalaSectionNav
+        v-model="sectionNavActive"
+        class="section-nav-demo__smaltt"
+        :items="smalttSectionItems"
+        aria-label="Configuración de Smaltt"
+        @select="selectSection"
+      />
+      <span class="interaction-status" aria-live="polite">Selected: {{ sectionNavSelection }}</span>
+    </div>
     <AgalaTable
       v-else-if="slug === 'table'"
       v-model:selected-rows="selectedTableRows"
@@ -748,6 +782,8 @@ const events = [
 .preview-row { display: flex; align-items: center; flex-wrap: wrap; gap: 0.75rem; }
 .preview-grow { display: flex; flex: 1; flex-direction: column; gap: 0.6rem; }
 .sidebar-demo { height: 20rem; overflow: hidden; border: 1px solid hsl(var(--agala-border)); border-radius: var(--agala-radius); }
+.section-nav-demo { width: 100%; min-width: 0; }
+.section-nav-demo__smaltt { max-height: 30rem; overflow-y: auto; }
 .calendar-demo { min-width: 0; height: 32rem; overflow: hidden; }
 .tab-label { display: inline-flex; align-items: center; gap: 0.4rem; }
 .tab-count { display: inline-flex; min-width: 1.25rem; height: 1.25rem; align-items: center; justify-content: center; border-radius: 999px; background: hsl(var(--agala-primary) / 0.12); color: hsl(var(--agala-primary)); font-size: 0.6875rem; font-weight: var(--agala-font-weight-semibold); }

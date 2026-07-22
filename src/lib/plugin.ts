@@ -27,6 +27,7 @@ import MarkdownPreview from './components/MarkdownEditor/MarkdownPreview.vue'
 import DropdownMenu from './components/DropdownMenu/DropdownMenu.vue'
 import Table from './components/Table/Table.vue'
 import Tabs from './components/Tabs/Tabs.vue'
+import SectionNav from './components/SectionNav/SectionNav.vue'
 import Card from './components/Card/Card.vue'
 import Tooltip from './components/Tooltip/Tooltip.vue'
 import RadioGroup from './components/RadioGroup/RadioGroup.vue'
@@ -79,6 +80,7 @@ const componentMap: Record<string, Component> = {
   AgalaDropdownMenu: DropdownMenu,
   AgalaTable: Table,
   AgalaTabs: Tabs,
+  AgalaSectionNav: SectionNav,
   AgalaCard: Card,
   AgalaTooltip: Tooltip,
   AgalaRadioGroup: RadioGroup,

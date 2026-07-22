@@ -24,7 +24,7 @@ const componentGroups = [
     text: 'Navigation & data',
     items: [
       ['Accordion', 'accordion'], ['Dropdown Menu', 'dropdown-menu'], ['Navbar', 'navbar'],
-      ['Pagination', 'pagination'], ['Sidebar', 'sidebar'], ['Table', 'table'],
+      ['Pagination', 'pagination'], ['Sidebar', 'sidebar'], ['Section Nav', 'section-nav'], ['Table', 'table'],
       ['Tabs', 'tabs'], ['Calendar', 'calendar'], ['List Group', 'list-group'],
     ],
   },

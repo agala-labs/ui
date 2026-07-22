@@ -56,12 +56,14 @@ writeFileSync(join(consumer, 'tsconfig.json'), JSON.stringify({
 }, null, 2))
 
 writeFileSync(join(consumer, 'consumer.ts'), `
-import { AgalaButton, AgalaUI, useMediaQuery } from '@agala-labs/ui'
+import { AgalaButton, AgalaSectionNav, AgalaUI, useMediaQuery } from '@agala-labs/ui'
+import type { SectionNavItem } from '@agala-labs/ui'
 import { BaseChart, useChartTheme } from '@agala-labs/charts'
 import '@agala-labs/ui/reset.css'
 import '@agala-labs/ui/themes/main.css'
 
-void [AgalaButton, AgalaUI, BaseChart, useMediaQuery, useChartTheme]
+const sectionItems: SectionNavItem[] = [{ value: 'general', label: 'General', icon: 'settings' }]
+void [AgalaButton, AgalaSectionNav, AgalaUI, BaseChart, useMediaQuery, useChartTheme, sectionItems]
 `)
 
 npm(['run', 'check'], consumer)

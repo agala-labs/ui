@@ -56,6 +56,23 @@ html[data-theme="kervo"] {
   --agala-navbar-padding: 0 1.25rem 0 1rem;
   --agala-navbar-shadow: none;
 
+  --agala-section-nav-width: 13.75rem;
+  --agala-section-nav-gap: 0.25rem;
+  --agala-section-nav-padding: 0.25rem;
+  --agala-section-nav-plain-padding: 0.25rem;
+  --agala-section-nav-item-min-height: 2.4rem;
+  --agala-section-nav-item-padding-inline: 0.7rem;
+  --agala-section-nav-item-radius: 0.5rem;
+  --agala-section-nav-font-size: 0.88rem;
+  --agala-section-nav-comfortable-item-min-height: 2.4rem;
+  --agala-section-nav-comfortable-item-padding-inline: 0.7rem;
+  --agala-section-nav-comfortable-font-size: 0.88rem;
+  --agala-section-nav-font-weight: var(--agala-font-weight-semibold);
+  --agala-section-nav-active-bg: hsl(var(--agala-primary) / 0.08);
+  --agala-section-nav-active-fg: hsl(var(--agala-primary));
+  --agala-section-nav-indicator: hsl(var(--agala-primary));
+  --agala-section-nav-indicator-size: 0;
+
   --agala-font-sans: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --agala-font-display: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --agala-font-mono: 'Geist Mono', ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
