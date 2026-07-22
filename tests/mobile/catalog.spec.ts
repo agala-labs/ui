@@ -1,5 +1,47 @@
-import { expect, test } from '@playwright/test'
+import { expect, test, type Locator } from '@playwright/test'
 import { expectNoDocumentOverflow, openWithTheme, settleVisuals, themes } from './helpers'
+
+async function contrastRatio(locator: Locator) {
+  return locator.evaluate((element) => {
+    const parseColor = (value: string) => {
+      const channels = value.match(/[\d.]+/g)?.map(Number) ?? []
+      return {
+        rgb: channels.slice(0, 3),
+        alpha: channels[3] ?? 1,
+      }
+    }
+    const composite = (foreground: number[], alpha: number, background: number[]) =>
+      foreground.map((channel, index) => channel * alpha + background[index] * (1 - alpha))
+    const backdropFor = (start: Element | null) => {
+      let current = start
+      while (current) {
+        const color = parseColor(getComputedStyle(current).backgroundColor)
+        if (color.rgb.length === 3 && color.alpha > 0) return color
+        current = current.parentElement
+      }
+      return { rgb: [255, 255, 255], alpha: 1 }
+    }
+    const luminance = (rgb: number[]) => {
+      const linear = rgb.map(channel => {
+        const value = channel / 255
+        return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4
+      })
+      return 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2]
+    }
+
+    const styles = getComputedStyle(element)
+    const foreground = parseColor(styles.color)
+    const background = parseColor(styles.backgroundColor)
+    const backdrop = backdropFor(element.parentElement)
+    const effectiveForeground = composite(foreground.rgb, foreground.alpha, backdrop.rgb)
+    const effectiveBackground = composite(background.rgb, background.alpha, backdrop.rgb)
+    const foregroundLuminance = luminance(effectiveForeground)
+    const backgroundLuminance = luminance(effectiveBackground)
+
+    return (Math.max(foregroundLuminance, backgroundLuminance) + 0.05)
+      / (Math.min(foregroundLuminance, backgroundLuminance) + 0.05)
+  })
+}
 
 const componentSlugs = [
   'button', 'input', 'form-field', 'select', 'creatable-select', 'date-picker',
@@ -30,6 +72,25 @@ test.describe('default-theme component baselines', () => {
       await expect(page).toHaveScreenshot(`${slug}.png`, { fullPage: true })
     })
   }
+})
+
+test.describe('Kervo semantic contrast', () => {
+  test('danger button keeps an AA contrast pair across interaction states', async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== 'mobile-390', 'Semantic contrast needs one representative browser viewport.')
+    await openWithTheme(page, '/components/button', 'kervo')
+
+    const danger = page.getByRole('button', { name: 'Delete' })
+    await expect(danger).toBeVisible()
+    expect(await contrastRatio(danger)).toBeGreaterThanOrEqual(4.5)
+
+    await danger.hover()
+    expect(await contrastRatio(danger)).toBeGreaterThanOrEqual(4.5)
+
+    await danger.evaluate((button: HTMLButtonElement) => { button.disabled = true })
+    await expect(danger).toBeDisabled()
+    await expect(danger).toHaveCSS('opacity', '0.5')
+    expect(await contrastRatio(danger)).toBeGreaterThanOrEqual(4.5)
+  })
 })
 
 const criticalPages = ['alert', 'calendar', 'table', 'tabs', 'segmented-control', 'markdown-editor', 'sidebar'] as const

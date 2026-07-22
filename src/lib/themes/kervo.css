@@ -27,8 +27,8 @@ html[data-theme="kervo"] {
   --agala-success-foreground: 220 49% 8.4%;
   --agala-warning: 38 92% 50%;
   --agala-warning-foreground: 220 49% 8.4%;
-  --agala-danger: 0 84% 60%;
-  --agala-danger-foreground: 220 49% 8.4%;
+  --agala-danger: 0 72% 46%;
+  --agala-danger-foreground: 0 0% 100%;
   --agala-info: 189 95% 43%;
   --agala-info-foreground: 220 49% 8.4%;
 

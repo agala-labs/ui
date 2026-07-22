@@ -56,6 +56,8 @@ document.documentElement.setAttribute('data-theme', 'main')
 | Smaltt | `@agala-labs/ui/themes/smaltt.css` | `smaltt` or `esmaltt` | Warm clinical canvas and teal |
 | Kervo | `@agala-labs/ui/themes/kervo.css` | `kervo` | Operational navy and bright blue |
 
+Theme identity and component semantics are separate concerns. Kervo keeps its navy, electric-blue, and Geist foundation while semantic controls continue to use the shared component contracts. In particular, destructive actions consume the Kervo `danger`/`danger-foreground` pair; do not replace it with product-specific red and text overrides.
+
 For example, the Kervo theme can be selected with:
 
 ```ts

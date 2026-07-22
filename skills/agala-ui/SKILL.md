@@ -27,6 +27,7 @@ description: >
 - Prefer component-level CSS custom properties with token fallbacks, e.g. `--agala-btn-radius`, `--agala-input-bg`.
 - Dark mode is handled in tokens via `@media (prefers-color-scheme: dark)`.
 - Shipped themes use `html[data-theme="main|smaltt|kervo"]`; Smaltt also supports `data-theme="esmaltt"` for compatibility.
+- Kervo keeps its navy/electric-blue/Geist identity while consuming the same semantic component contracts as other themes. Its destructive controls use the theme's deep-red `danger` token with a white `danger-foreground`; do not hardcode local red/foreground pairs.
 - Focus rings use `box-shadow` and `--agala-ring`; disabled states should combine native `disabled`/ARIA with `pointer-events: none` and reduced opacity.
 
 ## Imports
