@@ -208,22 +208,67 @@ test.describe('refined component interactions', () => {
     await retry.press('Enter')
     await expect(actionable.getByRole('button', { name: 'Retry (1)' })).toBeVisible()
     await expect(actionable.locator('.alert__icon')).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+    expect(await actionable.evaluate((element) => {
+      const action = element.querySelector('.alert__action')
+      const dismiss = element.querySelector('.alert__dismiss')
+      return Boolean(action && dismiss && (action.compareDocumentPosition(dismiss) & Node.DOCUMENT_POSITION_FOLLOWING))
+    })).toBe(true)
+    await actionable.getByRole('button', { name: 'Retry (1)' }).press('Tab')
+    await expect(actionable.getByRole('button', { name: 'Dismiss alert' })).toBeFocused()
 
     const flat = page.locator('.alert-flat-action-demo')
     await expect(flat.locator('.alert__action')).toHaveCount(1)
     await expect(flat).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
 
     if ((page.viewportSize()?.width ?? 0) >= 640) {
-      const alignment = await actionable.evaluate((element) => {
+      const titledAlignment = await actionable.evaluate((element) => {
         const content = element.querySelector('.alert__content')?.getBoundingClientRect()
         const action = element.querySelector('.alert__action')?.getBoundingClientRect()
         if (!content || !action) return Number.POSITIVE_INFINITY
-        return Math.abs((content.top + content.height / 2) - (action.top + action.height / 2))
+        return Math.abs(content.top - action.top)
       })
-      expect(alignment).toBeLessThanOrEqual(1)
+      expect(titledAlignment).toBeLessThanOrEqual(1)
+
+      const compactAlignment = await flat.evaluate((element) => {
+        const regions = ['.alert__icon', '.alert__body', '.alert__action']
+          .map(selector => element.querySelector(selector)?.getBoundingClientRect())
+          .filter((rect): rect is DOMRect => Boolean(rect))
+        const centers = regions.map(rect => rect.top + rect.height / 2)
+        return Math.max(...centers) - Math.min(...centers)
+      })
+      expect(compactAlignment).toBeLessThanOrEqual(2)
+    } else {
+      const wrapsBelow = await actionable.evaluate((element) => {
+        const content = element.querySelector('.alert__content')?.getBoundingClientRect()
+        const action = element.querySelector('.alert__action')?.getBoundingClientRect()
+        return Boolean(content && action && action.top >= content.bottom)
+      })
+      expect(wrapsBelow).toBe(true)
     }
 
+    await page.getByRole('tab', { name: 'Without icon' }).click()
+    const withoutIcon = page.getByRole('alert')
+    await expect(withoutIcon.locator('.alert__icon')).toHaveCount(0)
+    await expect(withoutIcon).not.toHaveClass(/alert--has-icon/)
+
     await expectNoDocumentOverflow(page)
+  })
+
+  test('flat alert alignment remains stable across themes', async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== 'tablet-768', 'Cross-theme geometry needs one wide viewport.')
+
+    for (const theme of themes) {
+      await openWithTheme(page, '/components/alert', theme)
+      const flat = page.locator('.alert-flat-action-demo')
+      const centerSpread = await flat.evaluate((element) => {
+        const regions = ['.alert__icon', '.alert__body', '.alert__action']
+          .map(selector => element.querySelector(selector)?.getBoundingClientRect())
+          .filter((rect): rect is DOMRect => Boolean(rect))
+        const centers = regions.map(rect => rect.top + rect.height / 2)
+        return Math.max(...centers) - Math.min(...centers)
+      })
+      expect(centerSpread).toBeLessThanOrEqual(2)
+    }
   })
 
   test('stat layouts preserve hierarchy and intrinsic height', async ({ page }) => {

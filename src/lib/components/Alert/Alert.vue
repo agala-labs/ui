@@ -11,7 +11,7 @@ const props = withDefaults(defineProps<AlertProps>(), {
   icon: undefined,
 })
 
-defineSlots<{
+const slots = defineSlots<{
   default?: () => unknown
   action?: () => unknown
 }>()
@@ -30,6 +30,9 @@ const cls = computed(() => [
   `alert--${props.variant}`,
   props.title && !props.flat ? 'alert--has-title' : '',
   props.flat ? 'alert--flat' : '',
+  props.icon !== false ? 'alert--has-icon' : '',
+  slots.action ? 'alert--has-action' : '',
+  props.dismissible ? 'alert--dismissible' : '',
   props.class,
 ].filter(Boolean).join(' '))
 </script>
@@ -51,31 +54,7 @@ const cls = computed(() => [
         :size="16"
       />
     </span>
-    <template v-if="$slots.action">
-      <div class="alert__message">
-        <div class="alert__content">
-          <h4
-            v-if="props.title && !props.flat"
-            class="alert__title"
-          >
-            {{ props.title }}
-          </h4>
-          <div
-            v-if="$slots.default"
-            class="alert__body"
-          >
-            <slot />
-          </div>
-        </div>
-        <div class="alert__action">
-          <slot name="action" />
-        </div>
-      </div>
-    </template>
-    <div
-      v-else
-      class="alert__content"
-    >
+    <div class="alert__content">
       <h4
         v-if="props.title && !props.flat"
         class="alert__title"
@@ -88,6 +67,12 @@ const cls = computed(() => [
       >
         <slot />
       </div>
+    </div>
+    <div
+      v-if="$slots.action"
+      class="alert__action"
+    >
+      <slot name="action" />
     </div>
     <button
       v-if="props.dismissible"
@@ -106,16 +91,52 @@ const cls = computed(() => [
 
 <style scoped>
 .alert {
-  display: flex;
-  flex-direction: row;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: 'content';
   align-items: flex-start;
-  gap: var(--agala-alert-gap, 0.625rem);
+  gap: var(--agala-alert-row-gap, 0.5rem) var(--agala-alert-gap, 0.625rem);
   padding: var(--agala-alert-padding, 0.75rem 0.875rem);
   border: 0;
   border-radius: var(--agala-alert-radius, var(--agala-radius-md));
   background: var(--agala-alert-bg, hsl(var(--agala-muted) / 0.45));
   box-shadow: var(--agala-alert-shadow, none);
   font-family: var(--agala-font-sans);
+}
+
+.alert--has-icon {
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas: 'icon content';
+}
+
+.alert--has-action {
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: 'content action';
+}
+
+.alert--dismissible {
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: 'content dismiss';
+}
+
+.alert--has-action.alert--dismissible {
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-areas: 'content action dismiss';
+}
+
+.alert--has-icon.alert--has-action {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas: 'icon content action';
+}
+
+.alert--has-icon.alert--dismissible {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas: 'icon content dismiss';
+}
+
+.alert--has-icon.alert--has-action.alert--dismissible {
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  grid-template-areas: 'icon content action dismiss';
 }
 
 /* Variants set a semantic pair for the compact status tile. */
@@ -138,6 +159,7 @@ const cls = computed(() => [
 
 /* Flat variant — no surface, just a compact status cue and message. */
 .alert--flat {
+  align-items: center;
   background: transparent;
   border: 0;
   border-radius: 0;
@@ -159,7 +181,7 @@ const cls = computed(() => [
 }
 
 .alert__icon {
-  flex-shrink: 0;
+  grid-area: icon;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -172,16 +194,8 @@ const cls = computed(() => [
   color: hsl(var(--alert-accent));
 }
 
-.alert__message {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: var(--agala-alert-action-gap, 0.75rem);
-  min-width: 0;
-}
-
 .alert__content {
-  flex: 1;
+  grid-area: content;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
@@ -209,21 +223,26 @@ const cls = computed(() => [
 }
 
 .alert__action {
-  flex-shrink: 0;
+  grid-area: action;
   display: flex;
   align-items: center;
+  align-self: flex-start;
+  justify-self: end;
   max-width: 100%;
-  margin-inline-start: auto;
+}
+
+.alert--flat .alert__action {
+  align-self: center;
 }
 
 .alert__dismiss {
-  flex-shrink: 0;
+  grid-area: dismiss;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 1.5rem;
   height: 1.5rem;
-  margin: 0.125rem -0.25rem 0 0;
+  margin: 0 -0.25rem 0 0;
   padding: 0;
   border: none;
   border-radius: var(--agala-radius-sm);
@@ -246,15 +265,37 @@ const cls = computed(() => [
 }
 
 @media (max-width: 639px) {
-  .alert__message {
-    flex-direction: column;
-    align-items: stretch;
-    gap: var(--agala-alert-action-mobile-gap, 0.5rem);
+  .alert--has-action {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'content'
+      'action';
+  }
+
+  .alert--has-action.alert--dismissible {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'content dismiss'
+      'action action';
+  }
+
+  .alert--has-icon.alert--has-action {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      'icon content'
+      '. action';
+  }
+
+  .alert--has-icon.alert--has-action.alert--dismissible {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      'icon content dismiss'
+      '. action action';
   }
 
   .alert__action {
-    align-self: flex-start;
-    margin-inline-start: 0;
+    align-self: start;
+    justify-self: start;
   }
 }
 </style>

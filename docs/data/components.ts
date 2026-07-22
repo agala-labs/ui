@@ -199,7 +199,7 @@ export const components: ComponentMeta[] = [
   {
     slug: 'alert', name: 'Alert', exports: ['AgalaAlert'], description: 'Communicates contextual status or a recoverable issue.',
     props: [p('variant', "'info' | 'success' | 'warning' | 'danger'", 'Semantic status.', "'info'"), p('title', 'string', 'Optional heading.'), p('dismissible', 'boolean', 'Shows an internal close action.', 'false'), p('flat', 'boolean', 'Removes the neutral surface and radius.', 'false'), p('icon', 'string | false', 'Overrides or hides the icon.'), p('class', 'string', 'Consumer override class.')],
-    slots: ['default — alert body', 'action — recovery or follow-up control'], accessibility: 'Uses semantic status styling; action controls remain in normal keyboard order. Urgent messages should be announced by the consuming workflow when appropriate.',
+    slots: ['default — alert body', 'action — recovery or follow-up control'], accessibility: 'Icon, content, action, and dismissal remain in DOM order. Actions wrap below narrow messages while staying keyboard reachable. Urgent messages should be announced by the consuming workflow when appropriate.',
     snippet: `<AgalaAlert variant="danger" title="Could not load"><template #default>Try again.</template><template #action><AgalaButton size="sm" variant="outline">Retry</AgalaButton></template></AgalaAlert>`,
   },
   {
