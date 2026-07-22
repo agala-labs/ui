@@ -66,6 +66,8 @@ test.describe('component example navigation', () => {
     await expect(page.getByRole('button', { name: 'Saving' })).toBeDisabled()
     await expect(page.locator('.demo-frame__code code')).toContainText('loading')
     await expect(page).toHaveURL(/example=states/)
+    await page.getByRole('button', { name: 'Copy' }).click()
+    await expect(page.getByRole('button', { name: 'Copied' })).toBeVisible()
   })
 
   test('supports URL selection, keyboard navigation, and invalid fallback', async ({ page }) => {
@@ -99,6 +101,21 @@ test.describe('public component mobile layout', () => {
     test(`${slug} stays inside the document viewport`, async ({ page }) => {
       await openWithTheme(page, `/components/${slug}`)
       await expect(page.locator('.component-doc')).toBeVisible()
+      const exampleTabs = page.getByRole('tablist', { name: 'Component examples' }).getByRole('tab')
+      expect(await exampleTabs.count()).toBeGreaterThanOrEqual(2)
+      await exampleTabs.nth(1).click()
+      await expect(page.locator('[data-preview-example="states"]')).toBeVisible()
+      await expect(page.locator('.demo-frame__code code')).not.toBeEmpty()
+      await expectNoDocumentOverflow(page)
+    })
+  }
+
+  for (const slug of componentSlugs) {
+    test(`${slug} examples remain bounded at desktop width`, async ({ page }, testInfo) => {
+      test.skip(testInfo.project.name !== 'mobile-390', 'Desktop catalog coverage needs one representative project.')
+      await page.setViewportSize({ width: 1280, height: 900 })
+      await openWithTheme(page, `/components/${slug}`)
+      await page.getByRole('tablist', { name: 'Component examples' }).getByRole('tab').nth(1).click()
       await expectNoDocumentOverflow(page)
     })
   }

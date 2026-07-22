@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { AgalaIcon, toastManager } from '@ui'
 import type { FileItem } from '@ui'
 import DropdownOverlayFixture from './DropdownOverlayFixture.vue'
+import ComponentSecondaryPreview from './ComponentSecondaryPreview.vue'
 
 defineProps<{
   slug: string
@@ -85,7 +86,11 @@ const events = [
     class="preview-stack"
     :data-preview-example="example || 'default'"
   >
-    <template v-if="slug === 'button'">
+    <ComponentSecondaryPreview
+      v-if="example === 'states' && slug !== 'button'"
+      :slug="slug"
+    />
+    <template v-else-if="slug === 'button'">
       <div
         v-if="example === 'states'"
         class="preview-row"

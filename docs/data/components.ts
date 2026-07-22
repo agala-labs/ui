@@ -25,15 +25,68 @@ export interface ComponentMeta {
   examples?: ComponentExample[]
 }
 
+type AdditionalExample = Omit<ComponentExample, 'id'>
+
+const additionalExamples: Record<string, AdditionalExample> = {
+  input: { label: 'Validation', description: 'Keep the entered value visible and explain how to recover.', snippet: `<AgalaInput model-value="invalid@" error error-message="Enter a complete email address." />` },
+  'form-field': { label: 'Validation', description: 'Put the actionable error beside the labeled control.', snippet: `<AgalaFormField label="Workspace name" error="A workspace name is required." required>\n  <AgalaInput model-value="" error />\n</AgalaFormField>` },
+  select: { label: 'Multiple', description: 'Use multiple selection only when several peers may be chosen together.', snippet: `<AgalaSelect v-model="regions" :options="options" multiple searchable />` },
+  'creatable-select': { label: 'Disabled', description: 'Preserve selected values while making the unavailable state clear.', snippet: `<AgalaCreatableSelect v-model="skills" :options="options" disabled />` },
+  'date-picker': { label: 'Inline', description: 'Inline calendars suit scheduling surfaces where the calendar is the task.', snippet: `<AgalaDatePicker v-model="date" inline :highlight-dates="highlightDates" />` },
+  'color-picker': { label: 'Validation', description: 'Pair invalid color input with direct recovery copy.', snippet: `<AgalaColorPicker model-value="#12" error error-message="Enter a six-digit hex color." />` },
+  checkbox: { label: 'States', description: 'Mixed and disabled states remain explicit in the label.', snippet: `<AgalaCheckbox :model-value="false" indeterminate label="Some locations selected" />\n<AgalaCheckbox :model-value="false" disabled label="Managed by policy" />` },
+  'radio-group': { label: 'Unavailable option', description: 'Keep unavailable plans visible while preventing selection.', snippet: `<AgalaRadioGroup v-model="plan" :options="plansWithDisabled" />` },
+  textarea: { label: 'Validation', description: 'Long-form input keeps the user’s text when validation fails.', snippet: `<AgalaTextarea model-value="Too short" error error-message="Add at least 20 characters." />` },
+  'markdown-editor': { label: 'Read-only preview', description: 'Use MarkdownPreview when editing controls are not needed.', snippet: `<AgalaMarkdownPreview source="## Release notes\n\nInventory sync is complete." />` },
+  toggle: { label: 'Disabled', description: 'Explain externally why a managed setting cannot change.', snippet: `<AgalaToggle :model-value="true" disabled />\n<span>Required by workspace policy</span>` },
+  'file-upload': { label: 'Inline', description: 'Inline upload works inside compact forms with an existing label.', snippet: `<AgalaFileUpload v-model="files" variant="inline" accept=".pdf" :max-files="1" />` },
+  'segmented-control': { label: 'Compact', description: 'A compact segmented control switches an immediate view mode.', snippet: `<AgalaSegmentedControl v-model="density" :options="densityOptions" size="sm" aria-label="Table density" />` },
+  alert: { label: 'Without icon', description: 'Hide the icon only when the message and context already carry the status.', snippet: `<AgalaAlert variant="info" :icon="false">Scheduled maintenance starts at 22:00.</AgalaAlert>` },
+  badge: { label: 'Metadata', description: 'Passive badges label counts and states without becoming controls.', snippet: `<AgalaBadge variant="secondary">12 items</AgalaBadge>\n<AgalaBadge variant="outline">Draft</AgalaBadge>` },
+  drawer: { label: 'Top placement', description: 'Use a top drawer for a short viewport-wide task, not a long form.', snippet: `<AgalaDrawer :open="open" placement="top" size="14rem" title="Quick search" @close="open = false">…</AgalaDrawer>` },
+  modal: { label: 'Non-dismissible', description: 'Reserve non-dismissible dialogs for decisions that require an explicit path.', snippet: `<AgalaModal v-model:open="open" title="Resolve conflict" :dismissible="false" :escape-closes="false">…</AgalaModal>` },
+  toast: { label: 'Recovery action', description: 'A toast action may offer one immediate, reversible follow-up.', snippet: `toastManager.show({ message: 'Draft archived', variant: 'warning', action: { label: 'Undo', onClick: restoreDraft } })` },
+  tooltip: { label: 'Placement', description: 'Placement is a preference; collision handling keeps the tooltip visible.', snippet: `<AgalaTooltip content="Exports the current report" placement="bottom">\n  <AgalaButton variant="outline">Export</AgalaButton>\n</AgalaTooltip>` },
+  progress: { label: 'Indeterminate', description: 'Use indeterminate progress only when completion cannot be estimated.', snippet: `<AgalaProgress indeterminate />` },
+  skeleton: { label: 'List row', description: 'Match the loading placeholder to the content geometry it replaces.', snippet: `<div class="loading-row"><AgalaSkeleton variant="circle" width="2.5rem" height="2.5rem" /><AgalaSkeleton width="70%" /></div>` },
+  'empty-state': { label: 'Filtered results', description: 'Filtered empty states should offer a direct way back to results.', snippet: `<AgalaEmptyState size="compact" title="No matching records" description="Try changing or clearing the filters.">\n  <template #action><AgalaButton variant="ghost" size="sm">Clear filters</AgalaButton></template>\n</AgalaEmptyState>` },
+  'dev-env-banner': { label: 'Environment copy', description: 'Name the environment and the consequence that matters.', snippet: `<AgalaDevEnvBanner text="Staging environment — payments are simulated." />` },
+  accordion: { label: 'Multiple and disabled', description: 'Allow multiple open items only when users need to compare sections.', snippet: `<AgalaAccordion multiple>\n  <AgalaAccordionItem value="access" title="Access">…</AgalaAccordionItem>\n  <AgalaAccordionItem value="billing" title="Billing" disabled>…</AgalaAccordionItem>\n</AgalaAccordion>` },
+  'dropdown-menu': { label: 'Destructive command', description: 'Separate destructive commands and keep unavailable commands visible.', snippet: `<AgalaDropdownMenu :items="[{ label: 'Duplicate' }, { label: 'Archive', separator: true }, { label: 'Delete', variant: 'danger' }]">…</AgalaDropdownMenu>` },
+  navbar: { label: 'Compact actions', description: 'Keep product navigation primary and utility actions concise.', snippet: `<AgalaNavbar><template #brand>Inventory</template><a href="#stock">Stock</a><template #actions><AgalaButton size="icon" aria-label="Notifications" icon="bell" /></template></AgalaNavbar>` },
+  pagination: { label: 'Compact result set', description: 'Small result sets omit unnecessary edge controls.', snippet: `<AgalaPagination v-model="page" :total="48" :page-size="10" :show-edges="false" />` },
+  sidebar: { label: 'Comfortable tree', description: 'Use comfortable indentation when nested destinations need stronger hierarchy.', snippet: `<AgalaSidebar v-model:active-value="active" v-model:expanded="expanded" :items="items" indent="comfortable" />` },
+  table: { label: 'Loading and empty', description: 'Tables preserve their columns while loading and explain an empty result.', snippet: `<AgalaTable :columns="columns" :rows="[]" loading :loading-rows="3" empty-message="No matching members" />` },
+  tabs: { label: 'Underline', description: 'Underline tabs are the default for related content sections.', snippet: `<AgalaTabs v-model="tab" :tabs="tabs" aria-label="Project sections"><template #panel-overview>Project overview</template></AgalaTabs>` },
+  calendar: { label: 'List view', description: 'List view prioritizes chronological scanning in narrow or agenda-focused contexts.', snippet: `<AgalaCalendar v-model:view="view" v-model:current-date="date" :events="events" :available-views="['list']" />` },
+  'list-group': { label: 'Card rows', description: 'Card rows suit independently actionable records with clear separation.', snippet: `<AgalaListGroup variant="cards" gap="0.5rem"><AgalaListGroupItem label="Main warehouse" subtitle="184 products" action-icon="chevron-right" /></AgalaListGroup>` },
+  avatar: { label: 'Shapes', description: 'Choose shape from the represented object, not decoration.', snippet: `<AgalaAvatar fallback="AL" shape="circle" />\n<AgalaAvatar fallback="HQ" shape="square" />` },
+  card: { label: 'Quiet container', description: 'Use a plain card when content already provides the hierarchy.', snippet: `<AgalaCard padding="lg"><template #header>Clinic details</template><p>Contact and scheduling information.</p></AgalaCard>` },
+  center: { label: 'Empty region', description: 'Center a compact empty-state message inside a bounded region.', snippet: `<AgalaCenter><AgalaEmptyState size="compact" title="Nothing selected" /></AgalaCenter>` },
+  divider: { label: 'Vertical', description: 'Vertical dividers separate adjacent controls, never unrelated page regions.', snippet: `<AgalaHStack><span>List</span><AgalaDivider orientation="vertical" /><span>Grid</span></AgalaHStack>` },
+  stack: { label: 'Vertical form actions', description: 'Vertical stacking keeps narrow actions readable and ordered.', snippet: `<AgalaVStack gap="0.5rem"><AgalaButton block>Continue</AgalaButton><AgalaButton block variant="ghost">Cancel</AgalaButton></AgalaVStack>` },
+  spacer: { label: 'Status bar', description: 'Spacer can push secondary metadata to the far edge of one row.', snippet: `<AgalaHStack><strong>Inventory sync</strong><AgalaSpacer /><span>Updated 2 min ago</span></AgalaHStack>` },
+  stat: { label: 'Inline summary', description: 'Inline stats belong in dense summaries rather than stretched metric cards.', snippet: `<AgalaStat label="Pending reviews" value="12" secondary-value="0 overdue" layout="inline" :bordered="false" />` },
+  tag: { label: 'Disabled and removable', description: 'Use tags for labels or selected values, with an explicit removal affordance when needed.', snippet: `<AgalaTag label="Mar del Plata" removable />\n<AgalaTag label="Managed" disabled />` },
+  icon: { label: 'Sizes', description: 'Icons inherit current color and should match the control or text they support.', snippet: `<AgalaIcon name="settings" :size="16" />\n<AgalaIcon name="settings" :size="24" />` },
+}
+
 export function getComponentExamples(component: ComponentMeta): ComponentExample[] {
+  const additional = additionalExamples[component.slug]
   const examples = component.examples?.length
     ? component.examples
-    : [{ id: 'default', label: 'Default', snippet: component.snippet }]
+    : [
+        { id: 'default', label: 'Default', snippet: component.snippet },
+        ...(additional ? [{ id: 'states', ...additional }] : []),
+      ]
 
   if (import.meta.env.DEV) {
     const ids = examples.map(example => example.id)
     if (new Set(ids).size !== ids.length) {
       console.warn(`[Agala docs] Duplicate example id for ${component.slug}.`)
+    }
+    if (examples.length < 2) {
+      console.warn(`[Agala docs] ${component.slug} needs at least two examples.`)
     }
   }
 
