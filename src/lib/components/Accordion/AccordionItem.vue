@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject, type Ref } from 'vue'
+import { computed, inject, useId, type Ref } from 'vue'
 import type { AccordionItemProps } from './types'
 
 const props = defineProps<AccordionItemProps>()
@@ -10,6 +10,9 @@ const accordion = inject<{
 } | null>('agala-accordion', null)
 
 const isOpen = computed(() => !!accordion?.openItems.value.includes(props.value))
+const itemId = useId()
+const triggerId = `agala-accordion-trigger-${itemId}`
+const panelId = `agala-accordion-panel-${itemId}`
 
 function handleClick() {
   if (!props.disabled) accordion?.toggle(props.value)
@@ -21,7 +24,9 @@ function handleClick() {
     <button
       type="button"
       class="trigger"
+      :id="triggerId"
       :aria-expanded="isOpen"
+      :aria-controls="panelId"
       :disabled="disabled"
       @click="handleClick"
     >
@@ -33,7 +38,14 @@ function handleClick() {
       </span>
     </button>
 
-    <div class="panel" :style="{ gridTemplateRows: isOpen ? '1fr' : '0fr' }" role="region">
+    <div
+      :id="panelId"
+      class="panel"
+      :style="{ gridTemplateRows: isOpen ? '1fr' : '0fr' }"
+      role="region"
+      :aria-labelledby="triggerId"
+      :aria-hidden="!isOpen"
+    >
       <div class="panelInner">
         <div class="panelContent">
           <slot />
@@ -61,7 +73,7 @@ function handleClick() {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 1rem 1.25rem;
+  padding: var(--agala-accordion-trigger-padding, 1rem 1.25rem);
   background: none;
   border: none;
   cursor: pointer;
@@ -113,10 +125,32 @@ function handleClick() {
 }
 
 .panelContent {
-  padding: 0 1.25rem 1rem;
+  padding: var(--agala-accordion-content-padding, 0.375rem 1.25rem 1rem);
   font-family: var(--agala-font-sans);
   font-size: var(--agala-font-size-base);
   color: hsl(var(--agala-muted-foreground));
   line-height: var(--agala-line-height-relaxed);
+}
+
+.panelContent :deep(> :first-child) {
+  margin-block-start: 0;
+}
+
+.panelContent :deep(> :last-child) {
+  margin-block-end: 0;
+}
+
+@media (max-width: 480px) {
+  .item {
+    --agala-accordion-trigger-padding: 0.875rem 1rem;
+    --agala-accordion-content-padding: 0.375rem 1rem 0.875rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel,
+  .chevron {
+    transition: none !important;
+  }
 }
 </style>

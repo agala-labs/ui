@@ -339,6 +339,52 @@ test.describe('refined component interactions', () => {
     await expectNoDocumentOverflow(page)
   })
 
+  test('accordion content keeps an intentional inset and closed items collapse', async ({ page }) => {
+    await openWithTheme(page, '/components/accordion')
+
+    const installation = page.getByRole('button', { name: 'Installation' })
+    const panelId = await installation.getAttribute('aria-controls')
+    expect(panelId).toBeTruthy()
+    const installationPanel = page.locator(`[id="${panelId}"]`)
+    await expect(installationPanel).toHaveAttribute('aria-labelledby', await installation.getAttribute('id') as string)
+    expect(await installationPanel.evaluate(element => element.getBoundingClientRect().height)).toBe(0)
+    await installation.focus()
+    await expect(installation).toBeFocused()
+    await expect(installation).toHaveCSS('outline-width', '2px')
+    await installation.press('Enter')
+    await expect(installation).toHaveAttribute('aria-expanded', 'true')
+    await expect(installationPanel).toHaveAttribute('aria-hidden', 'false')
+
+    const content = installationPanel.locator('.panelContent')
+    expect(parseFloat(await content.evaluate(element => getComputedStyle(element).paddingTop))).toBeGreaterThanOrEqual(4)
+    await expect(content.locator(':scope > p')).toHaveCSS('margin-top', '0px')
+    await expect(content.locator(':scope > ul')).toHaveCSS('margin-bottom', '0px')
+
+    await page.getByRole('tab', { name: 'Rich content and states' }).click()
+    const access = page.getByRole('button', { name: 'Access' })
+    const retention = page.getByRole('button', { name: 'Data retention and operational audit history' })
+    const billing = page.getByRole('button', { name: 'Billing' })
+    await access.click()
+    await retention.click()
+    await expect(access).toHaveAttribute('aria-expanded', 'true')
+    await expect(retention).toHaveAttribute('aria-expanded', 'true')
+    await expect(billing).toBeDisabled()
+    await expectNoDocumentOverflow(page)
+  })
+
+  test('accordion removes disclosure interpolation for reduced motion', async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== 'mobile-390', 'Theme and motion coverage needs one representative viewport.')
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+
+    for (const theme of themes) {
+      await openWithTheme(page, '/components/accordion', theme)
+      const installation = page.getByRole('button', { name: 'Installation' })
+      await installation.click()
+      await expect(installation.locator('.chevron')).toHaveCSS('transition-duration', '0s')
+      await expect(page.getByRole('region', { name: 'Installation' })).toHaveCSS('transition-duration', '0s')
+    }
+  })
+
   test('stat layouts preserve hierarchy and intrinsic height', async ({ page }) => {
     await openWithTheme(page, '/components/stat')
 

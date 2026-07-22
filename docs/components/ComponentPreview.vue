@@ -427,12 +427,16 @@ const events = [
         value="install"
         title="Installation"
       >
-        Install the package and import its styles.
+        <p>Install the package and import its styles before mounting the application.</p>
+        <ul>
+          <li>Register the plugin once.</li>
+          <li>Import the shared design tokens.</li>
+        </ul>
       </AgalaAccordionItem><AgalaAccordionItem
         value="themes"
         title="Themes"
       >
-        Override semantic HSL tokens at the root.
+        <p>Override semantic HSL tokens at the root to keep component states consistent.</p>
       </AgalaAccordionItem>
     </AgalaAccordion>
     <DropdownOverlayFixture

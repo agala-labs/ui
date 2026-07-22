@@ -263,10 +263,17 @@ const events = [
       multiple
     >
       <AgalaAccordionItem value="access" title="Access">
-        Workspace roles and invitations.
+        <p>Workspace roles control what teammates can view and change.</p>
+        <ul>
+          <li>Invite members with the least privilege they need.</li>
+          <li>Review access after role changes.</li>
+        </ul>
       </AgalaAccordionItem>
       <AgalaAccordionItem value="billing" title="Billing" disabled>
         Billing is managed by the account owner.
+      </AgalaAccordionItem>
+      <AgalaAccordionItem value="retention" title="Data retention and operational audit history">
+        <p>Audit history is retained according to the active workspace policy and legal requirements.</p>
       </AgalaAccordionItem>
     </AgalaAccordion>
     <AgalaDropdownMenu

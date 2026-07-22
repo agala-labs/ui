@@ -102,7 +102,7 @@ Internal source composables include `useSelectFilter`, `useChipDisplay`, `useKey
 - `AgalaAlert`: borderless neutral notice with a subtle semantic icon treatment and `variant info|success|warning|danger`, `title`, `dismissible`, `flat`, `icon?: string|false`; slots are default body and `action`. Set `icon=false` to hide the icon. Icon, content, action, and dismissal keep one DOM order; compact flat alerts center as one row, titled alerts align controls to the first line, and actions wrap below the message under 639px. Dismissal is internal and does not emit.
 - `AgalaProgress`: `variant linear|circular`, `value`, `size sm|md|lg`, `color primary|success|warning|danger`, `indeterminate`.
 - `AgalaAvatar`: `src`, `alt`, `fallback`, `size xs|sm|md|lg|xl`, `shape circle|rounded|square`.
-- `AgalaAccordion`/`AgalaAccordionItem`: `multiple`; items use `value`, `title`, `disabled`.
+- `AgalaAccordion`/`AgalaAccordionItem`: `multiple`; items use `value`, `title`, `disabled`. Tune spacing with `--agala-accordion-trigger-padding` and `--agala-accordion-content-padding`; expanded content includes a restrained top inset, normalizes first/last child margins, and disables height/chevron interpolation under reduced motion.
 - `AgalaDropdownMenu`: trigger slot; items have `label`, `icon`, `variant default|danger`, `disabled`, `separator`, `onClick`; placement `bottom-start|bottom-end` defaults to `bottom-end`. Its native top-layer menu flips vertically, shifts within an 8px viewport margin, and stays anchored during ancestor scrolling.
 - `AgalaTooltip`: default slot trigger, `content`, `placement top|bottom|left|right`, `delay`, `block`.
 - `AgalaNavbar`: slots `brand`, default nav content, `actions`.
