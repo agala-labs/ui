@@ -146,13 +146,36 @@ const events = [
       accept=".pdf"
       :max-files="1"
     />
-    <AgalaSegmentedControl
+    <div
       v-else-if="slug === 'segmented-control'"
-      v-model="density"
-      :options="densityOptions"
-      size="sm"
-      aria-label="Table density"
-    />
+      class="primitive-comparison"
+    >
+      <div class="primitive-example">
+        <span class="primitive-label">Immediate table value</span>
+        <AgalaSegmentedControl
+          v-model="density"
+          :options="densityOptions"
+          size="sm"
+          aria-label="Table density"
+        />
+      </div>
+      <div class="primitive-example">
+        <span class="primitive-label">Related content panels</span>
+        <AgalaTabs
+          v-model="tab"
+          :tabs="tabs"
+          variant="pills"
+          aria-label="Project sections"
+        >
+          <template #panel-overview>
+            Project overview
+          </template>
+          <template #panel-activity>
+            Recent activity
+          </template>
+        </AgalaTabs>
+      </div>
+    </div>
     <AgalaAlert
       v-else-if="slug === 'alert'"
       variant="info"
@@ -326,6 +349,7 @@ const events = [
       v-else-if="slug === 'tabs'"
       v-model="tab"
       :tabs="tabs"
+      variant="pills"
       aria-label="Project sections"
     >
       <template #panel-overview>
@@ -509,11 +533,36 @@ const events = [
 .divider-frame { height: 2.5rem; }
 .muted-copy { color: hsl(var(--agala-muted-foreground)); }
 
+.primitive-comparison {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+}
+
+.primitive-example {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.625rem;
+}
+
+.primitive-label {
+  color: hsl(var(--agala-muted-foreground));
+  font-size: 0.75rem;
+  font-weight: var(--agala-font-weight-medium);
+}
+
 .stat-context-list {
   display: flex;
   min-width: 0;
   flex-direction: column;
   align-items: stretch;
   gap: 0.75rem;
+}
+
+@media (max-width: 639px) {
+  .primitive-comparison { grid-template-columns: minmax(0, 1fr); }
 }
 </style>

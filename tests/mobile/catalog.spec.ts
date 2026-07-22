@@ -471,10 +471,15 @@ test.describe('refined component interactions', () => {
     await expect(page.locator('.skeletonLine')).toHaveCount(0)
   })
 
-  test('tabs move focus, skip disabled items, and keep pills scoped to the strip', async ({ page }) => {
+  test('tabs preserve panel linkage and keep underline as the canonical treatment', async ({ page }) => {
     await openWithTheme(page, '/components/tabs')
 
     const overview = page.getByRole('tab', { name: 'Overview' })
+    const overviewPanel = page.getByRole('tabpanel', { name: 'Overview' })
+    await expect(overview).toHaveAttribute('aria-controls', await overviewPanel.getAttribute('id') as string)
+    await expect(overviewPanel).toHaveAttribute('aria-labelledby', await overview.getAttribute('id') as string)
+    await expect(page.locator('.tabList.tabsPills')).toHaveCount(0)
+    await expect(page.getByRole('tablist', { name: 'Project sections' })).not.toHaveCSS('border-bottom-width', '0px')
     await overview.focus()
     await overview.press('ArrowRight')
     const activity = page.getByRole('tab', { name: 'Activity' })
@@ -484,8 +489,13 @@ test.describe('refined component interactions', () => {
     await activity.press('End')
     await expect(page.getByRole('tab', { name: 'Milestones' })).toBeFocused()
     await expect(page.getByRole('tab', { name: 'Settings' })).toBeDisabled()
+
+    await page.getByRole('tab', { name: 'Pills navigation' }).click()
     await expect(page.locator('.tabList.tabsPills')).toHaveCount(1)
     await expect(page.locator('.tabs.tabsPills')).toHaveCount(0)
+    await expect(page.locator('.tabList.tabsPills')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+    await expect(page.locator('.tabList.tabsPills')).toHaveCSS('border-bottom-width', '0px')
+    await expect(page.locator('.tabsPills .tabBtnActive')).toHaveCSS('box-shadow', 'none')
   })
 
   test('calendar event cards expose complete labels in the detailed day view', async ({ page }) => {
@@ -575,6 +585,31 @@ test.describe('refined component interactions', () => {
     await list.press('ArrowRight')
     await expect(board).toBeFocused()
     await expect(group.locator('svg')).toHaveCount(3)
+  })
+
+  test('segmented controls and pill tabs remain structurally distinct across themes', async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== 'mobile-390', 'Cross-theme distinction needs one representative viewport.')
+
+    for (const theme of themes) {
+      await openWithTheme(page, '/components/segmented-control', theme)
+      await page.getByRole('tab', { name: 'Compared with Tabs' }).click()
+
+      const group = page.getByRole('radiogroup', { name: 'Table density' })
+      const pills = page.getByRole('tablist', { name: 'Project sections' })
+      await expect(group).toHaveCSS('border-top-width', '1px')
+      await expect(group).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+      await expect(pills).toHaveCSS('border-bottom-width', '0px')
+      await expect(pills).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+      await expect(group.getByRole('tabpanel')).toHaveCount(0)
+
+      const compact = group.getByRole('radio', { name: 'Compact' })
+      await compact.focus()
+      await expect(compact).toBeFocused()
+      const activity = pills.getByRole('tab', { name: 'Activity' })
+      await activity.focus()
+      await expect(activity).toBeFocused()
+      await expectNoDocumentOverflow(page)
+    }
   })
 
   test('refined surfaces remain bounded with the default dark preference', async ({ page }, testInfo) => {

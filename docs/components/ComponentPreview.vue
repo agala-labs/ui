@@ -490,7 +490,7 @@ const events = [
       v-else-if="slug === 'tabs'"
       v-model="tab"
       :tabs="tabs"
-      variant="pills"
+      aria-label="Project sections"
     >
       <template #tab-activity>
         <span class="tab-label">Activity <span class="tab-count">12</span></span>

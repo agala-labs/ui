@@ -295,23 +295,30 @@ function tabCls(tab: TabItem) {
 /* Pills variant */
 .tabsPills {
   border-bottom: none;
-  gap: 0.25rem;
-  padding: 0.25rem;
-  background: hsl(var(--agala-muted) / 0.5);
-  border-radius: var(--agala-radius);
+  gap: var(--agala-tab-pill-gap, 0.375rem);
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
   width: fit-content;
   max-width: 100%;
 }
 .tabsPills .tabBtn {
-  border-bottom: none;
-  border-radius: calc(var(--agala-radius) - 2px);
-  padding: 0.375rem 0.75rem;
+  min-height: var(--agala-tab-pill-height, 2.25rem);
+  margin-bottom: 0;
+  border: var(--agala-border-width) solid transparent;
+  border-radius: var(--agala-tab-pill-radius, var(--agala-radius-md));
+  padding: var(--agala-tab-pill-padding, 0.4375rem 0.75rem);
 }
 .tabsPills .tabBtnActive {
-  background: hsl(var(--agala-card));
-  color: hsl(var(--agala-foreground));
-  box-shadow: var(--agala-shadow-xs);
-  border-bottom: none;
+  background: hsl(var(--agala-primary) / 0.1);
+  color: hsl(var(--agala-primary));
+  border-color: hsl(var(--agala-primary) / 0.16);
+  box-shadow: none;
+}
+
+.tabsPills .tabBtn:focus-visible {
+  outline-offset: 2px;
+  border-radius: var(--agala-tab-pill-radius, var(--agala-radius-md));
 }
 
 @media (prefers-reduced-motion: reduce) {
