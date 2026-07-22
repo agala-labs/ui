@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { AgalaIcon, toastManager } from '@ui'
-import type { FileItem } from '@ui'
+import type { DrawerPlacement, FileItem } from '@ui'
 import DropdownOverlayFixture from './DropdownOverlayFixture.vue'
 import ComponentSecondaryPreview from './ComponentSecondaryPreview.vue'
 
@@ -26,6 +26,7 @@ const tableSortKey = ref('name')
 const tableSortDir = ref<'asc' | 'desc'>('asc')
 const modalOpen = ref(false)
 const drawerOpen = ref(false)
+const drawerPlacement = ref<DrawerPlacement>('right')
 const markdown = ref('Build interfaces with **semantic tokens** and accessible Vue components.')
 const files = ref<FileItem[]>([])
 const calendarView = ref<'month' | 'week' | 'day' | 'list'>('day')
@@ -35,6 +36,11 @@ const sidebarExpanded = ref<string[]>(['workspace'])
 const alertRetryCount = ref(0)
 const listActivations = ref(0)
 const tagActivations = ref(0)
+
+function openDrawer(placement: DrawerPlacement) {
+  drawerPlacement.value = placement
+  drawerOpen.value = true
+}
 
 const options = [
   { value: 'ar', label: 'Argentina', subtitle: 'South America' },
@@ -271,10 +277,23 @@ const events = [
       </AgalaBadge>
     </div>
     <template v-else-if="slug === 'drawer'">
-      <AgalaButton @click="drawerOpen = true">
-        Open filters
-      </AgalaButton><AgalaDrawer
+      <div class="preview-row">
+        <AgalaButton @click="openDrawer('right')">
+          Open filters
+        </AgalaButton>
+        <AgalaButton variant="outline" @click="openDrawer('left')">
+          Open left drawer
+        </AgalaButton>
+        <AgalaButton variant="outline" @click="openDrawer('top')">
+          Open top drawer
+        </AgalaButton>
+        <AgalaButton variant="outline" @click="openDrawer('bottom')">
+          Open bottom drawer
+        </AgalaButton>
+      </div>
+      <AgalaDrawer
         :open="drawerOpen"
+        :placement="drawerPlacement"
         title="Filters"
         @close="drawerOpen = false"
       >

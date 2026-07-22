@@ -210,8 +210,8 @@ export const components: ComponentMeta[] = [
   },
   {
     slug: 'drawer', name: 'Drawer', exports: ['AgalaDrawer'], description: 'Presents a focused task from an edge of the viewport.',
-    props: [p('open', 'boolean', 'Required controlled visibility.'), p('title', 'string', 'Visible and accessible drawer heading.'), p('placement', "'left' | 'right' | 'top' | 'bottom'", 'Viewport edge.', "'right'"), p('size', 'string', 'CSS size value, clamped to the viewport.'), p('dismissible', 'boolean', 'Allows backdrop dismissal and shows the close button.', 'true'), p('escapeCloses', 'boolean', 'Allows Escape dismissal independently.', 'true'), p('class', 'string', 'Consumer override class.')],
-    events: ['close'], slots: ['header', 'default', 'footer — receives { close }'], accessibility: 'Traps focus while open, restores the opener, locks background scrolling, and respects reduced motion.',
+    props: [p('open', 'boolean', 'Required controlled visibility.'), p('title', 'string', 'Visible and accessible drawer heading.'), p('placement', "'left' | 'right' | 'top' | 'bottom'", 'Viewport edge and enter/leave direction.', "'right'"), p('size', 'string', 'CSS size value, clamped to the viewport.'), p('dismissible', 'boolean', 'Allows backdrop dismissal and shows the close button.', 'true'), p('escapeCloses', 'boolean', 'Allows Escape dismissal independently.', 'true'), p('class', 'string', 'Consumer override class.')],
+    events: ['close'], slots: ['header', 'default', 'footer — receives { close }'], accessibility: 'Traps focus while present, keeps background scrolling locked through the leave transition, then restores the opener. Entry and exit follow the configured edge and reduced motion removes meaningful travel.',
     snippet: `<AgalaDrawer :open="open" title="Inventory filters" @close="open = false">…</AgalaDrawer>`,
   },
   {

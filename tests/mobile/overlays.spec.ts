@@ -5,6 +5,9 @@ for (const theme of themes) {
   test.describe(`${theme} Drawer`, () => {
     test('contains focus, locks scroll, and restores focus', async ({ page }) => {
       await openWithTheme(page, '/components/drawer', theme)
+      await page.addStyleTag({
+        content: '.drawer-backdrop.drawer-leave-active { transition-duration: 180ms !important; } .drawer-backdrop.drawer-leave-active .drawer { transition-duration: 180ms !important; }',
+      })
       const trigger = page.getByRole('button', { name: 'Open filters' })
       await trigger.click()
 
@@ -21,11 +24,74 @@ for (const theme of themes) {
       }
 
       await page.keyboard.press('Escape')
+      await expect(page.locator('.drawer-backdrop')).toHaveClass(/drawer-leave-active/)
+      await expect(page.locator('body')).toHaveCSS('position', 'fixed')
+      await expect(trigger).not.toBeFocused()
       await expect(drawer).toBeHidden()
       await expect(trigger).toBeFocused()
+      await expect.poll(() => page.locator('body').evaluate(element => getComputedStyle(element).position)).not.toBe('fixed')
     })
   })
 }
+
+test('Drawer leaves toward every configured edge and survives a rapid reopen', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'mobile-390', 'Placement and interruption coverage runs once.')
+  await page.emulateMedia({ reducedMotion: 'no-preference' })
+  await openWithTheme(page, '/components/drawer')
+  await page.addStyleTag({
+    content: '.drawer-backdrop.drawer-leave-active { transition-duration: 180ms !important; } .drawer-backdrop.drawer-leave-active .drawer { transition-duration: 180ms !important; }',
+  })
+
+  const placements = [
+    { trigger: 'Open filters', className: 'drawer--right', closedTransform: 'translate3d(100%, 0, 0)' },
+    { trigger: 'Open left drawer', className: 'drawer--left', closedTransform: 'translate3d(-100%, 0, 0)' },
+    { trigger: 'Open top drawer', className: 'drawer--top', closedTransform: 'translate3d(0, -100%, 0)' },
+    { trigger: 'Open bottom drawer', className: 'drawer--bottom', closedTransform: 'translate3d(0, 100%, 0)' },
+  ]
+
+  for (const placement of placements) {
+    const trigger = page.getByRole('button', { name: placement.trigger })
+    await trigger.click()
+    const drawer = page.getByRole('dialog', { name: 'Filters' })
+    await expect(drawer).toHaveClass(new RegExp(placement.className))
+    expect(await drawer.evaluate(element => getComputedStyle(element).getPropertyValue('--agala-drawer-closed-transform').trim())).toBe(placement.closedTransform)
+    await page.keyboard.press('Escape')
+    await expect(page.locator('.drawer-backdrop')).toHaveClass(/drawer-leave-active/)
+    await expect(drawer).toBeHidden()
+    await expect(trigger).toBeFocused()
+  }
+
+  const trigger = page.getByRole('button', { name: 'Open filters' })
+  await trigger.click()
+  await page.keyboard.press('Escape')
+  await expect(page.locator('.drawer-backdrop')).toHaveClass(/drawer-leave-active/)
+  await trigger.evaluate(element => element.click())
+  const reopened = page.getByRole('dialog', { name: 'Filters' })
+  await expect(reopened).toBeVisible()
+  await expect(page.locator('body')).toHaveCSS('position', 'fixed')
+  await expect(reopened.locator(':focus')).toHaveCount(1)
+  await page.keyboard.press('Escape')
+  await expect(reopened).toBeHidden()
+  await expect(trigger).toBeFocused()
+})
+
+test('Drawer removes meaningful travel for reduced motion', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'mobile-390', 'Reduced-motion lifecycle coverage runs once.')
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await openWithTheme(page, '/components/drawer')
+  const trigger = page.getByRole('button', { name: 'Open filters' })
+  await trigger.click()
+  const drawer = page.getByRole('dialog', { name: 'Filters' })
+  const backdrop = page.locator('.drawer-backdrop')
+  await backdrop.evaluate(element => element.classList.add('drawer-leave-active', 'drawer-leave-to'))
+  await expect(backdrop).toHaveCSS('transition-duration', '0.001s')
+  await expect(drawer).toHaveCSS('transition-duration', '0.001s')
+  await expect(drawer).toHaveCSS('transform', 'none')
+  await backdrop.evaluate(element => element.classList.remove('drawer-leave-active', 'drawer-leave-to'))
+  await page.keyboard.press('Escape')
+  await expect(drawer).toBeHidden()
+  await expect(trigger).toBeFocused()
+})
 
 test('Modal remains bounded and restores its opener', async ({ page }) => {
   await openWithTheme(page, '/components/modal')

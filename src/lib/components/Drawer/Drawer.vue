@@ -18,6 +18,7 @@ const emit = defineEmits<{
 const drawerRef = ref<HTMLElement | null>(null)
 const bodyRef = ref<HTMLElement | null>(null)
 const isOpen = computed(() => props.open)
+const lockActive = ref(false)
 const isScrolled = ref(false)
 const canScrollFurther = ref(false)
 let previouslyFocused: HTMLElement | null = null
@@ -37,7 +38,7 @@ const drawerStyle = computed(() => ({
   '--agala-drawer-size': props.size,
 }))
 
-useBodyScrollLock(isOpen)
+useBodyScrollLock(lockActive)
 
 function emitClose() {
   emit('close')
@@ -109,9 +110,12 @@ function observeBodySize() {
 
 watch(isOpen, async (open) => {
   if (open) {
-    previouslyFocused = document.activeElement instanceof HTMLElement
-      ? document.activeElement
-      : null
+    if (!lockActive.value) {
+      previouslyFocused = document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null
+    }
+    lockActive.value = true
     await nextTick()
     observeBodySize()
     updateScrollEdges()
@@ -124,20 +128,27 @@ watch(isOpen, async (open) => {
 
   bodyResizeObserver?.disconnect()
   bodyResizeObserver = null
+})
+
+function onAfterLeave() {
+  if (props.open) return
+  lockActive.value = false
   isScrolled.value = false
   canScrollFurther.value = false
-
-  await nextTick()
   if (previouslyFocused?.isConnected) previouslyFocused.focus({ preventScroll: true })
   previouslyFocused = null
-})
+}
 
 onUnmounted(() => bodyResizeObserver?.disconnect())
 </script>
 
 <template>
   <Teleport to="body">
-    <Transition name="drawer-fade">
+    <Transition
+      name="drawer"
+      appear
+      @after-leave="onAfterLeave"
+    >
       <div
         v-if="open"
         class="drawer-backdrop"
@@ -145,70 +156,64 @@ onUnmounted(() => bodyResizeObserver?.disconnect())
         @click="onBackdropClick"
         @keydown="onKeydown"
       >
-        <Transition
-          :name="`drawer-slide-${placement}`"
-          appear
+        <section
+          ref="drawerRef"
+          class="drawer"
+          :class="[placementClasses, props.class]"
+          :style="drawerStyle"
+          role="dialog"
+          aria-modal="true"
+          :aria-label="title || 'Drawer'"
+          tabindex="-1"
         >
-          <section
-            v-if="open"
-            ref="drawerRef"
-            class="drawer"
-            :class="[placementClasses, props.class]"
-            :style="drawerStyle"
-            role="dialog"
-            aria-modal="true"
-            :aria-label="title || 'Drawer'"
-            tabindex="-1"
+          <header
+            v-if="$slots.header || title || dismissible"
+            class="drawer__header"
+            :class="{ 'drawer__header--elevated': isScrolled }"
           >
-            <header
-              v-if="$slots.header || title || dismissible"
-              class="drawer__header"
-              :class="{ 'drawer__header--elevated': isScrolled }"
-            >
-              <div class="drawer__heading">
-                <slot name="header">
-                  <h2
-                    v-if="title"
-                    class="drawer__title"
-                  >
-                    {{ title }}
-                  </h2>
-                </slot>
-              </div>
-              <button
-                v-if="dismissible"
-                type="button"
-                class="drawer__close"
-                aria-label="Close drawer"
-                @click="requestDismiss"
-              >
-                <AgalaIcon
-                  name="x"
-                  :size="16"
-                />
-              </button>
-            </header>
-
-            <div
-              ref="bodyRef"
-              class="drawer__body"
-              @scroll.passive="updateScrollEdges"
-            >
-              <slot />
+            <div class="drawer__heading">
+              <slot name="header">
+                <h2
+                  v-if="title"
+                  class="drawer__title"
+                >
+                  {{ title }}
+                </h2>
+              </slot>
             </div>
-
-            <footer
-              v-if="$slots.footer"
-              class="drawer__footer"
-              :class="{ 'drawer__footer--elevated': canScrollFurther }"
+            <button
+              v-if="dismissible"
+              type="button"
+              class="drawer__close"
+              aria-label="Close drawer"
+              @click="requestDismiss"
             >
-              <slot
-                name="footer"
-                :close="emitClose"
+              <AgalaIcon
+                name="x"
+                :size="16"
               />
-            </footer>
-          </section>
-        </Transition>
+            </button>
+          </header>
+
+          <div
+            ref="bodyRef"
+            class="drawer__body"
+            @scroll.passive="updateScrollEdges"
+          >
+            <slot />
+          </div>
+
+          <footer
+            v-if="$slots.footer"
+            class="drawer__footer"
+            :class="{ 'drawer__footer--elevated': canScrollFurther }"
+          >
+            <slot
+              name="footer"
+              :close="emitClose"
+            />
+          </footer>
+        </section>
       </div>
     </Transition>
   </Teleport>
@@ -216,6 +221,10 @@ onUnmounted(() => bodyResizeObserver?.disconnect())
 
 <style scoped>
 .drawer-backdrop {
+  --agala-drawer-enter-duration: 230ms;
+  --agala-drawer-leave-duration: 180ms;
+  --agala-drawer-enter-easing: cubic-bezier(0.22, 1, 0.36, 1);
+  --agala-drawer-leave-easing: cubic-bezier(0.4, 0, 1, 1);
   position: fixed;
   inset: 0;
   z-index: var(--agala-z-modal);
@@ -255,21 +264,25 @@ onUnmounted(() => bodyResizeObserver?.disconnect())
 }
 
 .drawer--left {
+  --agala-drawer-closed-transform: translate3d(-100%, 0, 0);
   margin-right: auto;
   border-right: var(--agala-drawer-border, var(--agala-border-width) solid hsl(var(--agala-border)));
 }
 
 .drawer--right {
+  --agala-drawer-closed-transform: translate3d(100%, 0, 0);
   margin-left: auto;
   border-left: var(--agala-drawer-border, var(--agala-border-width) solid hsl(var(--agala-border)));
 }
 
 .drawer--top {
+  --agala-drawer-closed-transform: translate3d(0, -100%, 0);
   margin-bottom: auto;
   border-bottom: var(--agala-drawer-border, var(--agala-border-width) solid hsl(var(--agala-border)));
 }
 
 .drawer--bottom {
+  --agala-drawer-closed-transform: translate3d(0, 100%, 0);
   margin-top: auto;
   border-top: var(--agala-drawer-border, var(--agala-border-width) solid hsl(var(--agala-border)));
 }
@@ -373,45 +386,31 @@ onUnmounted(() => bodyResizeObserver?.disconnect())
   padding-right: max(1.25rem, env(safe-area-inset-right));
 }
 
-.drawer-fade-enter-active,
-.drawer-fade-leave-active {
-  transition: opacity var(--agala-transition-base);
+.drawer-enter-active {
+  transition: background-color var(--agala-drawer-enter-duration) var(--agala-drawer-enter-easing);
 }
 
-.drawer-fade-enter-from,
-.drawer-fade-leave-to {
-  opacity: 0;
+.drawer-leave-active {
+  pointer-events: none;
+  transition: background-color var(--agala-drawer-leave-duration) var(--agala-drawer-leave-easing);
 }
 
-.drawer-slide-right-enter-active,
-.drawer-slide-right-leave-active,
-.drawer-slide-left-enter-active,
-.drawer-slide-left-leave-active,
-.drawer-slide-top-enter-active,
-.drawer-slide-top-leave-active,
-.drawer-slide-bottom-enter-active,
-.drawer-slide-bottom-leave-active {
-  transition: transform var(--agala-transition-slow);
+.drawer-enter-active .drawer {
+  transition: transform var(--agala-drawer-enter-duration) var(--agala-drawer-enter-easing);
 }
 
-.drawer-slide-right-enter-from,
-.drawer-slide-right-leave-to {
-  transform: translateX(100%);
+.drawer-leave-active .drawer {
+  transition: transform var(--agala-drawer-leave-duration) var(--agala-drawer-leave-easing);
 }
 
-.drawer-slide-left-enter-from,
-.drawer-slide-left-leave-to {
-  transform: translateX(-100%);
+.drawer-enter-from,
+.drawer-leave-to {
+  background-color: transparent;
 }
 
-.drawer-slide-top-enter-from,
-.drawer-slide-top-leave-to {
-  transform: translateY(-100%);
-}
-
-.drawer-slide-bottom-enter-from,
-.drawer-slide-bottom-leave-to {
-  transform: translateY(100%);
+.drawer-enter-from .drawer,
+.drawer-leave-to .drawer {
+  transform: var(--agala-drawer-closed-transform);
 }
 
 @media (max-width: 639px) {
@@ -436,17 +435,16 @@ onUnmounted(() => bodyResizeObserver?.disconnect())
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .drawer-fade-enter-active,
-  .drawer-fade-leave-active,
-  .drawer-slide-right-enter-active,
-  .drawer-slide-right-leave-active,
-  .drawer-slide-left-enter-active,
-  .drawer-slide-left-leave-active,
-  .drawer-slide-top-enter-active,
-  .drawer-slide-top-leave-active,
-  .drawer-slide-bottom-enter-active,
-  .drawer-slide-bottom-leave-active {
-    transition-duration: 1ms;
+  .drawer-enter-active,
+  .drawer-leave-active,
+  .drawer-enter-active .drawer,
+  .drawer-leave-active .drawer {
+    transition-duration: 1ms !important;
+  }
+
+  .drawer-enter-from .drawer,
+  .drawer-leave-to .drawer {
+    transform: none;
   }
 }
 </style>
