@@ -67,6 +67,7 @@ export default defineConfig({
           { text: 'Theming', link: '/guide/theming' },
           { text: 'Accessibility', link: '/guide/accessibility' },
           { text: 'Utilities', link: '/guide/utilities' },
+          { text: 'Component examples', link: '/guide/component-examples' },
         ] },
       ],
       '/components/': [

@@ -7,6 +7,7 @@ let idCounter = 0
 
 const props = withDefaults(defineProps<TabsProps>(), {
   variant: 'underline',
+  ariaLabel: undefined,
 })
 
 const emit = defineEmits<{
@@ -143,6 +144,7 @@ function tabCls(tab: TabItem) {
         :class="tabListCls"
         role="tablist"
         aria-orientation="horizontal"
+        :aria-label="ariaLabel"
         @scroll="checkOverflow"
       >
         <button
@@ -161,7 +163,11 @@ function tabCls(tab: TabItem) {
           @click="select(tab)"
           @keydown="handleKeyDown($event, tab.value)"
         >
-          <slot :name="`tab-${tab.value}`" :tab="tab" :active="modelValue === tab.value">
+          <slot
+            :name="`tab-${tab.value}`"
+            :tab="tab"
+            :active="modelValue === tab.value"
+          >
             {{ tab.label }}
           </slot>
         </button>

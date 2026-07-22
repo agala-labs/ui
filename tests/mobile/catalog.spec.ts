@@ -1,5 +1,5 @@
 import { expect, test, type Locator } from '@playwright/test'
-import { expectNoDocumentOverflow, openWithTheme } from './helpers'
+import { expectNoDocumentOverflow, openWithTheme, themes } from './helpers'
 
 async function contrastRatio(locator: Locator) {
   return locator.evaluate((element) => {
@@ -52,6 +52,47 @@ const componentSlugs = [
   'sidebar', 'table', 'tabs', 'calendar', 'list-group', 'avatar', 'card',
   'center', 'divider', 'stack', 'spacer', 'stat', 'tag', 'icon',
 ] as const
+
+test.describe('component example navigation', () => {
+  test('keeps the selected preview and snippet in sync', async ({ page }) => {
+    await openWithTheme(page, '/components/button')
+
+    const examples = page.locator('.component-examples')
+    await expect(page.getByRole('tablist', { name: 'Component examples' })).toBeVisible()
+    await expect(examples).toHaveAttribute('data-active-example', 'variants')
+    await page.getByRole('tab', { name: 'States' }).click()
+    await expect(examples).toHaveAttribute('data-active-example', 'states')
+    await expect(page.locator('[data-preview-example="states"]')).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Saving' })).toBeDisabled()
+    await expect(page.locator('.demo-frame__code code')).toContainText('loading')
+    await expect(page).toHaveURL(/example=states/)
+  })
+
+  test('supports URL selection, keyboard navigation, and invalid fallback', async ({ page }) => {
+    await openWithTheme(page, '/components/button?example=states')
+    await expect(page.getByRole('tab', { name: 'States' })).toHaveAttribute('aria-selected', 'true')
+
+    await page.getByRole('tab', { name: 'States' }).press('Home')
+    await expect(page.getByRole('tab', { name: 'Variants' })).toHaveAttribute('aria-selected', 'true')
+    await expect(page).not.toHaveURL(/example=/)
+
+    await openWithTheme(page, '/components/button?example=missing')
+    await expect(page.locator('.component-examples')).toHaveAttribute('data-active-example', 'variants')
+    await expectNoDocumentOverflow(page)
+  })
+
+  test('keeps example tabs focusable across themes', async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== 'mobile-390', 'Theme coverage needs one representative viewport.')
+
+    for (const theme of themes) {
+      await openWithTheme(page, '/components/button', theme)
+      const states = page.getByRole('tab', { name: 'States' })
+      await states.focus()
+      await expect(states).toBeFocused()
+      await expect(states).not.toHaveCSS('outline-style', 'none')
+    }
+  })
+})
 
 test.describe('public component mobile layout', () => {
   for (const slug of componentSlugs) {

@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { componentMap } from '../data/components'
-import ComponentPreview from './ComponentPreview.vue'
-import DemoFrame from './DemoFrame.vue'
+import { componentMap, getComponentExamples } from '../data/components'
+import ComponentExamples from './ComponentExamples.vue'
 
 const props = defineProps<{ slug: string }>()
 const component = computed(() => componentMap[props.slug])
+const examples = computed(() => component.value ? getComponentExamples(component.value) : [])
 </script>
 
 <template>
@@ -21,12 +21,13 @@ const component = computed(() => componentMap[props.slug])
       {{ component.description }}
     </p>
 
-    <h2 id="example">
-      Example
+    <h2 id="examples">
+      Examples
     </h2>
-    <DemoFrame :code="component.snippet">
-      <ComponentPreview :slug="component.slug" />
-    </DemoFrame>
+    <ComponentExamples
+      :slug="component.slug"
+      :examples="examples"
+    />
 
     <h2 id="import">
       Import

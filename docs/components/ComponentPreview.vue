@@ -4,7 +4,10 @@ import { AgalaIcon, toastManager } from '@ui'
 import type { FileItem } from '@ui'
 import DropdownOverlayFixture from './DropdownOverlayFixture.vue'
 
-defineProps<{ slug: string }>()
+defineProps<{
+  slug: string
+  example?: string
+}>()
 
 const text = ref('')
 const checked = ref(true)
@@ -78,9 +81,25 @@ const events = [
 </script>
 
 <template>
-  <div class="preview-stack">
+  <div
+    class="preview-stack"
+    :data-preview-example="example || 'default'"
+  >
     <template v-if="slug === 'button'">
-      <div class="preview-row">
+      <div
+        v-if="example === 'states'"
+        class="preview-row"
+      >
+        <AgalaButton loading>
+          Saving
+        </AgalaButton><AgalaButton disabled>
+          Unavailable
+        </AgalaButton>
+      </div>
+      <div
+        v-else
+        class="preview-row"
+      >
         <AgalaButton icon="plus">
           Create project
         </AgalaButton><AgalaButton variant="secondary">

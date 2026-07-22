@@ -5,6 +5,13 @@ export interface ApiProp {
   description: string
 }
 
+export interface ComponentExample {
+  id: string
+  label: string
+  description?: string
+  snippet: string
+}
+
 export interface ComponentMeta {
   slug: string
   name: string
@@ -15,6 +22,22 @@ export interface ComponentMeta {
   slots?: string[]
   accessibility: string
   snippet: string
+  examples?: ComponentExample[]
+}
+
+export function getComponentExamples(component: ComponentMeta): ComponentExample[] {
+  const examples = component.examples?.length
+    ? component.examples
+    : [{ id: 'default', label: 'Default', snippet: component.snippet }]
+
+  if (import.meta.env.DEV) {
+    const ids = examples.map(example => example.id)
+    if (new Set(ids).size !== ids.length) {
+      console.warn(`[Agala docs] Duplicate example id for ${component.slug}.`)
+    }
+  }
+
+  return examples
 }
 
 const p = (name: string, type: string, description: string, defaultValue?: string): ApiProp => ({
@@ -27,6 +50,20 @@ export const components: ComponentMeta[] = [
     props: [p('variant', "'default' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'link'", 'Visual emphasis.', "'default'"), p('size', "'sm' | 'md' | 'lg' | 'icon'", 'Control size.', "'md'"), p('type', "'button' | 'submit' | 'reset'", 'Native button type.', "'button'"), p('loading', 'boolean', 'Shows progress and prevents repeated activation.', 'false'), p('block', 'boolean', 'Fills the available width.', 'false'), p('icon', 'string', 'Leading Agala icon name.'), p('disabled', 'boolean', 'Disables interaction.', 'false'), p('class', 'string', 'Consumer override class.')],
     slots: ['default — button label'], accessibility: 'Uses a native button. Loading and disabled states prevent activation; icon-only buttons need an accessible name.',
     snippet: `<AgalaButton icon="plus">Create project</AgalaButton>`,
+    examples: [
+      {
+        id: 'variants',
+        label: 'Variants',
+        description: 'Choose emphasis from the consequence and frequency of the action.',
+        snippet: `<AgalaButton icon="plus">Create project</AgalaButton>\n<AgalaButton variant="secondary">Secondary</AgalaButton>\n<AgalaButton variant="outline">Outline</AgalaButton>\n<AgalaButton variant="danger">Delete</AgalaButton>`,
+      },
+      {
+        id: 'states',
+        label: 'States',
+        description: 'Loading prevents repeat submission; disabled explains unavailable actions through surrounding copy.',
+        snippet: `<AgalaButton loading>Saving</AgalaButton>\n<AgalaButton disabled>Unavailable</AgalaButton>`,
+      },
+    ],
   },
   {
     slug: 'input', name: 'Input', exports: ['AgalaInput'], description: 'Captures a single line of text with optional icons and validation.',
@@ -203,7 +240,7 @@ export const components: ComponentMeta[] = [
   },
   {
     slug: 'tabs', name: 'Tabs', exports: ['AgalaTabs'], description: 'Switches among related panels while preserving context.',
-    props: [p('tabs', 'TabItem[]', 'Required tab definitions.'), p('modelValue', 'string', 'Required active tab.'), p('variant', "'underline' | 'pills'", 'Visual treatment.', "'underline'"), p('class', 'string', 'Consumer override class.')],
+    props: [p('tabs', 'TabItem[]', 'Required tab definitions.'), p('modelValue', 'string', 'Required active tab.'), p('variant', "'underline' | 'pills'", 'Visual treatment.', "'underline'"), p('ariaLabel', 'string', 'Accessible name for the tab list.'), p('class', 'string', 'Consumer override class.')],
     events: ['update:modelValue(value: string)'], slots: ['panel-<value>', 'tab-<value> — receives { tab, active }'], accessibility: 'Implements tablist, tab, and tabpanel relationships. Arrow keys, Home, and End move focus and skip disabled tabs.',
     snippet: `<AgalaTabs v-model="tab" :tabs="tabs"><template #panel-overview>Overview</template></AgalaTabs>`,
   },
