@@ -304,6 +304,41 @@ test.describe('refined component interactions', () => {
     }
   })
 
+  test('tag semantics match passive, interactive, and removable intent', async ({ page }) => {
+    await openWithTheme(page, '/components/tag')
+
+    const passive = page.locator('.tag').filter({ hasText: 'Vue' })
+    await expect(passive).toHaveCount(1)
+    await expect(passive).not.toHaveAttribute('role')
+    await expect(passive).not.toHaveAttribute('tabindex')
+    await passive.click()
+    await expect(page.locator('.interaction-status')).toHaveText('Tag activations: 0')
+
+    const interactive = page.getByRole('button', { name: 'Needs review' })
+    await expect(interactive).toHaveClass(/tag--interactive/)
+    await interactive.focus()
+    await expect(interactive).toBeFocused()
+    await interactive.press('Enter')
+    await interactive.press('Space')
+    await expect(page.locator('.interaction-status')).toHaveText('Tag activations: 2')
+
+    await page.getByRole('tab', { name: 'Removal and passive states' }).click()
+    const removable = page.locator('.tag--removable')
+    await expect(removable).toHaveCount(1)
+    await expect(removable).not.toHaveAttribute('role')
+    await expect(removable.locator('button button')).toHaveCount(0)
+    const remove = page.getByRole('button', { name: 'Remove Mar del Plata' })
+    await remove.focus()
+    await expect(remove).toBeFocused()
+    await remove.press('Enter')
+    await expect(page.locator('.tag-remove-status')).toHaveText('Location removed')
+
+    const disabled = page.locator('.tag--disabled')
+    await expect(disabled).toHaveAttribute('aria-disabled', 'true')
+    await expect(disabled).not.toHaveAttribute('tabindex')
+    await expectNoDocumentOverflow(page)
+  })
+
   test('stat layouts preserve hierarchy and intrinsic height', async ({ page }) => {
     await openWithTheme(page, '/components/stat')
 

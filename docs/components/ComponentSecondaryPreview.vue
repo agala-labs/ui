@@ -23,6 +23,7 @@ const calendarView = ref<'list'>('list')
 const calendarDate = ref('2026-07-10')
 const sidebarActive = ref('locations')
 const sidebarExpanded = ref<string[]>(['settings'])
+const removedTag = ref(false)
 
 const options = [
   { value: 'ar', label: 'Argentina' },
@@ -433,10 +434,21 @@ const events = [
     </template>
     <div
       v-else-if="slug === 'tag'"
-      class="preview-row"
+      class="preview-stack"
     >
-      <AgalaTag label="Mar del Plata" removable />
+      <div class="preview-row">
+        <AgalaTag
+          v-if="!removedTag"
+          label="Mar del Plata"
+          removable
+          @remove="removedTag = true"
+        />
+        <span class="tag-remove-status">{{ removedTag ? 'Location removed' : 'Selected location' }}</span>
+      </div>
       <AgalaTag label="Managed" disabled />
+      <AgalaTag color="hsl(196 70% 32%)">
+        <span>Custom slotted label</span>
+      </AgalaTag>
     </div>
     <div
       v-else-if="slug === 'icon'"

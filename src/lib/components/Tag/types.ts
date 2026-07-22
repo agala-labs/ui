@@ -7,6 +7,7 @@ export interface TagProps {
   variant?: TagVariant
   size?: TagSize
   removable?: boolean
+  interactive?: boolean
   disabled?: boolean
   color?: string
   class?: string

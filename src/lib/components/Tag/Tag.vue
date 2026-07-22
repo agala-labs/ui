@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, watchEffect } from 'vue'
+import type { CSSProperties } from 'vue'
 import AgalaIcon from '../AgalaIcon/AgalaIcon.vue'
 import type { TagProps } from './types'
 
@@ -7,6 +8,7 @@ const props = withDefaults(defineProps<TagProps>(), {
   variant: 'default',
   size: 'md',
   removable: false,
+  interactive: false,
   color: '',
 })
 
@@ -18,16 +20,20 @@ const emit = defineEmits<{
 const colorStyle = computed(() => {
   if (!props.color) return undefined
   return {
-    backgroundColor: props.color + '1A',
-    color: props.color,
-  }
+    '--agala-tag-custom-color': props.color,
+  } as CSSProperties
 })
+
+const isInteractive = computed(() => props.interactive && !props.removable)
+const rootElement = computed(() => isInteractive.value ? 'button' : 'span')
 
 const cls = computed(() => [
   'tag',
   `tag--${props.variant}`,
   `tag--${props.size}`,
   props.removable && 'tag--removable',
+  isInteractive.value && 'tag--interactive',
+  props.color && 'tag--custom',
   props.disabled && 'tag--disabled',
   props.class,
 ].filter(Boolean).join(' '))
@@ -38,19 +44,27 @@ function onRemove(e: MouseEvent) {
 }
 
 function onClick() {
-  if (!props.disabled) emit('click')
+  if (isInteractive.value && !props.disabled) emit('click')
+}
+
+if (import.meta.env.DEV) {
+  watchEffect(() => {
+    if (props.interactive && props.removable) {
+      console.warn('[AgalaTag] `interactive` is ignored when `removable` is true. The remove button remains the only action.')
+    }
+  })
 }
 </script>
 
 <template>
-  <span
+  <component
+    :is="rootElement"
     :class="cls"
     :style="colorStyle"
-    role="button"
-    tabindex="0"
+    :type="isInteractive ? 'button' : undefined"
+    :disabled="isInteractive ? disabled : undefined"
+    :aria-disabled="!isInteractive && disabled ? 'true' : undefined"
     @click="onClick"
-    @keydown.enter.prevent="onClick"
-    @keydown.space.prevent="onClick"
   >
     <slot>
       <span class="tag__label">{{ label }}</span>
@@ -66,7 +80,7 @@ function onClick() {
     >
       <AgalaIcon name="x" :size="12" />
     </button>
-  </span>
+  </component>
 </template>
 
 <style scoped>
@@ -76,6 +90,8 @@ function onClick() {
   gap: var(--agala-tag-gap, 0.375rem);
   max-width: 100%;
   padding: var(--agala-tag-padding, 0.1875rem 0.5rem);
+  border: 0;
+  appearance: none;
   border-radius: var(--agala-tag-radius, 99px);
   font-size: var(--agala-tag-font-size, 0.6875rem);
   font-family: var(--agala-font-sans);
@@ -138,8 +154,28 @@ function onClick() {
   box-shadow: inset 0 0 0 1px hsl(var(--agala-border));
 }
 
-.tag--outline:hover:not(.tag--disabled) {
+.tag--interactive {
+  cursor: pointer;
+}
+
+.tag--interactive:hover:not(.tag--disabled) {
+  opacity: 0.86;
+}
+
+.tag--interactive:focus-visible,
+.tag__remove:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px hsl(var(--agala-ring));
+}
+
+.tag--interactive.tag--outline:hover:not(.tag--disabled) {
   background: hsl(var(--agala-accent));
+}
+
+.tag--custom {
+  background-color: transparent;
+  background-color: color-mix(in srgb, var(--agala-tag-custom-color) 12%, transparent);
+  color: var(--agala-tag-custom-color);
 }
 
 .tag__label {
@@ -180,7 +216,10 @@ function onClick() {
 
 .tag--disabled {
   opacity: 0.5;
-  pointer-events: none;
   cursor: not-allowed;
+}
+
+.tag--disabled:not(button) {
+  pointer-events: none;
 }
 </style>

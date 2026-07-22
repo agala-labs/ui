@@ -34,6 +34,7 @@ const sidebarActive = ref('active')
 const sidebarExpanded = ref<string[]>(['workspace'])
 const alertRetryCount = ref(0)
 const listActivations = ref(0)
+const tagActivations = ref(0)
 
 const options = [
   { value: 'ar', label: 'Argentina', subtitle: 'South America' },
@@ -670,19 +671,26 @@ const events = [
     </div>
     <div
       v-else-if="slug === 'tag'"
-      class="preview-row"
+      class="preview-stack"
     >
-      <AgalaTag
-        label="Vue"
-        variant="success"
-        removable
-      /><AgalaTag
-        label="TypeScript"
-        variant="primary"
-      /><AgalaTag
-        label="Needs review"
-        variant="warning"
-      />
+      <div class="preview-row">
+        <span class="component-choice-label">System state</span>
+        <AgalaBadge variant="success" dot>
+          Active
+        </AgalaBadge>
+      </div>
+      <div class="preview-row">
+        <span class="component-choice-label">User label</span>
+        <AgalaTag label="Vue" variant="primary" />
+        <AgalaTag
+          class="tag-demo-interactive"
+          label="Needs review"
+          variant="warning"
+          interactive
+          @click="tagActivations++"
+        />
+      </div>
+      <span class="interaction-status">Tag activations: {{ tagActivations }}</span>
     </div>
     <div
       v-else-if="slug === 'icon'"
@@ -712,5 +720,6 @@ const events = [
 .card-demo { width: min(100%, 36rem); }
 .card-demo__header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
 .card-demo__body { margin: 0; color: hsl(var(--agala-muted-foreground)); }
+.component-choice-label { min-width: 6rem; color: hsl(var(--agala-muted-foreground)); font-size: 0.75rem; }
 @media (max-width: 640px) { .icon-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 </style>

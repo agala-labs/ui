@@ -67,7 +67,7 @@ const additionalExamples: Record<string, AdditionalExample> = {
   stack: { label: 'Vertical form actions', description: 'Vertical stacking keeps narrow actions readable and ordered.', snippet: `<AgalaVStack gap="0.5rem"><AgalaButton block>Continue</AgalaButton><AgalaButton block variant="ghost">Cancel</AgalaButton></AgalaVStack>` },
   spacer: { label: 'Status bar', description: 'Spacer can push secondary metadata to the far edge of one row.', snippet: `<AgalaHStack><strong>Inventory sync</strong><AgalaSpacer /><span>Updated 2 min ago</span></AgalaHStack>` },
   stat: { label: 'Inline summary', description: 'Inline stats belong in dense summaries rather than stretched metric cards.', snippet: `<AgalaStat label="Pending reviews" value="12" secondary-value="0 overdue" layout="inline" :bordered="false" />` },
-  tag: { label: 'Disabled and removable', description: 'Use tags for labels or selected values, with an explicit removal affordance when needed.', snippet: `<AgalaTag label="Mar del Plata" removable />\n<AgalaTag label="Managed" disabled />` },
+  tag: { label: 'Removal and passive states', description: 'A removable tag exposes only its labeled remove button. Passive and disabled tags stay out of the tab order.', snippet: `<AgalaTag label="Mar del Plata" removable @remove="removeLocation" />\n<AgalaTag label="Managed" disabled />` },
   icon: { label: 'Sizes', description: 'Icons inherit current color and should match the control or text they support.', snippet: `<AgalaIcon name="settings" :size="16" />\n<AgalaIcon name="settings" :size="24" />` },
 }
 
@@ -370,10 +370,10 @@ export const components: ComponentMeta[] = [
     ],
   },
   {
-    slug: 'tag', name: 'Tag', exports: ['AgalaTag'], description: 'Represents a compact label that may be interactive or removable.',
-    props: [p('label', 'string', 'Visible tag text.'), p('variant', "'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'outline'", 'Treatment.', "'default'"), p('size', "'sm' | 'md'", 'Tag size.', "'md'"), p('removable', 'boolean', 'Shows removal action.', 'false'), p('disabled', 'boolean', 'Disables interaction.', 'false'), p('color', 'string', 'Custom CSS color.'), p('class', 'string', 'Consumer override class.')],
-    events: ['click', 'remove'], accessibility: 'Removal has a labeled control; use badges rather than interactive tags for status-only text.',
-    snippet: `<AgalaTag label="Vue" variant="success" removable @remove="removeTag" />`,
+    slug: 'tag', name: 'Tag', exports: ['AgalaTag'], description: 'Represents a user-applied label that may be explicitly interactive or removable.',
+    props: [p('label', 'string', 'Visible tag text.'), p('variant', "'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'outline'", 'Treatment.', "'default'"), p('size', "'sm' | 'md'", 'Tag size.', "'md'"), p('removable', 'boolean', 'Shows a labeled native remove button.', 'false'), p('interactive', 'boolean', 'Renders the root as a native button and enables the click event. Ignored when removable.', 'false'), p('disabled', 'boolean', 'Disables available interaction.', 'false'), p('color', 'string', 'Any valid CSS color.'), p('class', 'string', 'Consumer override class.')],
+    events: ['click — emitted only when interactive', 'remove'], accessibility: 'Choose Badge for system state/count and Tag for user-applied labels or filters. Passive tags are not focusable; removable tags expose only their labeled remove button; interactive tags use native button semantics.',
+    snippet: `<AgalaTag label="Needs review" interactive @click="filterByTag" />`,
   },
   {
     slug: 'icon', name: 'Icon', exports: ['AgalaIcon', 'IconName'], description: 'Renders the library’s local inline SVG icon set.',
