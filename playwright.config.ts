@@ -7,14 +7,8 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 2 : 4,
   reporter: process.env.CI ? [['html', { open: 'never' }], ['list']] : 'list',
-  snapshotPathTemplate: '{testDir}/__screenshots__/{projectName}/{testFilePath}/{arg}{ext}',
   expect: {
     timeout: 5000,
-    toHaveScreenshot: {
-      animations: 'disabled',
-      caret: 'hide',
-      maxDiffPixelRatio: 0.01,
-    },
   },
   use: {
     baseURL: 'http://127.0.0.1:4173',

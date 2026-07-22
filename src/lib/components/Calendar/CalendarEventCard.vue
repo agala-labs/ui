@@ -85,24 +85,33 @@ const presentationClass = computed(() =>
 <style scoped>
 .calendarEventCard {
   --event-accent: var(--agala-calendar-event-accent, hsl(var(--agala-primary)));
+  --event-surface: var(
+    --agala-calendar-event-surface,
+    color-mix(in srgb, var(--event-accent) 7%, hsl(var(--agala-card)))
+  );
+  --event-border: var(
+    --agala-calendar-event-border,
+    color-mix(in srgb, var(--event-accent) 24%, hsl(var(--agala-border)))
+  );
   display: flex;
   min-width: 0;
   margin: 0;
-  border: var(--agala-border-width) solid hsl(var(--agala-border));
-  border-left: 3px solid var(--event-accent);
+  border: var(--agala-border-width) solid var(--event-border);
+  border-left: 2px solid var(--event-accent);
   border-radius: var(--agala-calendar-event-radius, var(--agala-radius-sm));
-  background: var(--agala-calendar-event-surface, hsl(var(--agala-card)));
+  background: var(--event-surface);
   color: hsl(var(--agala-foreground));
   font-family: var(--agala-font-sans);
   text-align: left;
   cursor: pointer;
+  touch-action: manipulation;
   box-sizing: border-box;
   overflow: hidden;
   transition: background-color var(--agala-transition-fast), border-color var(--agala-transition-fast);
 }
 
 .calendarEventCard:hover {
-  background: hsl(var(--agala-accent) / 0.55);
+  background: color-mix(in srgb, var(--event-accent) 12%, hsl(var(--agala-card)));
 }
 
 .calendarEventCard:focus-visible {
@@ -133,7 +142,7 @@ const presentationClass = computed(() =>
 }
 
 .title {
-  font-weight: var(--agala-font-weight-semibold);
+  font-weight: var(--agala-font-weight-medium);
 }
 
 .time,
@@ -173,20 +182,32 @@ const presentationClass = computed(() =>
 .presentationTimeGrid {
   position: absolute;
   z-index: 2;
-  container-type: inline-size;
+  container: calendar-event / size;
   min-height: 1.75rem;
   padding: var(--agala-calendar-event-padding, 0.25rem 0.375rem);
   font-size: 0.6875rem;
-  line-height: 1.15;
+  line-height: 1.2;
 }
 
-@container (max-width: 7rem) {
+@container calendar-event (max-width: 6rem) {
   .presentationTimeGrid .subtitle {
     display: none;
   }
 }
 
-@container (max-width: 5rem) {
+@container calendar-event (max-width: 5rem) {
+  .presentationTimeGrid .time {
+    display: none;
+  }
+}
+
+@container calendar-event (max-height: 3.5rem) {
+  .presentationTimeGrid .subtitle {
+    display: none;
+  }
+}
+
+@container calendar-event (max-height: 2.25rem) {
   .presentationTimeGrid .time {
     display: none;
   }

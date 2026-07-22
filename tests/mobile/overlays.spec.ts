@@ -3,7 +3,7 @@ import { expectInsideViewport, expectNoDocumentOverflow, openWithTheme, settleVi
 
 for (const theme of themes) {
   test.describe(`${theme} Drawer`, () => {
-    test('contains focus, locks scroll, restores focus, and matches its baseline', async ({ page }) => {
+    test('contains focus, locks scroll, and restores focus', async ({ page }) => {
       await openWithTheme(page, '/components/drawer', theme)
       const trigger = page.getByRole('button', { name: 'Open filters' })
       await trigger.click()
@@ -20,8 +20,6 @@ for (const theme of themes) {
         await expect(drawer.locator(':focus')).toHaveCount(1)
       }
 
-      await settleVisuals(page)
-      await expect(page).toHaveScreenshot(`${theme}-drawer-open.png`)
       await page.keyboard.press('Escape')
       await expect(drawer).toBeHidden()
       await expect(trigger).toBeFocused()

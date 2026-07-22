@@ -192,7 +192,7 @@ export const components: ComponentMeta[] = [
   {
     slug: 'sidebar', name: 'Sidebar', exports: ['AgalaSidebar', 'AgalaSidebarGroup', 'AgalaSidebarItem', 'AgalaSidebarToggle'], description: 'Navigates hierarchical product areas across desktop and mobile.',
     props: [p('items', 'SidebarNode[]', 'Data-driven navigation tree.'), p('activeValue', 'string', 'Selected item.'), p('expanded / defaultExpanded', 'string[]', 'Controlled or initial open branches.'), p('collapsed', 'boolean', 'Desktop collapsed state.'), p('open', 'boolean', 'Mobile drawer state.'), p('responsive', 'boolean', 'Enables responsive behavior.', 'false'), p('indent', "'compact' | 'comfortable'", 'Nested density.'), p('width / collapsedWidth', 'string', 'CSS widths.')],
-    events: ['update:activeValue', 'update:expanded', 'update:collapsed', 'update:open', 'select(value)'], slots: ['default', 'SidebarItem: icon and default'], accessibility: 'Tree branches expose expansion state; use SidebarToggle with aria-controls for mobile or collapsed navigation.',
+    events: ['update:activeValue', 'update:expanded', 'update:collapsed', 'update:open', 'select(value)'], slots: ['default', 'SidebarItem: icon and default'], accessibility: 'Tree branches expose expansion state, animate their disclosure height, and keep the selected surface on the active leaf. Use SidebarToggle with aria-controls for mobile or collapsed navigation.',
     snippet: `<AgalaSidebar v-model:active-value="active" v-model:expanded="expanded" :items="items" responsive />`,
   },
   {
@@ -210,7 +210,7 @@ export const components: ComponentMeta[] = [
   {
     slug: 'calendar', name: 'Calendar', exports: ['AgalaCalendar'], description: 'Displays events in month, week, day, or list views and supports time-slot selection.',
     props: [p('events', 'CalendarEvent[]', 'Event collection.'), p('view', "'month' | 'week' | 'day' | 'list'", 'Current view.'), p('currentDate', 'string', 'ISO focus date.'), p('availableViews', 'CalendarView[]', 'Enabled views.'), p('dayStart / dayEnd', 'string', 'Visible HH:MM bounds.'), p('snapMinutes', 'number', 'Slot selection interval.', '30'), p('hideHeader', 'boolean', 'Hides built-in controls.', 'false')],
-    events: ['update:view', 'update:currentDate', 'select(event)', 'day-click(date)', 'slot-select({ start, end })'], slots: ['header', 'event — receives { event, view, presentation, timeLabel, isCompact }', 'empty-day'], accessibility: 'Grid selection supports keyboard navigation; event controls expose full titles, time context, and consistent focus behavior in every view.',
+    events: ['update:view', 'update:currentDate', 'select(event)', 'day-click(date)', 'slot-select({ start, end })'], slots: ['header', 'event — receives { event, view, presentation, timeLabel, isCompact }', 'empty-day'], accessibility: 'Grid selection supports keyboard navigation. Default timed event cards progressively show title, time, and subtitle as space allows while their accessible labels retain the complete event context.',
     snippet: `<AgalaCalendar v-model:view="view" v-model:current-date="date" :events="events" />`,
   },
   {
@@ -254,10 +254,10 @@ export const components: ComponentMeta[] = [
     snippet: `<AgalaHStack><strong>Project</strong><AgalaSpacer /><AgalaButton>Edit</AgalaButton></AgalaHStack>`,
   },
   {
-    slug: 'stat', name: 'Stat', exports: ['AgalaStat'], description: 'Displays a key metric with optional trend and icon.',
-    props: [p('label', 'string', 'Required metric label.'), p('value', 'string | number', 'Required metric value.'), p('secondaryValue', 'string | number', 'Neutral supporting value rendered before any trend.'), p('trend', 'number', 'Signed trend value.'), p('trendLabel', 'string', 'Trend context.'), p('icon', 'string', 'Agala icon name.'), p('iconBg', "'primary' | 'danger' | 'success' | 'warning' | 'info'", 'Icon surface.'), p('layout', "'vertical' | 'row' | 'inline'", 'Content arrangement.', "'vertical'"), p('bordered', 'boolean', 'Adds a border.', 'false'), p('labelTransform', 'string', 'CSS text transform override.')],
+    slug: 'stat', name: 'Stat', exports: ['AgalaStat'], description: 'Presents one key metric with optional supporting context, trend, and icon.',
+    props: [p('label', 'string', 'Required metric label.'), p('value', 'string | number', 'Required metric value.'), p('secondaryValue', 'string | number', 'Neutral supporting value rendered before any trend.'), p('trend', 'number', 'Signed trend value.'), p('trendLabel', 'string', 'Trend context.'), p('icon', 'string', 'Agala icon name.'), p('iconBg', "'primary' | 'danger' | 'success' | 'warning' | 'info'", 'Icon surface.'), p('layout', "'vertical' | 'row' | 'inline'", 'Content arrangement.', "'vertical'"), p('bordered', 'boolean', 'Adds the quiet grouped surface.', 'true'), p('labelTransform', 'string', 'CSS text transform override.')],
     accessibility: 'Trend direction is conveyed by signed text and labels as well as color/icon.',
-    snippet: `<AgalaStat label="Require action" value="4" secondary-value="$280,000" layout="row" />`,
+    snippet: `<AgalaStat label="Needs attention" value="4" secondary-value="$280k at risk" layout="row" />`,
   },
   {
     slug: 'tag', name: 'Tag', exports: ['AgalaTag'], description: 'Represents a compact label that may be interactive or removable.',

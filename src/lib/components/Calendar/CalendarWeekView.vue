@@ -178,19 +178,13 @@ const timedEventsByDay = computed(() => {
         )
         if (!position) return null
 
-        const start = parseISO(event.start)
-        const end = parseISO(event.end)
-        const duration = start && end
-          ? (end.getTime() - start.getTime()) / 60000
-          : 0
-
         return {
           event,
           ...position,
           column,
           totalColumns,
-          isShort: duration < 15,
-          showSubtitle: duration > 30,
+          showTime: position.height >= 36,
+          showSubtitle: position.height >= 56,
         }
       })
       .filter((item): item is NonNullable<typeof item> => item !== null)
@@ -330,7 +324,7 @@ function handleEventClick(event: CalendarEvent) {
             :event="eventInfo.event"
             presentation="time-grid"
             :time-label="formatEventTimeRange(eventInfo.event)"
-            :show-time="!eventInfo.isShort"
+            :show-time="eventInfo.showTime"
             :show-subtitle="eventInfo.showSubtitle"
             :style="getEventStyle(
               eventInfo.top,

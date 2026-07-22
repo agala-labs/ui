@@ -191,11 +191,11 @@ function hourDate(hour: number): Date {
 }
 
 function eventShowTime(height: number): boolean {
-  return height >= 28
+  return height >= 36
 }
 
 function eventShowSubtitle(height: number): boolean {
-  return height >= 40
+  return height >= 56
 }
 
 function formatSelectionTime(minutes: number): string {

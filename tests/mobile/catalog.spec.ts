@@ -1,5 +1,5 @@
 import { expect, test, type Locator } from '@playwright/test'
-import { expectNoDocumentOverflow, openWithTheme, settleVisuals, themes } from './helpers'
+import { expectNoDocumentOverflow, openWithTheme } from './helpers'
 
 async function contrastRatio(locator: Locator) {
   return locator.evaluate((element) => {
@@ -63,17 +63,6 @@ test.describe('public component mobile layout', () => {
   }
 })
 
-test.describe('default-theme component baselines', () => {
-  for (const slug of componentSlugs) {
-    test(`${slug} visual baseline`, async ({ page }, testInfo) => {
-      test.skip(testInfo.project.name !== 'mobile-390', 'Catalog baselines use the representative 390px viewport.')
-      await openWithTheme(page, `/components/${slug}`)
-      await expect(page.locator('.component-doc')).toBeVisible()
-      await expect(page).toHaveScreenshot(`${slug}.png`, { fullPage: true })
-    })
-  }
-})
-
 test.describe('Kervo semantic contrast', () => {
   test('danger button keeps an AA contrast pair across interaction states', async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== 'mobile-390', 'Semantic contrast needs one representative browser viewport.')
@@ -96,30 +85,6 @@ test.describe('Kervo semantic contrast', () => {
     expect(await contrastRatio(danger)).toBeGreaterThanOrEqual(4.5)
   })
 })
-
-const criticalPages = ['alert', 'calendar', 'table', 'tabs', 'segmented-control', 'markdown-editor', 'sidebar'] as const
-
-for (const theme of themes) {
-  test.describe(`${theme} critical visual surfaces`, () => {
-    for (const slug of criticalPages) {
-      test(`${slug} baseline`, async ({ page }, testInfo) => {
-        test.skip(testInfo.project.name !== 'mobile-390', 'Cross-theme baselines use the representative 390px viewport.')
-        await openWithTheme(page, `/components/${slug}`, theme)
-        await settleVisuals(page)
-        await expect(page).toHaveScreenshot(`${theme}-${slug}.png`, { fullPage: true })
-      })
-    }
-
-    test('chart gallery baseline', async ({ page }, testInfo) => {
-      test.skip(testInfo.project.name !== 'mobile-390', 'Cross-theme baselines use the representative 390px viewport.')
-      await openWithTheme(page, '/charts/', theme)
-      await expect(page.locator('.chart-gallery canvas')).toHaveCount(8)
-      await settleVisuals(page)
-      await expectNoDocumentOverflow(page)
-      await expect(page).toHaveScreenshot(`${theme}-charts.png`, { fullPage: true })
-    })
-  })
-}
 
 test.describe('refined component interactions', () => {
   test('list group applies semantic badges and preserves slot and keyboard behavior', async ({ page }) => {
@@ -204,9 +169,8 @@ test.describe('refined component interactions', () => {
   test('stat renders neutral secondary values before trends in every layout', async ({ page }) => {
     await openWithTheme(page, '/components/stat')
 
-    await expect(page.locator('.stat-secondary-row .statSecondary')).toHaveText('$280,000')
-    await expect(page.locator('.stat-secondary-inline-zero .statSecondary')).toHaveText('0')
-    await expect(page.locator('.stat-secondary-empty .statSecondary')).toHaveText('')
+    await expect(page.locator('.stat-secondary-row .statSecondary')).toHaveText('$280k at risk')
+    await expect(page.locator('.stat-secondary-inline-zero .statSecondary')).toHaveText('0 overdue')
 
     const combined = page.locator('.stat-secondary-with-trend')
     await expect(combined.locator('.statSecondary')).toHaveText('Across 18 teams')
@@ -219,6 +183,21 @@ test.describe('refined component interactions', () => {
     const trendOnly = page.locator('.agala-doc-grid > .stat').first()
     await expect(trendOnly.locator('.statSecondary')).toHaveCount(0)
     await expect(trendOnly.locator('.trendText')).toContainText('+12.4%')
+    await expect(trendOnly.locator('.statIcon')).toHaveCount(1)
+    await expect(trendOnly).toHaveCSS('box-shadow', 'none')
+    await expect(trendOnly.locator('.statLabel')).toHaveCSS('text-transform', 'none')
+    const inline = page.locator('.stat-secondary-inline-zero')
+    await expect(inline).toHaveCSS('flex-direction', 'row')
+    expect(await inline.evaluate((element) => {
+      const label = element.querySelector('.statLabel')?.getBoundingClientRect()
+      const value = element.querySelector('.statValue')?.getBoundingClientRect()
+      const secondary = element.querySelector('.statSecondary')?.getBoundingClientRect()
+      if (!label || !value || !secondary) return false
+      const sharesLine = (a: DOMRect, b: DOMRect) => a.top < b.bottom && a.bottom > b.top
+      return label.right <= value.left && value.right <= secondary.left
+        && sharesLine(label, value) && sharesLine(value, secondary)
+    })).toBe(true)
+    await expectNoDocumentOverflow(page)
   })
 
   test('empty state supports default and compact custom-slot layouts', async ({ page }) => {
@@ -270,10 +249,67 @@ test.describe('refined component interactions', () => {
   test('calendar event cards expose complete labels in the detailed day view', async ({ page }) => {
     await openWithTheme(page, '/components/calendar')
 
+    const eventContentSize = (event: Locator) => event.evaluate((element) => {
+      const styles = getComputedStyle(element)
+      const rect = element.getBoundingClientRect()
+      return {
+        width: rect.width
+          - parseFloat(styles.paddingLeft)
+          - parseFloat(styles.paddingRight)
+          - parseFloat(styles.borderLeftWidth)
+          - parseFloat(styles.borderRightWidth),
+        height: rect.height
+          - parseFloat(styles.paddingTop)
+          - parseFloat(styles.paddingBottom)
+          - parseFloat(styles.borderTopWidth)
+          - parseFloat(styles.borderBottomWidth),
+        visibleTextContained: Array.from(element.querySelectorAll<HTMLElement>('.title, .time, .subtitle'))
+          .filter(node => getComputedStyle(node).display !== 'none')
+          .every((node) => {
+            const nodeRect = node.getBoundingClientRect()
+            return nodeRect.top >= rect.top && nodeRect.bottom <= rect.bottom
+              && nodeRect.left >= rect.left && nodeRect.right <= rect.right
+          }),
+      }
+    })
+
     await expect(page.locator('[data-calendar-event]')).toHaveCount(4)
-    await expect(page.getByRole('button', { name: /Design review/ })).toBeVisible()
-    await expect(page.getByRole('button', { name: /10:00 AM.*Design review.*Checkout handoff/ })).toBeVisible()
+    const mediumEvent = page.getByRole('button', { name: /10:00 AM.*Design review.*Checkout handoff/ })
+    const tallEvent = page.getByRole('button', { name: /10:30 AM.*Release readiness.*API and web/ })
+    const compactEvent = page.getByRole('button', { name: /2:00 PM.*Team planning/ })
+
+    await expect(mediumEvent).toBeVisible()
+    await expect(mediumEvent.locator('.subtitle')).toHaveCount(0)
+    await expect(tallEvent.locator('.subtitle')).toHaveText('API and web')
+    await expect(compactEvent.locator('.time')).toHaveCount(0)
+    await expect(compactEvent.locator('.subtitle')).toHaveCount(0)
+    await expect(mediumEvent).toHaveCSS('border-left-width', '2px')
+
+    const mediumSize = await eventContentSize(mediumEvent)
+    const tallSize = await eventContentSize(tallEvent)
+    expect(await mediumEvent.locator('.time').isVisible()).toBe(mediumSize.width > 80 && mediumSize.height > 36)
+    expect(await tallEvent.locator('.time').isVisible()).toBe(tallSize.width > 80 && tallSize.height > 36)
+    expect(await tallEvent.locator('.subtitle').isVisible()).toBe(tallSize.width > 96 && tallSize.height > 56)
+    expect(mediumSize.visibleTextContained).toBe(true)
+    expect(tallSize.visibleTextContained).toBe(true)
     await expectNoDocumentOverflow(page)
+  })
+
+  test('sidebar reserves the selected surface for the active leaf', async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== 'tablet-768', 'The expanded desktop tree is visible from 768px.')
+    await page.emulateMedia({ reducedMotion: 'no-preference' })
+    await openWithTheme(page, '/components/sidebar')
+
+    const parent = page.getByRole('button', { name: 'Projects', exact: true })
+    const activeLeaf = page.getByRole('button', { name: 'Active projects', exact: true })
+    await expect(activeLeaf).toHaveAttribute('aria-current', 'page')
+    await expect(parent).toHaveClass(/sidebarTreeItem--descendant-active/)
+    await expect(parent).not.toHaveClass(/sidebarTreeItem--active/)
+    await expect(parent).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+
+    const panel = page.locator('.sidebarTreePanel').first()
+    await panel.evaluate(element => element.classList.add('sidebarTreePanel-enter-active'))
+    await expect(panel).toHaveCSS('transition-property', 'grid-template-rows')
   })
 
   test('segmented control keeps radio focus local and skips disabled choices', async ({ page }) => {

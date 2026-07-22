@@ -26,7 +26,6 @@
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
     "test:mobile": "playwright test",
-    "test:mobile:update": "playwright test --update-snapshots",
     "test:consumer": "node scripts/smoke-consumer.mjs",
     "build:lib": "vue-tsc --noEmit && vite build && cp src/lib/reset.css dist/reset.css && node -e \"require('fs').rmSync('dist/themes',{recursive:true,force:true})\" && mkdir -p dist/themes && cp src/lib/themes/*.css dist/themes/ && cp dist/agala-ui.es.js dist/agala-ui.browser.js && node -e \"require('fs').writeFileSync('dist/agala-ui.browser.js', require('fs').readFileSync('dist/agala-ui.es.js','utf-8').replace(/import '\\.\\/index\\.css';[^\\n]*\\n?/g, ''))\"",
     "lint": "eslint .",

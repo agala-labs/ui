@@ -244,20 +244,22 @@ function focusSelector(event: KeyboardEvent, direction: 'next' | 'previous' | 'f
             class="sidebarTreePanel"
             role="group"
           >
-            <SidebarTree
-              :items="node.children || []"
-              :active-value="activeValue"
-              :expanded-values="expandedValues"
-              :collapsed="collapsed"
-              :level="level + 1"
-              :indent="indent"
-              @toggle="emit('toggle', $event)"
-              @select="(item, event) => emit('select', item, event)"
-              @focus-next="focusSelector($event, 'next')"
-              @focus-previous="focusSelector($event, 'previous')"
-              @focus-first="focusSelector($event, 'first')"
-              @focus-last="focusSelector($event, 'last')"
-            />
+            <div class="sidebarTreePanel__inner">
+              <SidebarTree
+                :items="node.children || []"
+                :active-value="activeValue"
+                :expanded-values="expandedValues"
+                :collapsed="collapsed"
+                :level="level + 1"
+                :indent="indent"
+                @toggle="emit('toggle', $event)"
+                @select="(item, event) => emit('select', item, event)"
+                @focus-next="focusSelector($event, 'next')"
+                @focus-previous="focusSelector($event, 'previous')"
+                @focus-first="focusSelector($event, 'first')"
+                @focus-last="focusSelector($event, 'last')"
+              />
+            </div>
           </div>
         </Transition>
       </div>
@@ -299,6 +301,8 @@ function focusSelector(event: KeyboardEvent, direction: 'next' | 'previous' | 'f
 }
 
 .sidebarTreeItem {
+  --sidebar-item-hover-surface: var(--agala-sidebar-item-hover-bg, hsl(var(--agala-accent) / 0.55));
+  --sidebar-item-active-surface: var(--agala-sidebar-item-active-bg, hsl(var(--agala-primary) / 0.1));
   display: flex;
   align-items: center;
   gap: 0.625rem;
@@ -306,7 +310,7 @@ function focusSelector(event: KeyboardEvent, direction: 'next' | 'previous' | 'f
   min-height: 2.25rem;
   padding: 0.5rem 0.625rem 0.5rem 0.75rem;
   border: none;
-  border-radius: var(--agala-radius-md);
+  border-radius: var(--agala-sidebar-item-radius, var(--agala-radius-sm));
   background: transparent;
   color: hsl(var(--agala-foreground));
   font-family: var(--agala-font-sans);
@@ -316,18 +320,23 @@ function focusSelector(event: KeyboardEvent, direction: 'next' | 'previous' | 'f
   text-align: left;
   text-decoration: none;
   cursor: pointer;
+  touch-action: manipulation;
   transition:
     background var(--agala-transition-fast),
     color var(--agala-transition-fast),
-    box-shadow var(--agala-transition-fast),
-    transform var(--agala-transition-fast);
+    box-shadow var(--agala-transition-fast);
   position: relative;
   overflow: hidden;
 }
 
 .sidebarTreeItem:hover:not(.sidebarTreeItem--disabled):not(.sidebarTreeItem--active) {
-  background: hsl(var(--agala-accent));
+  background: var(--sidebar-item-hover-surface);
   color: hsl(var(--agala-accent-foreground));
+}
+
+.sidebarTreeItem:active:not(.sidebarTreeItem--disabled) {
+  background: hsl(var(--agala-primary) / 0.14);
+  transition-duration: 0s;
 }
 
 .sidebarTreeItem:focus-visible {
@@ -338,29 +347,29 @@ function focusSelector(event: KeyboardEvent, direction: 'next' | 'previous' | 'f
 }
 
 .sidebarTreeItem--active {
-  background: hsl(var(--agala-primary) / 0.12);
+  background: var(--sidebar-item-active-surface);
   color: hsl(var(--agala-foreground));
   font-weight: var(--agala-font-weight-semibold);
 }
 
 .sidebarTreeItem--active:hover:not(.sidebarTreeItem--disabled) {
-  background: hsl(var(--agala-primary) / 0.16);
+  background: hsl(var(--agala-primary) / 0.14);
 }
 
 .sidebarTreeItem--active::before {
   content: '';
   position: absolute;
   left: 0;
-  top: 0.375rem;
-  bottom: 0.375rem;
-  width: 3px;
-  border-radius: 0 3px 3px 0;
+  top: 0.5rem;
+  bottom: 0.5rem;
+  width: 2px;
+  border-radius: 0 2px 2px 0;
   background: hsl(var(--agala-primary));
 }
 
 .sidebarTreeItem--descendant-active:not(.sidebarTreeItem--active) {
   color: hsl(var(--agala-foreground));
-  background: hsl(var(--agala-muted) / 0.55);
+  font-weight: var(--agala-font-weight-medium);
 }
 
 .sidebarTreeItem--disabled {
@@ -498,9 +507,14 @@ function focusSelector(event: KeyboardEvent, direction: 'next' | 'previous' | 'f
 }
 
 .sidebarTreePanel {
+  display: grid;
+  grid-template-rows: 1fr;
+}
+
+.sidebarTreePanel__inner {
   position: relative;
-  display: flex;
-  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
   padding-left: var(--sidebar-indent, 1rem);
   margin: 0.125rem 0 0.25rem;
 }
@@ -508,7 +522,7 @@ function focusSelector(event: KeyboardEvent, direction: 'next' | 'previous' | 'f
 /* Guide line runs in the gutter just left of the nested children, descending
    from the parent row's icon. Offset is pulled slightly inside the icon centre
    (1.375rem) so child icons don't collide with the line. */
-.sidebarTreePanel::before {
+.sidebarTreePanel__inner::before {
   content: '';
   position: absolute;
   left: 1.125rem;
@@ -521,12 +535,22 @@ function focusSelector(event: KeyboardEvent, direction: 'next' | 'previous' | 'f
 
 .sidebarTreePanel-enter-active,
 .sidebarTreePanel-leave-active {
-  transition: opacity var(--agala-transition-base), transform var(--agala-transition-base);
+  overflow: hidden;
+  transition: grid-template-rows var(--agala-transition-fast);
 }
 
 .sidebarTreePanel-enter-from,
 .sidebarTreePanel-leave-to {
-  opacity: 0;
-  transform: translateY(-0.25rem);
+  grid-template-rows: 0fr;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebarTreeItem,
+  .sidebarTreeItem__icon,
+  .sidebarTreeItem__chevron,
+  .sidebarTreePanel-enter-active,
+  .sidebarTreePanel-leave-active {
+    transition: none;
+  }
 }
 </style>

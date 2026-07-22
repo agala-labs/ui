@@ -26,7 +26,7 @@ const markdown = ref('Build interfaces with **semantic tokens** and accessible V
 const files = ref<FileItem[]>([])
 const calendarView = ref<'month' | 'week' | 'day' | 'list'>('day')
 const calendarDate = ref('2026-07-10')
-const sidebarActive = ref('overview')
+const sidebarActive = ref('active')
 const sidebarExpanded = ref<string[]>(['workspace'])
 const alertRetryCount = ref(0)
 const listActivations = ref(0)
@@ -624,23 +624,20 @@ const events = [
         :trend="12.4"
         trend-label="vs last month"
         icon="trending-up"
-        bordered
       /><AgalaStat
         class="stat-secondary-row"
-        label="Require action"
+        label="Needs attention"
         value="4"
-        secondary-value="$280,000"
+        secondary-value="$280k at risk"
         layout="row"
         icon="alert-triangle"
         icon-bg="danger"
-        bordered
       /><AgalaStat
         class="stat-secondary-inline-zero"
-        label="Pending"
+        label="Pending reviews"
         value="12"
-        :secondary-value="0"
+        secondary-value="0 overdue"
         layout="inline"
-        bordered
       /><AgalaStat
         class="stat-secondary-with-trend"
         label="Active members"
@@ -649,13 +646,6 @@ const events = [
         :trend="-2.1"
         trend-label="vs last month"
         icon="users"
-        bordered
-      /><AgalaStat
-        class="stat-secondary-empty"
-        label="Empty supporting value"
-        value="0"
-        secondary-value=""
-        bordered
       />
     </div>
     <div
