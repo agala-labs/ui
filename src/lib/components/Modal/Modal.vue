@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, ref, watch } from 'vue'
+import { nextTick, onMounted, ref, watch } from 'vue'
 import { useBodyScrollLock } from '../../composables/useBodyScrollLock'
 import { AgalaIcon } from '../AgalaIcon'
 import type { ModalSize } from './types'
@@ -22,13 +22,14 @@ const props = withDefaults(defineProps<{
 const emit = defineEmits<{
   close: []
   'update:open': [value: boolean]
+  'after-leave': []
 }>()
 
 const dialogRef = ref<HTMLElement | null>(null)
-const isOpen = computed(() => props.open)
+const lockActive = ref(props.open)
 let previouslyFocused: HTMLElement | null = null
 
-useBodyScrollLock(isOpen)
+useBodyScrollLock(lockActive)
 
 function requestClose() {
   emit('update:open', false)
@@ -84,86 +85,107 @@ function getFocusableElements() {
   )).filter(element => !element.hidden && element.getAttribute('aria-hidden') !== 'true')
 }
 
-watch(() => props.open, async (open) => {
-  if (open) {
+async function activateModal() {
+  if (!previouslyFocused) {
     previouslyFocused = document.activeElement instanceof HTMLElement
       ? document.activeElement
       : null
-    await nextTick()
-    const autofocus = dialogRef.value?.querySelector<HTMLElement>('[autofocus]')
-    ;(autofocus || getFocusableElements()[0] || dialogRef.value)?.focus({ preventScroll: true })
-    return
   }
-
+  lockActive.value = true
   await nextTick()
+  const autofocus = dialogRef.value?.querySelector<HTMLElement>('[autofocus]')
+  ;(autofocus || getFocusableElements()[0] || dialogRef.value)?.focus({ preventScroll: true })
+}
+
+watch(() => props.open, (open) => {
+  if (open) void activateModal()
+})
+
+onMounted(() => {
+  if (props.open) void activateModal()
+})
+
+function onAfterLeave() {
+  if (props.open) return
+  lockActive.value = false
   if (previouslyFocused?.isConnected) previouslyFocused.focus({ preventScroll: true })
   previouslyFocused = null
-})
+  emit('after-leave')
+}
 </script>
 
 <template>
-  <Teleport
-    v-if="open"
-    to="body"
-  >
-    <div
-      class="overlay"
-      role="presentation"
-      @click="handleBackdropClick"
-      @keydown="handleKeyDown"
+  <Teleport to="body">
+    <Transition
+      name="modal"
+      appear
+      @after-leave="onAfterLeave"
     >
       <div
-        ref="dialogRef"
-        :class="[ 'dialog', sizeMap[size] ].filter(Boolean).join(' ')"
-        role="dialog"
-        aria-modal="true"
-        :aria-label="title || 'Dialog'"
-        tabindex="-1"
+        v-if="open"
+        class="overlay"
+        role="presentation"
+        @click="handleBackdropClick"
+        @keydown="handleKeyDown"
       >
         <div
-          v-if="!hideHeader"
-          class="header"
+          ref="dialogRef"
+          :class="[ 'dialog', sizeMap[size] ].filter(Boolean).join(' ')"
+          role="dialog"
+          aria-modal="true"
+          :aria-label="title || 'Dialog'"
+          tabindex="-1"
         >
-          <h2
-            v-if="title"
-            class="title"
+          <div
+            v-if="!hideHeader"
+            class="header"
           >
-            {{ title }}
-          </h2>
-          <span v-else />
-          <button
-            type="button"
-            class="closeBtn"
-            aria-label="Close dialog"
-            @click="requestClose"
+            <h2
+              v-if="title"
+              class="title"
+            >
+              {{ title }}
+            </h2>
+            <span v-else />
+            <button
+              v-if="dismissible"
+              type="button"
+              class="closeBtn"
+              aria-label="Close dialog"
+              @click="requestClose"
+            >
+              <AgalaIcon
+                name="x"
+                :size="16"
+              />
+            </button>
+          </div>
+
+          <div class="body">
+            <slot />
+          </div>
+
+          <div
+            v-if="$slots.footer"
+            class="footer"
           >
-            <AgalaIcon
-              name="x"
-              :size="16"
+            <slot
+              name="footer"
+              :close="requestClose"
             />
-          </button>
-        </div>
-
-        <div class="body">
-          <slot />
-        </div>
-
-        <div
-          v-if="$slots.footer"
-          class="footer"
-        >
-          <slot
-            name="footer"
-            :close="requestClose"
-          />
+          </div>
         </div>
       </div>
-    </div>
+    </Transition>
   </Teleport>
 </template>
 
 <style scoped>
 .overlay {
+  --agala-modal-enter-duration: 210ms;
+  --agala-modal-leave-duration: 160ms;
+  --agala-modal-enter-easing: cubic-bezier(0.22, 1, 0.36, 1);
+  --agala-modal-leave-easing: cubic-bezier(0.4, 0, 1, 1);
   position: fixed;
   inset: 0;
   z-index: var(--agala-z-modal);
@@ -172,13 +194,7 @@ watch(() => props.open, async (open) => {
   justify-content: center;
   padding: 1.5rem;
   background-color: hsl(var(--agala-overlay) / 0.4);
-  animation: fadeIn 180ms ease-out;
   overscroll-behavior: contain;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
 }
 
 .dialog {
@@ -192,12 +208,38 @@ watch(() => props.open, async (open) => {
   border-radius: var(--agala-radius-lg);
   box-shadow: var(--agala-shadow-lg);
   overflow: hidden;
-  animation: dialogIn 200ms ease-out;
 }
 
-@keyframes dialogIn {
-  from { opacity: 0; transform: scale(0.96) translateY(8px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
+.modal-enter-active {
+  transition: background-color var(--agala-modal-enter-duration) var(--agala-modal-enter-easing);
+}
+
+.modal-leave-active {
+  pointer-events: none;
+  transition: background-color var(--agala-modal-leave-duration) var(--agala-modal-leave-easing);
+}
+
+.modal-enter-active .dialog {
+  transition:
+    opacity var(--agala-modal-enter-duration) var(--agala-modal-enter-easing),
+    transform var(--agala-modal-enter-duration) var(--agala-modal-enter-easing);
+}
+
+.modal-leave-active .dialog {
+  transition:
+    opacity var(--agala-modal-leave-duration) var(--agala-modal-leave-easing),
+    transform var(--agala-modal-leave-duration) var(--agala-modal-leave-easing);
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  background-color: transparent;
+}
+
+.modal-enter-from .dialog,
+.modal-leave-to .dialog {
+  opacity: 0;
+  transform: translate3d(0, 4px, 0) scale(0.985);
 }
 
 .dialogSm { width: 100%; max-width: 24rem; }
@@ -313,16 +355,19 @@ watch(() => props.open, async (open) => {
     flex: 1 1 auto;
   }
 
-  @keyframes dialogIn {
-    from { opacity: 0; transform: scale(0.96) translateY(4px); }
-    to { opacity: 1; transform: scale(1) translateY(0); }
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .overlay,
-  .dialog {
-    animation-duration: 1ms;
+  .modal-enter-active,
+  .modal-leave-active,
+  .modal-enter-active .dialog,
+  .modal-leave-active .dialog {
+    transition-duration: 1ms !important;
+  }
+
+  .modal-enter-from .dialog,
+  .modal-leave-to .dialog {
+    transform: none;
   }
 }
 </style>

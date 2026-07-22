@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { AgalaIcon, toastManager } from '@ui'
-import type { DrawerPlacement, FileItem } from '@ui'
+import type { DrawerPlacement, FileItem, ModalSize } from '@ui'
 import DropdownOverlayFixture from './DropdownOverlayFixture.vue'
 import ComponentSecondaryPreview from './ComponentSecondaryPreview.vue'
 
@@ -25,6 +25,7 @@ const selectedTableRows = ref<string[]>(['1'])
 const tableSortKey = ref('name')
 const tableSortDir = ref<'asc' | 'desc'>('asc')
 const modalOpen = ref(false)
+const modalSize = ref<ModalSize>('md')
 const drawerOpen = ref(false)
 const drawerPlacement = ref<DrawerPlacement>('right')
 const markdown = ref('Build interfaces with **semantic tokens** and accessible Vue components.')
@@ -40,6 +41,11 @@ const tagActivations = ref(0)
 function openDrawer(placement: DrawerPlacement) {
   drawerPlacement.value = placement
   drawerOpen.value = true
+}
+
+function openModal(size: ModalSize) {
+  modalSize.value = size
+  modalOpen.value = true
 }
 
 const options = [
@@ -323,10 +329,20 @@ const events = [
       </AgalaDrawer>
     </template>
     <template v-else-if="slug === 'modal'">
-      <AgalaButton @click="modalOpen = true">
-        Open modal
-      </AgalaButton><AgalaModal
+      <div class="preview-row">
+        <AgalaButton @click="openModal('md')">
+          Open modal
+        </AgalaButton>
+        <AgalaButton variant="outline" @click="openModal('sm')">
+          Open small modal
+        </AgalaButton>
+        <AgalaButton variant="outline" @click="openModal('full')">
+          Open full modal
+        </AgalaButton>
+      </div>
+      <AgalaModal
         v-model:open="modalOpen"
+        :size="modalSize"
         title="Archive record"
       >
         <p>This record will move to the archive.</p><template #footer>

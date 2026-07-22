@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { AgalaIcon, toastManager } from '@ui'
+import { h, ref } from 'vue'
+import { AgalaIcon, modalManager, toastManager } from '@ui'
 import type { FileItem } from '@ui'
 
 defineProps<{
@@ -67,6 +67,17 @@ const events = [
   { id: '1', title: 'Inventory review', start: '2026-07-10T09:30:00', end: '2026-07-10T10:00:00', color: 'primary' },
   { id: '2', title: 'Supplier call', start: '2026-07-10T13:00:00', end: '2026-07-10T14:00:00', color: 'success' },
 ]
+
+const ManagedModalContent = {
+  render: () => h('p', 'This modal is rendered by the shared provider.'),
+}
+
+function openManagedModal() {
+  void modalManager.open(ManagedModalContent, {
+    title: 'Managed confirmation',
+    size: 'sm',
+  })
+}
 </script>
 
 <template>
@@ -218,9 +229,14 @@ const events = [
       </AgalaDrawer>
     </template>
     <template v-else-if="slug === 'modal'">
-      <AgalaButton @click="overlayOpen = true">
-        Resolve conflict
-      </AgalaButton>
+      <div class="preview-row">
+        <AgalaButton @click="overlayOpen = true">
+          Resolve conflict
+        </AgalaButton>
+        <AgalaButton variant="outline" @click="openManagedModal">
+          Open managed modal
+        </AgalaButton>
+      </div>
       <AgalaModal
         v-model:open="overlayOpen"
         title="Resolve conflict"

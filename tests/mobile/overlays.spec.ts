@@ -95,11 +95,124 @@ test('Drawer removes meaningful travel for reduced motion', async ({ page }, tes
 
 test('Modal remains bounded and restores its opener', async ({ page }) => {
   await openWithTheme(page, '/components/modal')
+  await page.addStyleTag({
+    content: '.overlay.modal-leave-active { transition-duration: 160ms !important; } .overlay.modal-leave-active .dialog { transition-duration: 160ms !important; }',
+  })
   const trigger = page.getByRole('button', { name: 'Open modal' })
   await trigger.click()
   const dialog = page.getByRole('dialog')
   await expect(dialog).toBeVisible()
   await expectInsideViewport(page, dialog, 8)
+  await page.keyboard.press('Escape')
+  await expect(page.locator('.overlay')).toHaveClass(/modal-leave-active/)
+  await expect(page.locator('body')).toHaveCSS('position', 'fixed')
+  await expect(trigger).not.toBeFocused()
+  await expect(dialog).toBeHidden()
+  await expect(trigger).toBeFocused()
+  await expect.poll(() => page.locator('body').evaluate(element => getComputedStyle(element).position)).not.toBe('fixed')
+})
+
+test('Modal uses one leave lifecycle for controls, backdrop, Escape, and rapid reopen', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'mobile-390', 'Modal close-path coverage runs once.')
+  await page.emulateMedia({ reducedMotion: 'no-preference' })
+  await openWithTheme(page, '/components/modal')
+  await page.addStyleTag({
+    content: '.overlay.modal-leave-active { transition-duration: 160ms !important; } .overlay.modal-leave-active .dialog { transition-duration: 160ms !important; }',
+  })
+
+  const trigger = page.getByRole('button', { name: 'Open modal' })
+  const closePaths = [
+    async () => page.getByRole('button', { name: 'Close dialog' }).click(),
+    async () => page.getByRole('button', { name: 'Cancel' }).click(),
+    async () => page.locator('.overlay').dispatchEvent('click'),
+    async () => page.keyboard.press('Escape'),
+  ]
+
+  for (const close of closePaths) {
+    await trigger.click()
+    const dialog = page.getByRole('dialog', { name: 'Archive record' })
+    await expect(dialog).toBeVisible()
+    await close()
+    await expect(page.locator('.overlay')).toHaveClass(/modal-leave-active/)
+    await expect(page.locator('body')).toHaveCSS('position', 'fixed')
+    await expect(dialog).toBeHidden()
+    await expect(trigger).toBeFocused()
+  }
+
+  await trigger.click()
+  await page.keyboard.press('Escape')
+  await expect(page.locator('.overlay')).toHaveClass(/modal-leave-active/)
+  await trigger.evaluate(element => element.click())
+  const reopened = page.getByRole('dialog', { name: 'Archive record' })
+  await expect(reopened).toBeVisible()
+  await expect(page.locator('body')).toHaveCSS('position', 'fixed')
+  await expect(reopened.locator(':focus')).toHaveCount(1)
+  await page.keyboard.press('Escape')
+  await expect(reopened).toBeHidden()
+  await expect(trigger).toBeFocused()
+})
+
+test('Modal provider retains managed entries through leave and policy states stay explicit', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'mobile-390', 'Managed Modal coverage runs once.')
+  await page.emulateMedia({ reducedMotion: 'no-preference' })
+  await openWithTheme(page, '/components/modal')
+  await page.addStyleTag({
+    content: '.overlay.modal-leave-active { transition-duration: 160ms !important; } .overlay.modal-leave-active .dialog { transition-duration: 160ms !important; }',
+  })
+  await page.getByRole('tab', { name: 'Policy and manager' }).click()
+
+  const managedTrigger = page.getByRole('button', { name: 'Open managed modal' })
+  await managedTrigger.click()
+  const managed = page.getByRole('dialog', { name: 'Managed confirmation' })
+  await expect(managed).toBeVisible()
+  await expect(page.locator('body')).toHaveCSS('position', 'fixed')
+  await managed.getByRole('button', { name: 'Close dialog' }).click()
+  await expect(page.locator('.overlay')).toHaveClass(/modal-leave-active/)
+  await expect(managed).toBeAttached()
+  await expect(page.locator('body')).toHaveCSS('position', 'fixed')
+  await expect(managed).toBeHidden()
+  await expect(managedTrigger).toBeFocused()
+
+  const policyTrigger = page.getByRole('button', { name: 'Resolve conflict' })
+  await policyTrigger.click()
+  const policy = page.getByRole('dialog', { name: 'Resolve conflict' })
+  await expect(policy.getByRole('button', { name: 'Close dialog' })).toHaveCount(0)
+  await page.keyboard.press('Escape')
+  await expect(policy).toBeVisible()
+  await page.locator('.overlay').dispatchEvent('click')
+  await expect(policy).toBeVisible()
+  await policy.getByRole('button', { name: 'Keep current version' }).click()
+  await expect(policy).toBeHidden()
+  await expect(policyTrigger).toBeFocused()
+})
+
+test('Modal sizes stay bounded and reduced motion removes transform travel', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'mobile-390', 'Size and reduced-motion coverage runs once.')
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await openWithTheme(page, '/components/modal')
+
+  for (const example of [
+    { trigger: 'Open small modal', className: 'dialogSm' },
+    { trigger: 'Open full modal', className: 'dialogFull' },
+  ]) {
+    const trigger = page.getByRole('button', { name: example.trigger })
+    await trigger.click()
+    const dialog = page.getByRole('dialog', { name: 'Archive record' })
+    await expect(dialog).toHaveClass(new RegExp(example.className))
+    await expectInsideViewport(page, dialog, 8)
+    await page.getByRole('button', { name: 'Close dialog' }).click()
+    await expect(dialog).toBeHidden()
+  }
+
+  const trigger = page.getByRole('button', { name: 'Open modal' })
+  await trigger.click()
+  const dialog = page.getByRole('dialog', { name: 'Archive record' })
+  const overlay = page.locator('.overlay')
+  await overlay.evaluate(element => element.classList.add('modal-leave-active', 'modal-leave-to'))
+  await expect(overlay).toHaveCSS('transition-duration', '0.001s')
+  await expect(dialog).toHaveCSS('transition-duration', '0.001s')
+  await expect(dialog).toHaveCSS('transform', 'none')
+  await overlay.evaluate(element => element.classList.remove('modal-leave-active', 'modal-leave-to'))
   await page.keyboard.press('Escape')
   await expect(dialog).toBeHidden()
   await expect(trigger).toBeFocused()

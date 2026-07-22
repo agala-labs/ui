@@ -4,6 +4,7 @@ import type { ModalResult, ModalOptions } from './types'
 
 export interface ModalEntry<P = Record<string, unknown>> {
   id: number
+  open: boolean
   component: Component
   props: P
   options: ModalOptions
@@ -38,6 +39,7 @@ class ModalManagerImpl {
       const id = ++this._idCounter
       const entry: ModalEntry<P> = {
         id,
+        open: true,
         component: markRaw(component),
         props: options.props ?? ({} as P),
         options: {
@@ -56,18 +58,26 @@ class ModalManagerImpl {
   /** Close the top-most modal */
   close(result: ModalResult = { confirmed: false }) {
     const current = state.modals[state.modals.length - 1]
-    if (!current) return
+    if (!current || !current.open) return
     current.resolve(result)
-    state.modals.pop()
+    current.open = false
   }
 
   /** Close all modals */
   closeAll(result: ModalResult = { confirmed: false }) {
-    while (state.modals.length > 0) {
-      const current = state.modals[state.modals.length - 1]
-      current.resolve(result)
-      state.modals.pop()
+    const current = state.modals[state.modals.length - 1]
+    if (!current) return
+    for (const entry of state.modals) {
+      if (entry.open) entry.resolve(result)
     }
+    state.modals.splice(0, Math.max(0, state.modals.length - 1))
+    current.open = false
+  }
+
+  /** Remove a closed entry after its visual leave completes. */
+  finalize(id: number) {
+    const index = state.modals.findIndex(entry => entry.id === id)
+    if (index !== -1 && !state.modals[index].open) state.modals.splice(index, 1)
   }
 
   get modals() {
@@ -80,13 +90,14 @@ export const modalManager = new ModalManagerImpl()
 /** Helper to render a modal entry with its component */
 export function renderModalEntry(entry: ModalEntry): VNode {
   return h(Modal, {
-    open: true,
+    open: entry.open,
     title: entry.options.title,
     size: entry.options.size,
     dismissible: entry.options.dismissible,
     escapeCloses: entry.options.escapeCloses,
     hideHeader: entry.options.hideHeader,
     onClose: () => modalManager.close({ confirmed: false }),
+    onAfterLeave: () => modalManager.finalize(entry.id),
   }, {
     default: () => h(entry.component, entry.props),
   })
