@@ -169,6 +169,15 @@ const events = [
       <AgalaBadge variant="outline">
         Draft
       </AgalaBadge>
+      <AgalaBadge class="badge-demo-small" size="sm">
+        128
+      </AgalaBadge>
+      <AgalaBadge class="badge-demo-custom" color="rebeccapurple">
+        Custom
+      </AgalaBadge>
+      <AgalaBadge class="badge-demo-long" color="hsl(196 70% 32%)">
+        Local status with a longer label
+      </AgalaBadge>
     </div>
     <template v-else-if="slug === 'drawer'">
       <AgalaButton @click="overlayOpen = true">

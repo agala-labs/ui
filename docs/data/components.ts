@@ -42,7 +42,7 @@ const additionalExamples: Record<string, AdditionalExample> = {
   'file-upload': { label: 'Inline', description: 'Inline upload works inside compact forms with an existing label.', snippet: `<AgalaFileUpload v-model="files" variant="inline" accept=".pdf" :max-files="1" />` },
   'segmented-control': { label: 'Compact', description: 'A compact segmented control switches an immediate view mode.', snippet: `<AgalaSegmentedControl v-model="density" :options="densityOptions" size="sm" aria-label="Table density" />` },
   alert: { label: 'Without icon', description: 'Hide the icon only when the message and context already carry the status.', snippet: `<AgalaAlert variant="info" :icon="false">Scheduled maintenance starts at 22:00.</AgalaAlert>` },
-  badge: { label: 'Metadata', description: 'Passive badges label counts and states without becoming controls.', snippet: `<AgalaBadge variant="secondary">12 items</AgalaBadge>\n<AgalaBadge variant="outline">Draft</AgalaBadge>` },
+  badge: { label: 'Metadata and custom color', description: 'Passive badges label counts and states without becoming controls. Custom colors accept any valid CSS color.', snippet: `<AgalaBadge variant="secondary">12 items</AgalaBadge>\n<AgalaBadge variant="outline">Draft</AgalaBadge>\n<AgalaBadge size="sm">128</AgalaBadge>\n<AgalaBadge color="rebeccapurple">Custom</AgalaBadge>` },
   drawer: { label: 'Top placement', description: 'Use a top drawer for a short viewport-wide task, not a long form.', snippet: `<AgalaDrawer :open="open" placement="top" size="14rem" title="Quick search" @close="open = false">…</AgalaDrawer>` },
   modal: { label: 'Non-dismissible', description: 'Reserve non-dismissible dialogs for decisions that require an explicit path.', snippet: `<AgalaModal v-model:open="open" title="Resolve conflict" :dismissible="false" :escape-closes="false">…</AgalaModal>` },
   toast: { label: 'Recovery action', description: 'A toast action may offer one immediate, reversible follow-up.', snippet: `toastManager.show({ message: 'Draft archived', variant: 'warning', action: { label: 'Undo', onClick: restoreDraft } })` },
@@ -203,9 +203,9 @@ export const components: ComponentMeta[] = [
     snippet: `<AgalaAlert variant="danger" title="Could not load"><template #default>Try again.</template><template #action><AgalaButton size="sm" variant="outline">Retry</AgalaButton></template></AgalaAlert>`,
   },
   {
-    slug: 'badge', name: 'Badge', exports: ['AgalaBadge'], description: 'Labels compact status or metadata.',
+    slug: 'badge', name: 'Badge', exports: ['AgalaBadge'], description: 'Reports compact, passive status, counts, or metadata.',
     props: [p('variant', "'default' | 'secondary' | 'outline' | 'subtle' | 'success' | 'warning' | 'danger'", 'Visual/semantic treatment.', "'default'"), p('size', "'sm' | 'md'", 'Badge size.', "'md'"), p('dot', 'boolean', 'Shows a status dot.', 'false'), p('color', 'string', 'Custom color override.'), p('class', 'string', 'Consumer override class.')],
-    slots: ['default — badge label'], accessibility: 'Do not communicate status through color alone; keep the slot label meaningful.',
+    slots: ['default — badge label'], accessibility: 'Badge is always passive and never enters the tab order. Do not communicate status through color or a dot alone; keep the slot label meaningful.',
     snippet: `<AgalaBadge variant="success" dot>Active</AgalaBadge>`,
   },
   {

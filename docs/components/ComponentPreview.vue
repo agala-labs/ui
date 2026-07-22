@@ -250,14 +250,22 @@ const events = [
       v-else-if="slug === 'badge'"
       class="preview-row"
     >
+      <AgalaBadge class="badge-demo-default">Default</AgalaBadge><AgalaBadge class="badge-demo-secondary" variant="secondary">
+        12 items
+      </AgalaBadge><AgalaBadge class="badge-demo-subtle" variant="subtle">
+        New
+      </AgalaBadge><AgalaBadge class="badge-demo-outline" variant="outline">
+        Draft
+      </AgalaBadge>
       <AgalaBadge
+        class="badge-demo-success"
         variant="success"
         dot
       >
         Active
-      </AgalaBadge><AgalaBadge variant="warning">
+      </AgalaBadge><AgalaBadge class="badge-demo-warning" variant="warning">
         Pending
-      </AgalaBadge><AgalaBadge variant="danger">
+      </AgalaBadge><AgalaBadge class="badge-demo-danger" variant="danger">
         Failed
       </AgalaBadge>
     </div>

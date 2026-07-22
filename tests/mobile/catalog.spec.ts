@@ -271,6 +271,39 @@ test.describe('refined component interactions', () => {
     }
   })
 
+  test('badges remain legible, passive, and accept CSS colors', async ({ page }) => {
+    await openWithTheme(page, '/components/badge')
+
+    const badge = page.locator('.badge-demo-default')
+    await expect(badge).toHaveCSS('font-size', '12px')
+    expect(await badge.evaluate(element => element.getBoundingClientRect().height)).toBeGreaterThanOrEqual(24)
+    await expect(badge).not.toHaveAttribute('role')
+    await expect(badge).not.toHaveAttribute('tabindex')
+    await expect(badge).not.toHaveCSS('cursor', 'pointer')
+
+    await page.getByRole('tab', { name: 'Metadata and custom color' }).click()
+    const compact = page.locator('.badge-demo-small')
+    await expect(compact).toHaveCSS('font-size', '11px')
+    expect(await compact.evaluate(element => element.getBoundingClientRect().height)).toBeGreaterThanOrEqual(20)
+
+    const custom = page.locator('.badge-demo-custom')
+    await expect(custom).toHaveCSS('color', 'rgb(102, 51, 153)')
+    await expect(custom).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+    await expect(page.locator('.badge-demo-long')).toHaveCSS('white-space', 'nowrap')
+    await expectNoDocumentOverflow(page)
+  })
+
+  test('badge variants retain AA text contrast across themes', async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== 'tablet-768', 'Cross-theme contrast needs one representative viewport.')
+
+    for (const theme of themes) {
+      await openWithTheme(page, '/components/badge', theme)
+      for (const variant of ['default', 'secondary', 'subtle', 'outline', 'success', 'warning', 'danger']) {
+        expect(await contrastRatio(page.locator(`.badge-demo-${variant}`)), `${theme} ${variant}`).toBeGreaterThanOrEqual(4.5)
+      }
+    }
+  })
+
   test('stat layouts preserve hierarchy and intrinsic height', async ({ page }) => {
     await openWithTheme(page, '/components/stat')
 
