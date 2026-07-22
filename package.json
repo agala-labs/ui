@@ -1,6 +1,6 @@
 {
   "name": "@agala-labs/ui",
-  "version": "0.35.0",
+  "version": "0.36.0",
   "description": "Agala Labs UI — accessible Vue 3 components, semantic design tokens, and theming.",
   "type": "module",
   "module": "./dist/agala-ui.es.js",
