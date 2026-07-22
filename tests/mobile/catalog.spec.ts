@@ -104,7 +104,9 @@ test.describe('public component mobile layout', () => {
       const exampleTabs = page.getByRole('tablist', { name: 'Component examples' }).getByRole('tab')
       expect(await exampleTabs.count()).toBeGreaterThanOrEqual(2)
       await exampleTabs.nth(1).click()
-      await expect(page.locator('[data-preview-example="states"]')).toBeVisible()
+      const activeExample = await page.locator('.component-examples').getAttribute('data-active-example')
+      expect(activeExample).toBeTruthy()
+      await expect(page.locator(`[data-preview-example="${activeExample}"]`)).toBeVisible()
       await expect(page.locator('.demo-frame__code code')).not.toBeEmpty()
       await expectNoDocumentOverflow(page)
     })
@@ -224,13 +226,10 @@ test.describe('refined component interactions', () => {
     await expectNoDocumentOverflow(page)
   })
 
-  test('stat renders neutral secondary values before trends in every layout', async ({ page }) => {
+  test('stat layouts preserve hierarchy and intrinsic height', async ({ page }) => {
     await openWithTheme(page, '/components/stat')
 
-    await expect(page.locator('.stat-secondary-row .statSecondary')).toHaveText('$280k at risk')
-    await expect(page.locator('.stat-secondary-inline-zero .statSecondary')).toHaveText('0 overdue')
-
-    const combined = page.locator('.stat-secondary-with-trend')
+    const combined = page.locator('.stat-dashboard-members')
     await expect(combined.locator('.statSecondary')).toHaveText('Across 18 teams')
     expect(await combined.evaluate((element) => {
       const secondary = element.querySelector('.statSecondary')
@@ -238,14 +237,24 @@ test.describe('refined component interactions', () => {
       return Boolean(secondary && trend && (secondary.compareDocumentPosition(trend) & Node.DOCUMENT_POSITION_FOLLOWING))
     })).toBe(true)
 
-    const trendOnly = page.locator('.agala-doc-grid > .stat').first()
+    const trendOnly = page.locator('.stat-dashboard-revenue')
     await expect(trendOnly.locator('.statSecondary')).toHaveCount(0)
     await expect(trendOnly.locator('.trendText')).toContainText('+12.4%')
     await expect(trendOnly.locator('.statIcon')).toHaveCount(1)
     await expect(trendOnly).toHaveCSS('box-shadow', 'none')
     await expect(trendOnly.locator('.statLabel')).toHaveCSS('text-transform', 'none')
-    const inline = page.locator('.stat-secondary-inline-zero')
+    await page.getByRole('tab', { name: 'Attention row' }).click()
+    const row = page.locator('.stat-attention-row')
+    await expect(row.locator('.statSecondary')).toHaveText('$280k at risk')
+    await expect(row.locator('.statIcon')).toHaveCount(1)
+    await expect(row).toHaveCSS('align-self', 'flex-start')
+
+    await page.getByRole('tab', { name: 'Inline summary' }).click()
+    const inline = page.locator('.stat-inline-summary')
+    await expect(inline.locator('.statSecondary')).toHaveText('0 overdue')
     await expect(inline).toHaveCSS('flex-direction', 'row')
+    await expect(inline).toHaveCSS('align-self', 'flex-start')
+    await expect(inline).toHaveCSS('border-top-width', '0px')
     expect(await inline.evaluate((element) => {
       const label = element.querySelector('.statLabel')?.getBoundingClientRect()
       const value = element.querySelector('.statValue')?.getBoundingClientRect()
@@ -255,7 +264,23 @@ test.describe('refined component interactions', () => {
       return label.right <= value.left && value.right <= secondary.left
         && sharesLine(label, value) && sharesLine(value, secondary)
     })).toBe(true)
+
+    const longInline = page.locator('.stat-inline-long')
+    await expect(longInline.locator('.trendText')).toContainText('0%')
+    await expect(longInline.locator('.trendIcon')).toHaveCount(0)
     await expectNoDocumentOverflow(page)
+  })
+
+  test('stat layouts remain intrinsic across themes', async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== 'mobile-390', 'Theme coverage needs one representative viewport.')
+
+    for (const theme of themes) {
+      await openWithTheme(page, '/components/stat', theme)
+      await page.getByRole('tab', { name: 'Inline summary' }).click()
+      const inline = page.locator('.stat-inline-summary')
+      await expect(inline).toHaveCSS('align-self', 'flex-start')
+      await expectNoDocumentOverflow(page)
+    }
   })
 
   test('empty state supports default and compact custom-slot layouts', async ({ page }) => {

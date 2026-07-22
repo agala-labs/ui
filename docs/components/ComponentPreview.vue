@@ -87,8 +87,9 @@ const events = [
     :data-preview-example="example || 'default'"
   >
     <ComponentSecondaryPreview
-      v-if="example === 'states' && slug !== 'button'"
+      v-if="(example === 'states' && slug !== 'button') || (slug === 'stat' && ['attention-row', 'inline-summary'].includes(example || ''))"
       :slug="slug"
+      :example="example"
     />
     <template v-else-if="slug === 'button'">
       <div
@@ -643,27 +644,14 @@ const events = [
       class="agala-doc-grid"
     >
       <AgalaStat
+        class="stat-dashboard-revenue"
         label="Monthly revenue"
         value="$24,800"
         :trend="12.4"
         trend-label="vs last month"
         icon="trending-up"
       /><AgalaStat
-        class="stat-secondary-row"
-        label="Needs attention"
-        value="4"
-        secondary-value="$280k at risk"
-        layout="row"
-        icon="alert-triangle"
-        icon-bg="danger"
-      /><AgalaStat
-        class="stat-secondary-inline-zero"
-        label="Pending reviews"
-        value="12"
-        secondary-value="0 overdue"
-        layout="inline"
-      /><AgalaStat
-        class="stat-secondary-with-trend"
+        class="stat-dashboard-members"
         label="Active members"
         value="1,284"
         secondary-value="Across 18 teams"

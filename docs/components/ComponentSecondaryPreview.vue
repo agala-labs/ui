@@ -3,7 +3,10 @@ import { ref } from 'vue'
 import { AgalaIcon, toastManager } from '@ui'
 import type { FileItem } from '@ui'
 
-defineProps<{ slug: string }>()
+defineProps<{
+  slug: string
+  example?: string
+}>()
 
 const text = ref('Too short')
 const selectedMany = ref<string[]>(['ar', 'uy'])
@@ -385,14 +388,40 @@ const events = [
       <AgalaSpacer />
       <span class="muted-copy">Updated 2 min ago</span>
     </AgalaHStack>
-    <AgalaStat
-      v-else-if="slug === 'stat'"
-      label="Pending reviews"
-      value="12"
-      secondary-value="0 overdue"
-      layout="inline"
-      :bordered="false"
-    />
+    <template v-else-if="slug === 'stat'">
+      <AgalaStat
+        v-if="example === 'attention-row'"
+        class="stat-attention-row"
+        label="Needs attention"
+        value="4"
+        secondary-value="$280k at risk"
+        layout="row"
+        icon="alert-triangle"
+        icon-bg="danger"
+      />
+      <div
+        v-else
+        class="stat-context-list"
+      >
+        <AgalaStat
+          class="stat-inline-summary"
+          label="Pending reviews"
+          value="12"
+          secondary-value="0 overdue"
+          layout="inline"
+          :bordered="false"
+        />
+        <AgalaStat
+          class="stat-inline-long"
+          label="Items awaiting an unusually long operational review label"
+          value="3"
+          :trend="0"
+          trend-label="no change"
+          layout="inline"
+          :bordered="false"
+        />
+      </div>
+    </template>
     <div
       v-else-if="slug === 'tag'"
       class="preview-row"
@@ -451,4 +480,12 @@ const events = [
 .center-frame { height: 12rem; }
 .divider-frame { height: 2.5rem; }
 .muted-copy { color: hsl(var(--agala-muted-foreground)); }
+
+.stat-context-list {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.75rem;
+}
 </style>

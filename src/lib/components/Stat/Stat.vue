@@ -213,6 +213,7 @@ const statCls = computed(() => [
     'icon value'
     'icon meta';
   align-content: start;
+  align-self: flex-start;
   row-gap: 0.125rem;
 }
 
@@ -227,10 +228,12 @@ const statCls = computed(() => [
 /* Inline layout */
 .statInline {
   display: flex;
+  min-height: 0;
   flex-direction: row;
   flex-wrap: wrap;
   align-items: baseline;
-  align-content: center;
+  align-content: flex-start;
+  align-self: flex-start;
   gap: 0.25rem 0.625rem;
 }
 
@@ -245,6 +248,7 @@ const statCls = computed(() => [
 .statInline .statMeta {
   display: inline-flex;
   flex: 0 1 auto;
+  align-self: baseline;
 }
 
 /* Semantic icon marker */

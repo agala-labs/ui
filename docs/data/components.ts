@@ -345,9 +345,29 @@ export const components: ComponentMeta[] = [
   },
   {
     slug: 'stat', name: 'Stat', exports: ['AgalaStat'], description: 'Presents one key metric with optional supporting context, trend, and icon.',
-    props: [p('label', 'string', 'Required metric label.'), p('value', 'string | number', 'Required metric value.'), p('secondaryValue', 'string | number', 'Neutral supporting value rendered before any trend.'), p('trend', 'number', 'Signed trend value.'), p('trendLabel', 'string', 'Trend context.'), p('icon', 'string', 'Agala icon name.'), p('iconBg', "'primary' | 'danger' | 'success' | 'warning' | 'info'", 'Icon surface.'), p('layout', "'vertical' | 'row' | 'inline'", 'Content arrangement.', "'vertical'"), p('bordered', 'boolean', 'Adds the quiet grouped surface.', 'true'), p('labelTransform', 'string', 'CSS text transform override.')],
+    props: [p('label', 'string', 'Required metric label.'), p('value', 'string | number', 'Required metric value.'), p('secondaryValue', 'string | number', 'Neutral supporting value rendered before any trend.'), p('trend', 'number', 'Signed trend value.'), p('trendLabel', 'string', 'Trend context.'), p('icon', 'string', 'Agala icon name.'), p('iconBg', "'primary' | 'danger' | 'success' | 'warning' | 'info'", 'Icon surface.'), p('layout', "'vertical' | 'row' | 'inline'", 'Vertical cards, icon-led rows, or intrinsic inline summaries.', "'vertical'"), p('bordered', 'boolean', 'Adds the quiet grouped surface.', 'true'), p('labelTransform', 'string', 'CSS text transform override.')],
     accessibility: 'Trend direction is conveyed by signed text and labels as well as color/icon.',
     snippet: `<AgalaStat label="Needs attention" value="4" secondary-value="$280k at risk" layout="row" />`,
+    examples: [
+      {
+        id: 'dashboard',
+        label: 'Dashboard cards',
+        description: 'Vertical cards support side-by-side comparison of a small set of decision-relevant metrics.',
+        snippet: `<AgalaStat label="Monthly revenue" value="$24,800" :trend="12.4" trend-label="vs last month" icon="trending-up" />\n<AgalaStat label="Active members" value="1,284" secondary-value="Across 18 teams" :trend="-2.1" trend-label="vs last month" icon="users" />`,
+      },
+      {
+        id: 'attention-row',
+        label: 'Attention row',
+        description: 'Row layout ties one semantic icon to a compact exception summary.',
+        snippet: `<AgalaStat label="Needs attention" value="4" secondary-value="$280k at risk" layout="row" icon="alert-triangle" icon-bg="danger" />`,
+      },
+      {
+        id: 'inline-summary',
+        label: 'Inline summary',
+        description: 'Inline layout stays intrinsic-height inside dense lists and toolbars.',
+        snippet: `<AgalaStat label="Pending reviews" value="12" secondary-value="0 overdue" layout="inline" :bordered="false" />`,
+      },
+    ],
   },
   {
     slug: 'tag', name: 'Tag', exports: ['AgalaTag'], description: 'Represents a compact label that may be interactive or removable.',
