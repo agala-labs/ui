@@ -64,7 +64,7 @@ Component folders should expose local `index.ts` and `types.ts` when public type
   ```
 - Import `tokens.css` once through `src/lib/index.ts`.
 - Dark mode belongs in `tokens.css` via `@media (prefers-color-scheme: dark)`.
-- Shipped theme overrides use `html[data-theme="main|smaltt|kervo"]`; Smaltt also supports the existing `esmaltt` value.
+- Shipped theme overrides use `html[data-theme="main|smaltt|kervo"]`.
 - Prefer component-level CSS custom properties with token fallbacks for themeable values.
 
 ### Icons

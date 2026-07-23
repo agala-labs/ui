@@ -73,10 +73,12 @@ document.documentElement.setAttribute('data-theme', 'main')
 | Theme | Import | Selector | Character |
 | --- | --- | --- | --- |
 | Main | `@agala-labs/ui/themes/main.css` | `main` | Agala Labs navy and electric blue |
-| Smaltt | `@agala-labs/ui/themes/smaltt.css` | `smaltt` or `esmaltt` | Warm clinical canvas and teal |
+| Smaltt | `@agala-labs/ui/themes/smaltt.css` | `smaltt` | Warm clinical canvas and teal |
 | Kervo | `@agala-labs/ui/themes/kervo.css` | `kervo` | Operational navy and bright blue |
 
 Theme identity and component semantics are separate concerns. Kervo keeps its navy, electric-blue, and Geist foundation while semantic controls continue to use the shared component contracts. In particular, destructive actions consume the Kervo `danger`/`danger-foreground` pair; do not replace it with product-specific red and text overrides.
+
+The Smaltt theme is calibrated from the production application's established visual system. It preserves the deeper teal action color with white foreground text, its 12px/13px compact typography, readable Badge and Tag sizing, and its restrained ease-out motion. Smaltt consumers should import the named theme instead of copying these foundation tokens into application CSS; keep only page composition and genuinely application-specific component overrides locally.
 
 For example, the Kervo theme can be selected with:
 

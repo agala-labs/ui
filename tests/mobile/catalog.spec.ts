@@ -124,6 +124,50 @@ test.describe('public component mobile layout', () => {
 })
 
 test.describe('Section Nav', () => {
+  test('preserves the production Smaltt theme contract', async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== 'mobile-390', 'Theme contract needs one representative project.')
+
+    await openWithTheme(page, '/components/badge', 'smaltt')
+
+    const tokens = await page.evaluate(() => {
+      const styles = getComputedStyle(document.documentElement)
+      const value = (name: string) => styles.getPropertyValue(name).trim()
+      return {
+        primary: value('--agala-primary'),
+        primaryForeground: value('--agala-primary-foreground'),
+        ring: value('--agala-ring'),
+        fontSizeXs: value('--agala-font-size-xs'),
+        fontSizeSm: value('--agala-font-size-sm'),
+        lineHeightTight: value('--agala-line-height-tight'),
+        lineHeightNormal: value('--agala-line-height-normal'),
+        lineHeightRelaxed: value('--agala-line-height-relaxed'),
+        badgePadding: value('--agala-badge-padding'),
+        badgePaddingSm: value('--agala-badge-padding-sm'),
+        tagFontSize: value('--agala-tag-font-size'),
+        easingOut: value('--agala-motion-easing-out'),
+      }
+    })
+
+    expect(tokens).toEqual({
+      primary: '174 72% 26%',
+      primaryForeground: '0 0% 100%',
+      ring: '174 72% 26%',
+      fontSizeXs: '0.75rem',
+      fontSizeSm: '0.8125rem',
+      lineHeightTight: '1.25',
+      lineHeightNormal: '1.5',
+      lineHeightRelaxed: '1.625',
+      badgePadding: '0.125rem 0.5rem',
+      badgePaddingSm: '0.0625rem 0.375rem',
+      tagFontSize: '0.75rem',
+      easingOut: 'ease-out',
+    })
+
+    const badge = page.locator('.badge-demo-default')
+    await expect(badge).toHaveCSS('font-size', '12px')
+    await expect(badge).toHaveCSS('padding-top', '2px')
+  })
+
   test('matches Smaltt local navigation and emits controlled selection', async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== 'mobile-390', 'Section Nav behavior needs one representative project.')
     await page.setViewportSize({ width: 1280, height: 900 })

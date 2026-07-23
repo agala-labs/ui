@@ -73,7 +73,7 @@ import '@agala-labs/ui/themes/main.css'
 document.documentElement.dataset.theme = 'main'
 ```
 
-Available selectors are `main`, `smaltt` (also `esmaltt`), and `kervo`.
+Available selectors are `main`, `smaltt`, and `kervo`.
 
 ```vue
 <script setup lang="ts">

@@ -26,7 +26,8 @@ description: >
 - Component CSS stays in `<style scoped>`.
 - Prefer component-level CSS custom properties with token fallbacks, e.g. `--agala-btn-radius`, `--agala-input-bg`.
 - Dark mode is handled in tokens via `@media (prefers-color-scheme: dark)`.
-- Shipped themes use `html[data-theme="main|smaltt|kervo"]`; Smaltt also supports `data-theme="esmaltt"` for compatibility.
+- Shipped themes use `html[data-theme="main|smaltt|kervo"]`.
+- The Smaltt theme is calibrated from the production app: deep teal actions with white foreground text, 12px/13px compact typography, readable Badge/Tag sizing, and restrained ease-out motion. Consumers should import the theme instead of duplicating those foundation values locally.
 - Kervo keeps its navy/electric-blue/Geist identity while consuming the same semantic component contracts as other themes. Its destructive controls use the theme's deep-red `danger` token with a white `danger-foreground`; do not hardcode local red/foreground pairs.
 - Focus rings use `box-shadow` and `--agala-ring`; disabled states should combine native `disabled`/ARIA with `pointer-events: none` and reduced opacity.
 - Foundation tokens cover semantic colors, spacing (`--agala-space-*`), typography (`--agala-font-size-*`, `--agala-leading-*`, `--agala-tracking-*`), radii, shadows, icon sizes, opacity, motion, and semantic layers. Existing `--agala-transition-*` and `--agala-z-*` names remain compatibility aliases.
