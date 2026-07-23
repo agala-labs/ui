@@ -215,7 +215,7 @@ const iconSize = computed(() => props.size === 'lg' ? 16 : 14)
 }
 
 .segControlDisabled {
-  opacity: 0.5;
+  opacity: var(--agala-opacity-disabled);
   pointer-events: none;
 }
 

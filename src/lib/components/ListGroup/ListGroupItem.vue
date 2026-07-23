@@ -107,7 +107,7 @@ const badgeCls = computed(() => [
 }
 
 .listItemDisabled {
-  opacity: 0.5;
+  opacity: var(--agala-opacity-disabled);
   pointer-events: none;
 }
 

@@ -24,7 +24,7 @@ import { toastManager } from './ToastManager'
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  z-index: var(--agala-z-modal);
+  z-index: var(--agala-layer-toast, var(--agala-z-modal));
   pointer-events: none;
   align-items: flex-end;
 }

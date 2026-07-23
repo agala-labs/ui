@@ -94,7 +94,7 @@ const cls = computed(() => [
   <div class="inputWrapper" :class="$props.wrapperClass">
     <div class="field">
       <span v-if="iconStart" class="iconStart" aria-hidden="true">
-        <AgalaIcon :name="iconStart as IconName" :size="14" />
+        <AgalaIcon :name="iconStart as IconName" size="sm" />
       </span>
       <input
         ref="inputRef"
@@ -118,7 +118,7 @@ const cls = computed(() => [
         @keydown.enter.prevent="handleEndIconClick"
         @keydown.space.prevent="handleEndIconClick"
       >
-        <AgalaIcon :name="endIconName as IconName" :size="14" />
+        <AgalaIcon :name="endIconName as IconName" size="sm" />
       </span>
     </div>
     <p v-if="errorMessage" class="errorMessage">{{ errorMessage }}</p>
@@ -172,7 +172,7 @@ const cls = computed(() => [
 
 .input:disabled {
   cursor: not-allowed;
-  opacity: 0.5;
+  opacity: var(--agala-opacity-disabled);
   background-color: hsl(var(--agala-muted));
 }
 

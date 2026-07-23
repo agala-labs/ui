@@ -51,7 +51,7 @@ const cls = computed(() => [
     >
       <AgalaIcon
         :name="(props.icon as IconName) || iconMap[props.variant]"
-        :size="16"
+        size="md"
       />
     </span>
     <div class="alert__content">
@@ -83,7 +83,7 @@ const cls = computed(() => [
     >
       <AgalaIcon
         name="x"
-        :size="16"
+        size="md"
       />
     </button>
   </div>

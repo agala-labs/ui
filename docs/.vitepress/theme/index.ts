@@ -7,6 +7,7 @@ import ComponentDoc from '../../components/ComponentDoc.vue'
 import ChartGallery from '../../components/ChartGallery.vue'
 import ThemeControls from '../../components/ThemeControls.vue'
 import DocsLayout from '../../components/DocsLayout.vue'
+import IconCatalog from '../../components/IconCatalog.vue'
 import '../../../src/lib/themes/main.css'
 import '../../../src/lib/themes/smaltt.css'
 import '../../../src/lib/themes/kervo.css'
@@ -26,5 +27,6 @@ export default {
     app.component('ComponentDoc', ComponentDoc)
     app.component('ChartGallery', ChartGallery)
     app.component('ThemeControls', ThemeControls)
+    app.component('IconCatalog', IconCatalog)
   },
 } satisfies Theme

@@ -528,13 +528,25 @@ const events = [
       />
     </div>
     <div v-else-if="slug === 'section-nav'" class="section-nav-demo">
-      <AgalaSectionNav
-        v-model="sectionNavActive"
-        class="section-nav-demo__smaltt"
-        :items="smalttSectionItems"
-        aria-label="Configuración de Smaltt"
-        @select="selectSection"
-      />
+      <div class="section-nav-demo__surface">
+        <AgalaSectionNav
+          v-model="sectionNavActive"
+          class="section-nav-demo__smaltt"
+          :items="smalttSectionItems"
+          aria-label="Configuración de Smaltt"
+          @select="selectSection"
+        />
+        <section class="section-nav-demo__content" aria-label="Vista previa de Clínica">
+          <span class="section-nav-demo__eyebrow">Configuración</span>
+          <h3>Clínica</h3>
+          <p>Gestioná la identidad y los datos de contacto de tu clínica.</p>
+          <dl class="section-nav-demo__details">
+            <div><dt>Nombre</dt><dd>Estudio dental</dd></div>
+            <div><dt>Contacto</dt><dd>hola@clinica.test</dd></div>
+            <div><dt>Estado</dt><dd>Información completa</dd></div>
+          </dl>
+        </section>
+      </div>
       <span class="interaction-status" aria-live="polite">Selected: {{ sectionNavSelection }}</span>
     </div>
     <AgalaTable
@@ -782,8 +794,17 @@ const events = [
 .preview-row { display: flex; align-items: center; flex-wrap: wrap; gap: 0.75rem; }
 .preview-grow { display: flex; flex: 1; flex-direction: column; gap: 0.6rem; }
 .sidebar-demo { height: 20rem; overflow: hidden; border: 1px solid hsl(var(--agala-border)); border-radius: var(--agala-radius); }
-.section-nav-demo { width: 100%; min-width: 0; }
-.section-nav-demo__smaltt { max-height: 30rem; overflow-y: auto; }
+.section-nav-demo { display: flex; width: 100%; min-width: 0; flex-direction: column; gap: var(--agala-space-3); }
+.section-nav-demo__surface { display: grid; width: 100%; min-width: 0; grid-template-columns: var(--agala-section-nav-width, 13.5rem) minmax(0, 1fr); align-items: start; gap: var(--agala-space-6); }
+.section-nav-demo__smaltt { flex: 0 0 auto; }
+.section-nav-demo__content { min-width: 0; padding: var(--agala-space-4) var(--agala-space-2); }
+.section-nav-demo__eyebrow { color: hsl(var(--agala-primary)); font-size: var(--agala-font-size-xs); font-weight: var(--agala-font-weight-semibold); letter-spacing: var(--agala-tracking-wide); text-transform: uppercase; }
+.section-nav-demo__content h3 { margin: var(--agala-space-1) 0; font-size: var(--agala-font-size-xl); }
+.section-nav-demo__content p { margin: 0; color: hsl(var(--agala-muted-foreground)); }
+.section-nav-demo__details { margin: var(--agala-space-6) 0 0; border-top: var(--agala-border-width) solid hsl(var(--agala-border)); }
+.section-nav-demo__details div { display: grid; grid-template-columns: minmax(6rem, .45fr) minmax(0, 1fr); gap: var(--agala-space-4); padding: var(--agala-space-3) 0; border-bottom: var(--agala-border-width) solid hsl(var(--agala-border)); }
+.section-nav-demo__details dt { color: hsl(var(--agala-muted-foreground)); }
+.section-nav-demo__details dd { min-width: 0; margin: 0; font-weight: var(--agala-font-weight-medium); overflow-wrap: anywhere; }
 .calendar-demo { min-width: 0; height: 32rem; overflow: hidden; }
 .tab-label { display: inline-flex; align-items: center; gap: 0.4rem; }
 .tab-count { display: inline-flex; min-width: 1.25rem; height: 1.25rem; align-items: center; justify-content: center; border-radius: 999px; background: hsl(var(--agala-primary) / 0.12); color: hsl(var(--agala-primary)); font-size: 0.6875rem; font-weight: var(--agala-font-weight-semibold); }
@@ -796,5 +817,5 @@ const events = [
 .card-demo__header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
 .card-demo__body { margin: 0; color: hsl(var(--agala-muted-foreground)); }
 .component-choice-label { min-width: 6rem; color: hsl(var(--agala-muted-foreground)); font-size: 0.75rem; }
-@media (max-width: 640px) { .icon-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .icon-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .section-nav-demo__surface { grid-template-columns: minmax(0, 1fr); gap: var(--agala-space-4); } .section-nav-demo__content { padding-inline: 0; } }
 </style>

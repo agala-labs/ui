@@ -56,14 +56,15 @@ writeFileSync(join(consumer, 'tsconfig.json'), JSON.stringify({
 }, null, 2))
 
 writeFileSync(join(consumer, 'consumer.ts'), `
-import { AgalaButton, AgalaSectionNav, AgalaUI, useMediaQuery } from '@agala-labs/ui'
-import type { SectionNavItem } from '@agala-labs/ui'
+import { AgalaButton, AgalaIcon, AgalaSectionNav, AgalaUI, useMediaQuery } from '@agala-labs/ui'
+import type { AgalaIconProps, SectionNavItem } from '@agala-labs/ui'
 import { BaseChart, useChartTheme } from '@agala-labs/charts'
 import '@agala-labs/ui/reset.css'
 import '@agala-labs/ui/themes/main.css'
 
 const sectionItems: SectionNavItem[] = [{ value: 'general', label: 'General', icon: 'settings' }]
-void [AgalaButton, AgalaSectionNav, AgalaUI, BaseChart, useMediaQuery, useChartTheme, sectionItems]
+const iconProps: AgalaIconProps = { name: 'stock-location', size: 'sm', motion: 'hover' }
+void [AgalaButton, AgalaIcon, AgalaSectionNav, AgalaUI, BaseChart, useMediaQuery, useChartTheme, sectionItems, iconProps]
 `)
 
 npm(['run', 'check'], consumer)
@@ -72,3 +73,5 @@ const packageJson = JSON.parse(readFileSync(join(consumer, 'node_modules/@agala-
 for (const entry of ['.', './reset.css', './themes/main.css', './themes/smaltt.css', './themes/kervo.css']) {
   if (!(entry in packageJson.exports)) throw new Error(`Missing @agala-labs/ui export: ${entry}`)
 }
+
+readFileSync(join(consumer, 'node_modules/@agala-labs/ui/dist/licenses/lucide.txt'), 'utf8')

@@ -27,7 +27,7 @@
     "docs:preview": "vitepress preview docs",
     "test:mobile": "playwright test",
     "test:consumer": "node scripts/smoke-consumer.mjs",
-    "build:lib": "vue-tsc --noEmit && vite build && cp src/lib/reset.css dist/reset.css && node -e \"require('fs').rmSync('dist/themes',{recursive:true,force:true})\" && mkdir -p dist/themes && cp src/lib/themes/*.css dist/themes/ && cp dist/agala-ui.es.js dist/agala-ui.browser.js && node -e \"require('fs').writeFileSync('dist/agala-ui.browser.js', require('fs').readFileSync('dist/agala-ui.es.js','utf-8').replace(/import '\\.\\/index\\.css';[^\\n]*\\n?/g, ''))\"",
+    "build:lib": "vue-tsc --noEmit && vite build && cp src/lib/reset.css dist/reset.css && node -e \"require('fs').rmSync('dist/themes',{recursive:true,force:true})\" && mkdir -p dist/themes dist/licenses && cp src/lib/themes/*.css dist/themes/ && cp node_modules/@lucide/vue/LICENSE dist/licenses/lucide.txt && cp dist/agala-ui.es.js dist/agala-ui.browser.js && node -e \"require('fs').writeFileSync('dist/agala-ui.browser.js', require('fs').readFileSync('dist/agala-ui.es.js','utf-8').replace(/import '\\.\\/index\\.css';[^\\n]*\\n?/g, ''))\"",
     "lint": "eslint .",
     "preview": "vite preview",
     "prepublishOnly": "npm run build:lib"
@@ -54,6 +54,7 @@
   },
   "dependencies": {
     "@floating-ui/vue": "^2.0.1",
+    "@lucide/vue": "^1.25.0",
     "date-fns": "^4.1.0",
     "markdown-it": "^14.2.0",
     "vue": "^3.3.0"

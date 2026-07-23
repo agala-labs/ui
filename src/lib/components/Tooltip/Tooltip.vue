@@ -127,7 +127,7 @@ onUnmounted(() => {
   background: transparent;
   color: inherit;
   pointer-events: none;
-  z-index: var(--agala-z-dropdown);
+  z-index: var(--agala-layer-tooltip, var(--agala-z-dropdown));
 }
 
 .tooltip {
@@ -144,7 +144,7 @@ onUnmounted(() => {
   white-space: normal;
   overflow-wrap: anywhere;
   pointer-events: none;
-  box-shadow: var(--agala-shadow-md);
+  box-shadow: var(--agala-shadow-popover, var(--agala-shadow-md));
 }
 
 /* Placement */

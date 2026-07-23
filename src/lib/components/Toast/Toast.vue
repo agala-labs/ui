@@ -28,7 +28,7 @@ const iconMap: Record<ToastVariant, IconName> = {
     aria-live="polite"
     aria-atomic="true"
   >
-    <AgalaIcon :name="iconMap[toast.variant]" :size="16" class="toastIcon" />
+    <AgalaIcon :name="iconMap[toast.variant]" size="md" class="toastIcon" />
     <span class="toastMessage">{{ toast.message }}</span>
     <button
       v-if="toast.action"
@@ -44,7 +44,7 @@ const iconMap: Record<ToastVariant, IconName> = {
       aria-label="Dismiss"
       @click="toastManager.dismiss(toast.id)"
     >
-      <AgalaIcon name="x" :size="14" />
+      <AgalaIcon name="x" size="sm" />
     </button>
   </div>
 </template>

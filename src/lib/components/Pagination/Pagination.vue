@@ -75,7 +75,7 @@ const pages = computed(() => {
       aria-label="Previous page"
       @click="goTo(currentPage - 1)"
     >
-      <AgalaIcon name="chevron-left" :size="14" />
+      <AgalaIcon name="chevron-left" size="sm" />
     </button>
 
     <template v-if="isMobile">
@@ -107,7 +107,7 @@ const pages = computed(() => {
       aria-label="Next page"
       @click="goTo(currentPage + 1)"
     >
-      <AgalaIcon name="chevron-right" :size="14" />
+      <AgalaIcon name="chevron-right" size="sm" />
     </button>
   </nav>
 </template>

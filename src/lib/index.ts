@@ -19,7 +19,7 @@ export {
 } from './composables/useDateUtils'
 
 export { AgalaIcon } from './components/AgalaIcon'
-export type { IconName } from './components/AgalaIcon/types'
+export type { AgalaIconProps, IconMotion, IconName, IconSize } from './components/AgalaIcon/types'
 
 export { default as AgalaButton } from './components/Button/Button.vue'
 export type { ButtonProps, ButtonVariant, ButtonSize } from './components/Button'

@@ -61,7 +61,7 @@ function onClick() {
 
 .toggle:disabled {
   cursor: not-allowed;
-  opacity: 0.5;
+  opacity: var(--agala-opacity-disabled);
 }
 
 .toggle:not(:disabled):focus-visible {

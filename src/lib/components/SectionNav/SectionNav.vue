@@ -145,17 +145,17 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .agala-section-nav {
-  --_section-nav-item-min-height: var(--agala-section-nav-item-min-height, 2.125rem);
-  --_section-nav-item-padding-inline: var(--agala-section-nav-item-padding-inline, 0.7rem);
+  --_section-nav-item-min-height: var(--agala-section-nav-item-min-height, 2.25rem);
+  --_section-nav-item-padding-inline: var(--agala-section-nav-item-padding-inline, var(--agala-space-3));
   --_section-nav-font-size: var(--agala-section-nav-font-size, 0.8125rem);
 
   position: relative;
   display: flex;
-  width: min(100%, var(--agala-section-nav-width, 12rem));
+  width: min(100%, var(--agala-section-nav-width, 13.5rem));
   min-width: 0;
   flex-direction: column;
-  gap: var(--agala-section-nav-gap, 0.125rem);
-  padding: var(--agala-section-nav-padding, 0.25rem);
+  gap: var(--agala-section-nav-gap, var(--agala-space-0-5));
+  padding: var(--agala-section-nav-padding, var(--agala-space-1-5));
   font-family: var(--agala-font-sans);
 }
 
@@ -163,10 +163,16 @@ onBeforeUnmount(() => {
   border: 1px solid hsl(var(--agala-border));
   border-radius: var(--agala-section-nav-panel-radius, var(--agala-radius));
   background: var(--agala-section-nav-panel-bg, hsl(var(--agala-card)));
-  box-shadow: var(--agala-section-nav-panel-shadow, none);
+  box-shadow: var(--agala-section-nav-panel-shadow, var(--agala-shadow-xs));
 }
 
-.agala-section-nav--plain { padding: var(--agala-section-nav-plain-padding, 0); }
+.agala-section-nav--plain {
+  padding: var(--agala-section-nav-plain-padding, 0);
+  border: var(--agala-section-nav-plain-border, 0);
+  border-radius: var(--agala-section-nav-plain-radius, 0);
+  background: var(--agala-section-nav-plain-bg, transparent);
+  box-shadow: var(--agala-section-nav-plain-shadow, none);
+}
 
 .agala-section-nav--comfortable {
   --_section-nav-item-min-height: var(--agala-section-nav-comfortable-item-min-height, 2.5rem);
@@ -180,8 +186,8 @@ onBeforeUnmount(() => {
   min-width: 0;
   min-height: var(--_section-nav-item-min-height);
   align-items: center;
-  gap: 0.55rem;
-  padding: 0.4rem var(--_section-nav-item-padding-inline);
+  gap: var(--agala-space-2-5);
+  padding: var(--agala-space-1-5) var(--_section-nav-item-padding-inline);
   border: 0;
   border-radius: var(--agala-section-nav-item-radius, calc(var(--agala-radius) - 0.125rem));
   background: transparent;
@@ -193,7 +199,9 @@ onBeforeUnmount(() => {
   text-align: start;
   text-decoration: none;
   cursor: pointer;
-  transition: background-color 140ms ease, color 140ms ease;
+  transition:
+    background-color var(--agala-transition-fast),
+    color var(--agala-transition-fast);
 }
 
 .agala-section-nav__item::before {
@@ -206,18 +214,20 @@ onBeforeUnmount(() => {
   content: '';
   opacity: 0;
   transform: scaleY(0.55);
-  transition: opacity 140ms ease, transform 140ms ease;
+  transition:
+    opacity var(--agala-transition-fast),
+    transform var(--agala-transition-fast);
 }
 
 .agala-section-nav__item:hover:not(:disabled, [aria-disabled="true"]) {
-  background: hsl(var(--agala-muted));
+  background: var(--agala-section-nav-hover-bg, hsl(var(--agala-primary) / 0.055));
   color: hsl(var(--agala-foreground));
 }
 
 .agala-section-nav__item--active,
 .agala-section-nav__item--active:hover:not(:disabled, [aria-disabled="true"]) {
-  background: var(--agala-section-nav-active-bg, hsl(var(--agala-accent)));
-  color: var(--agala-section-nav-active-fg, hsl(var(--agala-accent-foreground)));
+  background: var(--agala-section-nav-active-bg, hsl(var(--agala-primary) / 0.09));
+  color: var(--agala-section-nav-active-fg, hsl(var(--agala-primary)));
   font-weight: var(--agala-font-weight-semibold);
 }
 
@@ -229,7 +239,7 @@ onBeforeUnmount(() => {
 }
 
 .agala-section-nav__item:disabled,
-.agala-section-nav__item[aria-disabled="true"] { opacity: 0.48; cursor: not-allowed; }
+.agala-section-nav__item[aria-disabled="true"] { opacity: var(--agala-opacity-disabled); cursor: not-allowed; }
 
 .agala-section-nav__icon { width: 1rem; height: 1rem; flex: 0 0 auto; }
 .agala-section-nav__label { min-width: 0; flex: 1; overflow-wrap: anywhere; }

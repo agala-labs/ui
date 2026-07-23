@@ -65,7 +65,7 @@ function handleClick() {
 }
 
 .itemDisabled {
-  opacity: 0.5;
+  opacity: var(--agala-opacity-disabled);
 }
 
 .trigger {

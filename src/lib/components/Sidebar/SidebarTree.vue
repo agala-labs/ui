@@ -498,7 +498,9 @@ function focusSelector(event: KeyboardEvent, direction: 'next' | 'previous' | 'f
   justify-content: center;
   flex-shrink: 0;
   color: hsl(var(--agala-muted-foreground));
-  transition: transform var(--agala-transition-base), color var(--agala-transition-fast);
+  transition:
+    transform var(--agala-sidebar-disclosure-enter-duration, 160ms) var(--agala-motion-easing-in-out),
+    color var(--agala-transition-fast);
 }
 
 .sidebarTreeItem__chevron--open {
@@ -509,6 +511,7 @@ function focusSelector(event: KeyboardEvent, direction: 'next' | 'previous' | 'f
 .sidebarTreePanel {
   display: grid;
   grid-template-rows: 1fr;
+  will-change: grid-template-rows;
 }
 
 .sidebarTreePanel__inner {
@@ -536,7 +539,26 @@ function focusSelector(event: KeyboardEvent, direction: 'next' | 'previous' | 'f
 .sidebarTreePanel-enter-active,
 .sidebarTreePanel-leave-active {
   overflow: hidden;
-  transition: grid-template-rows var(--agala-transition-fast);
+}
+
+.sidebarTreePanel-enter-active {
+  transition: grid-template-rows var(--agala-sidebar-disclosure-enter-duration, 160ms) var(--agala-motion-easing-out);
+}
+
+.sidebarTreePanel-leave-active {
+  transition: grid-template-rows var(--agala-sidebar-disclosure-leave-duration, 120ms) var(--agala-motion-easing-out);
+}
+
+.sidebarTreePanel-enter-active .sidebarTreePanel__inner {
+  transition:
+    opacity 100ms 30ms var(--agala-motion-easing-out),
+    transform var(--agala-sidebar-disclosure-enter-duration, 160ms) var(--agala-motion-easing-out);
+}
+
+.sidebarTreePanel-leave-active .sidebarTreePanel__inner {
+  transition:
+    opacity 80ms var(--agala-motion-easing-linear),
+    transform var(--agala-sidebar-disclosure-leave-duration, 120ms) var(--agala-motion-easing-out);
 }
 
 .sidebarTreePanel-enter-from,
@@ -544,13 +566,20 @@ function focusSelector(event: KeyboardEvent, direction: 'next' | 'previous' | 'f
   grid-template-rows: 0fr;
 }
 
+.sidebarTreePanel-enter-from .sidebarTreePanel__inner,
+.sidebarTreePanel-leave-to .sidebarTreePanel__inner {
+  opacity: 0;
+  transform: translateY(-2px);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .sidebarTreeItem,
   .sidebarTreeItem__icon,
   .sidebarTreeItem__chevron,
+  .sidebarTreePanel__inner,
   .sidebarTreePanel-enter-active,
   .sidebarTreePanel-leave-active {
-    transition: none;
+    transition: none !important;
   }
 }
 </style>

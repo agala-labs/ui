@@ -69,7 +69,7 @@ const additionalExamples: Record<string, AdditionalExample> = {
   spacer: { label: 'Status bar', description: 'Spacer can push secondary metadata to the far edge of one row.', snippet: `<AgalaHStack><strong>Inventory sync</strong><AgalaSpacer /><span>Updated 2 min ago</span></AgalaHStack>` },
   stat: { label: 'Inline summary', description: 'Inline stats belong in dense summaries rather than stretched metric cards.', snippet: `<AgalaStat label="Pending reviews" value="12" secondary-value="0 overdue" layout="inline" :bordered="false" />` },
   tag: { label: 'Removal and passive states', description: 'A removable tag exposes only its labeled remove button. Passive and disabled tags stay out of the tab order.', snippet: `<AgalaTag label="Mar del Plata" removable @remove="removeLocation" />\n<AgalaTag label="Managed" disabled />` },
-  icon: { label: 'Sizes', description: 'Icons inherit current color and should match the control or text they support.', snippet: `<AgalaIcon name="settings" :size="16" />\n<AgalaIcon name="settings" :size="24" />` },
+  icon: { label: 'Size and motion', description: 'Use named sizes for system consistency. Motion is opt-in and should communicate state or reinforce a familiar action.', snippet: `<AgalaIcon name="settings" size="sm" />\n<AgalaIcon name="settings" size="lg" />\n<AgalaIcon name="refresh" motion="active" active />` },
 }
 
 export function getComponentExamples(component: ComponentMeta): ComponentExample[] {
@@ -283,7 +283,7 @@ export const components: ComponentMeta[] = [
   {
     slug: 'sidebar', name: 'Sidebar', exports: ['AgalaSidebar', 'AgalaSidebarGroup', 'AgalaSidebarItem', 'AgalaSidebarToggle'], description: 'Navigates hierarchical product areas across desktop and mobile.',
     props: [p('items', 'SidebarNode[]', 'Data-driven navigation tree.'), p('activeValue', 'string', 'Selected item.'), p('expanded / defaultExpanded', 'string[]', 'Controlled or initial open branches.'), p('collapsed', 'boolean', 'Desktop collapsed state.'), p('open', 'boolean', 'Mobile drawer state.'), p('responsive', 'boolean', 'Enables responsive behavior.', 'false'), p('indent', "'compact' | 'comfortable'", 'Nested density.'), p('width / collapsedWidth', 'string', 'CSS widths.')],
-    events: ['update:activeValue', 'update:expanded', 'update:collapsed', 'update:open', 'select(value)'], slots: ['default', 'SidebarItem: icon and default'], accessibility: 'Tree branches expose expansion state, animate their disclosure height, and keep the selected surface on the active leaf. Use SidebarToggle with aria-controls for mobile or collapsed navigation.',
+    events: ['update:activeValue', 'update:expanded', 'update:collapsed', 'update:open', 'select(value)'], slots: ['default', 'SidebarItem: icon and default'], accessibility: 'Tree branches expose expansion state, coordinate their disclosure and chevron motion, respect reduced motion, and keep the selected surface on the active leaf. Use SidebarToggle with aria-controls for mobile or collapsed navigation.',
     snippet: `<AgalaSidebar v-model:active-value="active" v-model:expanded="expanded" :items="items" responsive />`,
   },
   {
@@ -383,8 +383,8 @@ export const components: ComponentMeta[] = [
     snippet: `<AgalaTag label="Needs review" interactive @click="filterByTag" />`,
   },
   {
-    slug: 'icon', name: 'Icon', exports: ['AgalaIcon', 'IconName'], description: 'Renders the library’s local inline SVG icon set.',
-    props: [p('name', 'IconName', 'Required icon identifier.'), p('size', 'number', 'Rendered size in pixels.', '16')],
+    slug: 'icon', name: 'Icon', exports: ['AgalaIcon', 'IconName', 'IconSize', 'IconMotion'], description: 'Renders a curated, product-aware icon set behind one stable Agala abstraction.',
+    props: [p('name', 'IconName', 'Required semantic icon identifier.'), p('size', "'xs' | 'sm' | 'md' | 'lg' | 'xl' | number | string", 'Named token size or explicit CSS size.', "'md'"), p('strokeWidth', 'number', 'Optional stroke override.', '2'), p('motion', "'none' | 'hover' | 'active'", 'Vendor-neutral opt-in motion behavior.', "'none'"), p('active', 'boolean', 'Activates state-led motion such as rotation or refresh.', 'false')],
     accessibility: 'Icons are aria-hidden by default. Put the accessible name on the interactive control that contains the icon.',
     snippet: `<AgalaIcon name="calendar" aria-hidden="true" />`,
   },

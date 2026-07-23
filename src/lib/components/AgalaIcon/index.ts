@@ -1,2 +1,2 @@
 export { default as AgalaIcon } from './AgalaIcon.vue'
-export type { IconName } from './types'
+export type { AgalaIconProps, IconMotion, IconName, IconSize } from './types'

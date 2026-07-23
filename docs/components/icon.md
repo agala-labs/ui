@@ -4,3 +4,5 @@ aside: true
 ---
 
 <ComponentDoc slug="icon" />
+
+<IconCatalog />

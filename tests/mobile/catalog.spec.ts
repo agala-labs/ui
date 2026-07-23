@@ -133,6 +133,7 @@ test.describe('Section Nav', () => {
     await expect(nav).toBeVisible()
     await expect(nav).toHaveCSS('width', '180px')
     await expect(nav).toHaveCSS('border-top-style', 'solid')
+    expect(await nav.evaluate(element => element.scrollHeight <= element.clientHeight + 1)).toBe(true)
     await expect(nav.getByRole('link')).toHaveCount(15)
     await expect(nav.getByRole('link', { name: 'Clínica', exact: true })).toHaveAttribute('aria-current', 'page')
 
@@ -158,6 +159,8 @@ test.describe('Section Nav', () => {
     await expect(nav.getByRole('button', { name: 'Usuarios' })).toBeDisabled()
     await expect(nav.locator('svg')).toHaveCount(8)
     await expect(nav.getByText('4')).toBeVisible()
+    await expect(nav).toHaveCSS('background-color', 'rgb(255, 255, 255)')
+    await expect(nav).toHaveCSS('border-top-style', 'solid')
     await expectNoDocumentOverflow(page)
   })
 
@@ -617,6 +620,22 @@ test.describe('refined component interactions', () => {
     const panel = page.locator('.sidebarTreePanel').first()
     await panel.evaluate(element => element.classList.add('sidebarTreePanel-enter-active'))
     await expect(panel).toHaveCSS('transition-property', 'grid-template-rows')
+    await expect(panel.locator('.sidebarTreePanel__inner')).toHaveCSS('transition-property', 'opacity, transform')
+
+    await parent.click()
+    await expect(panel).toHaveCount(0)
+    await expect(parent.locator('.sidebarTreeItem__chevron')).not.toHaveClass(/sidebarTreeItem__chevron--open/)
+  })
+
+  test('sidebar disclosure removes motion when reduced motion is requested', async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== 'tablet-768', 'The expanded desktop tree is visible from 768px.')
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await openWithTheme(page, '/components/sidebar')
+
+    const panel = page.locator('.sidebarTreePanel').first()
+    await panel.evaluate(element => element.classList.add('sidebarTreePanel-enter-active'))
+    await expect(panel).toHaveCSS('transition-property', 'none')
+    await expect(panel.locator('.sidebarTreePanel__inner')).toHaveCSS('transition-property', 'none')
   })
 
   test('segmented control keeps radio focus local and skips disabled choices', async ({ page }) => {

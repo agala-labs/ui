@@ -60,6 +60,10 @@ html[data-theme="kervo"] {
   --agala-section-nav-gap: 0.25rem;
   --agala-section-nav-padding: 0.25rem;
   --agala-section-nav-plain-padding: 0.25rem;
+  --agala-section-nav-plain-bg: hsl(var(--agala-card));
+  --agala-section-nav-plain-border: 1px solid hsl(var(--agala-border));
+  --agala-section-nav-plain-radius: var(--agala-radius);
+  --agala-section-nav-plain-shadow: var(--agala-shadow-xs);
   --agala-section-nav-item-min-height: 2.4rem;
   --agala-section-nav-item-padding-inline: 0.7rem;
   --agala-section-nav-item-radius: 0.5rem;

@@ -130,7 +130,7 @@ usePopoverBehavior(isOpen, wrapperRef, floatingRef, close, { closeOnScroll: fals
           @mouseleave="highlightedIdx = -1"
           @click="executeItem(item)"
         >
-          <AgalaIcon v-if="item.icon" :name="item.icon" :size="14" class="menuItemIcon" />
+          <AgalaIcon v-if="item.icon" :name="item.icon" size="sm" class="menuItemIcon" />
           {{ item.label }}
         </button>
       </template>
@@ -153,7 +153,7 @@ usePopoverBehavior(isOpen, wrapperRef, floatingRef, close, { closeOnScroll: fals
   position: fixed;
   inset: auto;
   margin: 0;
-  z-index: var(--agala-z-dropdown);
+  z-index: var(--agala-layer-dropdown, var(--agala-z-dropdown));
   min-width: 10rem;
   max-width: min(calc(100vw - 1rem), var(--agala-floating-available-width, calc(100vw - 1rem)));
   max-height: min(calc(100dvh - 1rem), var(--agala-floating-available-height, calc(100dvh - 1rem)));
@@ -162,7 +162,7 @@ usePopoverBehavior(isOpen, wrapperRef, floatingRef, close, { closeOnScroll: fals
   color: hsl(var(--agala-popover-foreground));
   border: var(--agala-border-width) solid hsl(var(--agala-border));
   border-radius: calc(var(--agala-radius) - 2px);
-  box-shadow: var(--agala-shadow-md);
+  box-shadow: var(--agala-shadow-popover, var(--agala-shadow-md));
   display: flex;
   flex-direction: column;
   overflow-y: auto;

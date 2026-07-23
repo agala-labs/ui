@@ -83,7 +83,7 @@ const wrapperCls = computed(() => [
 
 .textarea:disabled {
   cursor: not-allowed;
-  opacity: 0.5;
+  opacity: var(--agala-opacity-disabled);
   background-color: hsl(var(--agala-muted));
 }
 

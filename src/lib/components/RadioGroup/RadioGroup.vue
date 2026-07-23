@@ -91,7 +91,7 @@ function select(option: RadioOption) {
 
 .radioItemDisabled {
   cursor: not-allowed;
-  opacity: 0.5;
+  opacity: var(--agala-opacity-disabled);
 }
 
 /* Visually hidden native input */

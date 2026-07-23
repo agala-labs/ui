@@ -44,8 +44,8 @@ function onClick() {
       @click.prevent="onClick"
     />
     <span :class="boxCls" aria-hidden="true">
-      <AgalaIcon v-if="indeterminate" name="minus" :size="12" />
-      <AgalaIcon v-else-if="modelValue" name="check" :size="12" />
+      <AgalaIcon v-if="indeterminate" name="minus" size="xs" />
+      <AgalaIcon v-else-if="modelValue" name="check" size="xs" />
     </span>
     <span v-if="label" class="checkboxLabel">{{ label }}</span>
   </label>
@@ -62,7 +62,7 @@ function onClick() {
 
 .checkboxDisabled {
   cursor: not-allowed;
-  opacity: 0.5;
+  opacity: var(--agala-opacity-disabled);
 }
 
 .checkboxInput {

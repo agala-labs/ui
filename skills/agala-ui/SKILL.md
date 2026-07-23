@@ -8,7 +8,7 @@ description: >
 
 # Agala Labs UI
 
-`@agala-labs/ui` is Agala Labs' Vue 3 + TypeScript component library, built with Vite, scoped CSS, HSL design tokens, and accessible primitives. Vue is the peer dependency (`^3.3.0`); current source also uses `date-fns` for date utilities and calendar/date components.
+`@agala-labs/ui` is Agala Labs' Vue 3 + TypeScript component library, built with Vite, scoped CSS, HSL design tokens, and accessible primitives. Vue is the peer dependency (`^3.3.0`); current source also uses `date-fns` for date utilities and a private `@lucide/vue` registry behind `AgalaIcon`.
 
 ## First Checks
 
@@ -29,6 +29,7 @@ description: >
 - Shipped themes use `html[data-theme="main|smaltt|kervo"]`; Smaltt also supports `data-theme="esmaltt"` for compatibility.
 - Kervo keeps its navy/electric-blue/Geist identity while consuming the same semantic component contracts as other themes. Its destructive controls use the theme's deep-red `danger` token with a white `danger-foreground`; do not hardcode local red/foreground pairs.
 - Focus rings use `box-shadow` and `--agala-ring`; disabled states should combine native `disabled`/ARIA with `pointer-events: none` and reduced opacity.
+- Foundation tokens cover semantic colors, spacing (`--agala-space-*`), typography (`--agala-font-size-*`, `--agala-leading-*`, `--agala-tracking-*`), radii, shadows, icon sizes, opacity, motion, and semantic layers. Existing `--agala-transition-*` and `--agala-z-*` names remain compatibility aliases.
 
 ## Imports
 
@@ -61,7 +62,7 @@ Currently exported and globally registered:
 - Feedback/overlay: `AgalaAlert`, `AgalaBadge`, `AgalaDrawer`, `AgalaModal`, `AgalaModalProvider`, `AgalaToastProvider`, `AgalaTooltip`, `AgalaProgress`, `AgalaSkeleton`, `AgalaEmptyState`, `AgalaDevEnvBanner`
 - Navigation/data: `AgalaAccordion`, `AgalaAccordionItem`, `AgalaDropdownMenu`, `AgalaNavbar`, `AgalaPagination`, `AgalaSectionNav`, `AgalaSidebar`, `AgalaSidebarGroup`, `AgalaSidebarItem`, `AgalaSidebarToggle`, `AgalaTable`, `AgalaTabs`
 - Layout/display: `AgalaAvatar`, `AgalaCard`, `AgalaCenter`, `AgalaDivider`, `AgalaHStack`, `AgalaListGroup`, `AgalaListGroupItem`, `AgalaSpacer`, `AgalaStack`, `AgalaStat`, `AgalaTag`, `AgalaVStack`
-- Internal but exported: `AgalaIcon` and `IconName`
+- Icon: `AgalaIcon`; types `IconName`, `IconSize`, `IconMotion`, and `AgalaIconProps`
 
 ## Public Utilities
 
@@ -84,7 +85,7 @@ Internal source composables include `useSelectFilter`, `useChipDisplay`, `useKey
 - `AgalaCalendar`: `events`, `v-model:view`, `v-model:currentDate`, `availableViews`, `hideHeader`, `dayStart`, `dayEnd`, `snapMinutes`; views `month|week|day|list`; emits `select`, `day-click`, `slot-select`; slots `header`, `empty-day`, and `event`, which receives `{ event, view, presentation, timeLabel, isCompact }`. Default time-grid cards progressively disclose title, time, and subtitle according to their rendered width and height while keeping complete accessible labels. Event content must not add nested interactive controls because the library retains the event button shell.
 - `AgalaTable`: `columns`, `rows`, `selectable`, `v-model:selectedRows`, `v-model:sortKey`, `v-model:sortDir`, `loading`, `loadingRows`, `emptyMessage`, `rowKey`, `variant default|clean|minimal`, `density comfortable|compact`, `stickyHeader`, `stickyFirstColumn`, and `interactiveRows`; columns support `width` and `minWidth`; slots `cell-<key>`, `empty`, `footer`; emits `row-click`.
 - `AgalaTabs`: content-panel navigation with `tabs`, `v-model`, `variant underline|pills`, and `ariaLabel`; panel slots are named `panel-<value>` and custom labels use `tab-<value>` with `{ tab, active }`. Underline is the canonical primary treatment. Pills are separated soft navigation items without an enclosing track or raised tile. Custom labels must not contain interactive controls. Do not use Tabs for a form value or immediate view-mode setting.
-- `AgalaSectionNav`: one-level local navigation for settings and detail surfaces. Pass `items` with `value`, `label`, and optional `icon`, `href`, `disabled`, or `badge`; bind the active value with `v-model`. Use `variant="panel"` plus `density="compact"` for Smaltt-style bordered text navigation, or `variant="plain"` plus `density="comfortable"` for Kervo-style icon-led navigation. `responsive="scroll"` keeps long sets on one narrow row and reveals the active item; `responsive="stack"` keeps the vertical list. The `select(item, event)` event supports router or scroll interception while href items retain native links by default.
+- `AgalaSectionNav`: one-level local navigation for settings and detail surfaces. Pass `items` with `value`, `label`, and optional `icon`, `href`, `disabled`, or `badge`; bind the active value with `v-model`. Use `variant="panel"` plus `density="compact"` for Smaltt-style bordered text navigation, or `variant="plain"` plus `density="comfortable"` for Kervo-style icon-led navigation. The Kervo theme gives the plain variant a quiet card surface; customize it with `--agala-section-nav-plain-bg`, `--agala-section-nav-plain-border`, `--agala-section-nav-plain-radius`, and `--agala-section-nav-plain-shadow`. `responsive="scroll"` keeps long sets on one narrow row and reveals the active item; `responsive="stack"` keeps the vertical list. The `select(item, event)` event supports router or scroll interception while href items retain native links by default.
 - `AgalaPagination`: `v-model`, `total`, `pageSize`, `siblingCount`, `showEdges`; compact mobile layout.
 - `AgalaModal`: `v-model:open`, `title`, `size sm|md|lg|xl|full`, `dismissible`, `escapeCloses`, `hideHeader`; footer slot receives `{ close }`; emits `after-leave` after visual removal. Its stable Teleport coordinates backdrop/dialog enter and leave, retains background scroll lock through leave, restores the opener afterward, guards rapid reopen, and removes meaningful transform travel under reduced motion. Tune with `--agala-modal-enter-duration`, `--agala-modal-leave-duration`, `--agala-modal-enter-easing`, and `--agala-modal-leave-easing`.
 - `modalManager.open(component, options)`: requires one root `AgalaModalProvider`. Manager promises retain their existing close result while the provider keeps the entry mounted until the shared Modal leave completes.
@@ -92,7 +93,7 @@ Internal source composables include `useSelectFilter`, `useChipDisplay`, `useKey
 - `AgalaDrawer`: controlled with `:open` and `@close`; `placement left|right|top|bottom`, viewport-clamped `size`, `title`, `dismissible`, `escapeCloses`; slots `header`, default, `footer` with `{ close }`. One coordinated presence transition fades the backdrop while the panel enters/leaves through its configured edge. It traps focus and retains background scroll lock through leave, restores the opener only after exit, guards rapid reopen, and removes meaningful travel under reduced motion. Themes may tune `--agala-drawer-enter-duration`, `--agala-drawer-leave-duration`, `--agala-drawer-enter-easing`, and `--agala-drawer-leave-easing`.
 - `AgalaFileUpload`: `v-model` `FileItem[]`, `variant dropzone|inline`, `accept`, `multiple`, `maxSize`, `maxFiles`, labels/text props; emits `change`, `remove`, `error`.
 - `AgalaSegmentedControl`: an enclosed immediate value/mode selector with `options`, `v-model`, `size sm|md|lg`, `block`, `ariaLabel`, and `disabled`; options support `icon`, semantic `variant`, and per-option disabled state; custom labels use `option-<value>` with `{ option, selected }` and must not contain interactive controls. Use it for 2–5 short equal-peer values, never for independent content panels; use `AgalaTabs` for those.
-- `AgalaSidebar`: either pass structured `items` or use slots. Supports `v-model:collapsed`, `v-model:open`, `v-model:activeValue`, `v-model:expanded`, `defaultExpanded`, `indent compact|comfortable`, `responsive`, `width`, `collapsedWidth`; emits `select`. Tree items support `children`, badges, dots, icons, hrefs, disabled state. The active leaf owns the selected surface, active ancestors use icon/weight context without a competing fill, and nested disclosures animate their actual height with reduced-motion support.
+- `AgalaSidebar`: either pass structured `items` or use slots. Supports `v-model:collapsed`, `v-model:open`, `v-model:activeValue`, `v-model:expanded`, `defaultExpanded`, `indent compact|comfortable`, `responsive`, `width`, `collapsedWidth`; emits `select`. Tree items support `children`, badges, dots, icons, hrefs, disabled state. The active leaf owns the selected surface, active ancestors use icon/weight context without a competing fill, and nested disclosures coordinate a fast height clip, subtle content fade, and chevron rotation with reduced-motion support. Tune disclosure timing with `--agala-sidebar-disclosure-enter-duration` and `--agala-sidebar-disclosure-leave-duration`.
 - `AgalaSidebarItem`: `icon`, `label`, `active`, `badge`, `badgeVariant`, `dot`, `dotVariant`, `disabled`; slots `icon` and default.
 - `AgalaSidebarToggle`: emits `click`; props `ariaExpanded`, `ariaControls`, `ariaLabel`.
 - `AgalaListGroup`: `variant divided|cards`, `gap`, `borderless`, `dividers`; `AgalaListGroupItem` has label/subtitle/icon/badge/actionIcon/radius, semantic `badgeVariant default|primary|success|warning|danger`, and `leading`, default, `trailing`, `badge` slots. The badge and trailing slots override the built-in badge treatment.
@@ -114,7 +115,9 @@ Internal source composables include `useSelectFilter`, `useChipDisplay`, `useKey
 
 ## Icon System
 
-`AgalaIcon` renders local inline SVGs using an `IconName` string. Common icons include `search`, `mail`, `eye`, `eye-off`, `user`, `users`, `chevron*`, `check`, `x`, `calendar`, `clock`, `spinner`, `info`, `alert-*`, `more-*`, `arrow-*`, `trending-*`, `home`, `bell`, `settings`, `menu`, `panel-left`, `pencil`, `trash`, `plus`, `filter`, `building`, `document`, `credit-card`, `lock`, `sign-out`, `chart-bar`, `archive`, `inbox`, `key`, `grid`, `columns`, and `list`.
+`AgalaIcon` is the only supported icon rendering abstraction. Its private registry uses curated Lucide components plus Agala-owned product glyphs; consumers must never import Lucide directly. It accepts `name: IconName`, `size?: IconSize | number | string` (`xs|sm|md|lg|xl`), `strokeWidth?: number`, `motion?: none|hover|active`, and `active?: boolean`. Icons inherit `currentColor`, are `aria-hidden`, and respect reduced motion. Motion is off by default; opt in only for a familiar hover affordance or a real active state.
+
+The registry includes the existing common names plus operational icons such as `user-plus`, `external-link`, `copy`, `move`, `save`, `print`, `upload`, `download`, `file`, `phone`, `map`, `map-pin`, `directions`, `store`, `package`, `boxes`, `warehouse`, `barcode`, `scan`, `scan-barcode`, `receipt-text`, `truck`, `tags`, `percent`, `wallet-cards`, `monitor-smartphone`, `database`, and `network`; healthcare icons such as `tooth`, `odontogram`, `diagnosis-link`, `health-coverage`, `stethoscope`, `clipboard-medical`, `heart-pulse`, `flask-conical`, and `shield-plus`; and Kervo glyphs `cash-register`, `stock-location`, and `price-compare`. Compatibility aliases include `chevron`, `edit`, `linked-diagnosis`, `receipt`, `wallet`, `terminal`, and `flask`.
 
 Prefer existing icons and boolean/string icon props over adding icon slots unless the component already exposes one.
 
@@ -134,7 +137,7 @@ npm run build:lib
 npm run dev
 ```
 
-Library build runs `vue-tsc --noEmit`, Vite library build, copies `reset.css`, and creates `dist/agala-ui.browser.js` by removing the CSS import for import-map/browser usage.
+Library build runs `vue-tsc --noEmit`, Vite library build, copies `reset.css`, themes, and the bundled Lucide license, and creates `dist/agala-ui.browser.js` by removing the CSS import for import-map/browser usage.
 
 ## Companion Package
 

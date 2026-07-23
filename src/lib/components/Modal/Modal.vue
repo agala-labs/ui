@@ -188,12 +188,12 @@ function onAfterLeave() {
   --agala-modal-leave-easing: cubic-bezier(0.4, 0, 1, 1);
   position: fixed;
   inset: 0;
-  z-index: var(--agala-z-modal);
+  z-index: var(--agala-layer-modal, var(--agala-z-modal));
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 1.5rem;
-  background-color: hsl(var(--agala-overlay) / 0.4);
+  background-color: hsl(var(--agala-overlay) / var(--agala-opacity-overlay));
   overscroll-behavior: contain;
 }
 
@@ -206,7 +206,7 @@ function onAfterLeave() {
   color: hsl(var(--agala-card-foreground));
   border: var(--agala-border-width) solid hsl(var(--agala-border));
   border-radius: var(--agala-radius-lg);
-  box-shadow: var(--agala-shadow-lg);
+  box-shadow: var(--agala-shadow-overlay, var(--agala-shadow-lg));
   overflow: hidden;
 }
 

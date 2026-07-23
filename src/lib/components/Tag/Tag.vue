@@ -78,7 +78,7 @@ if (import.meta.env.DEV) {
       :aria-label="`Remove ${label || 'tag'}`"
       @click="onRemove"
     >
-      <AgalaIcon name="x" :size="12" />
+      <AgalaIcon name="x" size="xs" />
     </button>
   </component>
 </template>
@@ -215,7 +215,7 @@ if (import.meta.env.DEV) {
 }
 
 .tag--disabled {
-  opacity: 0.5;
+  opacity: var(--agala-opacity-disabled);
   cursor: not-allowed;
 }
 

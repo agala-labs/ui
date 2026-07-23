@@ -61,7 +61,7 @@ const statCls = computed(() => [
     >
       <AgalaIcon
         :name="icon as IconName"
-        :size="16"
+        size="md"
       />
     </span>
 

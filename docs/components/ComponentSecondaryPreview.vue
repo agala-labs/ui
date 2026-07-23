@@ -364,16 +364,30 @@ function openManagedModal() {
         indent="comfortable"
       />
     </div>
-    <AgalaSectionNav
+    <div
       v-else-if="slug === 'section-nav'"
-      v-model="kervoSection"
-      class="section-nav-demo__kervo"
-      :items="kervoSectionItems"
-      variant="plain"
-      density="comfortable"
-      responsive="stack"
-      aria-label="Configuración de Kervo"
-    />
+      class="kervo-settings-demo"
+    >
+      <AgalaSectionNav
+        v-model="kervoSection"
+        class="section-nav-demo__kervo"
+        :items="kervoSectionItems"
+        variant="plain"
+        density="comfortable"
+        responsive="stack"
+        aria-label="Configuración de Kervo"
+      />
+      <section class="kervo-settings-demo__content" aria-label="Vista previa de Ubicaciones">
+        <span class="kervo-settings-demo__eyebrow">Inventario</span>
+        <h3>Ubicaciones</h3>
+        <p>Definí dónde existe físicamente el stock y qué sucursal lo administra.</p>
+        <div class="kervo-settings-demo__summary">
+          <span>Casa Central</span><strong>184 productos</strong>
+          <span>Devoluciones</span><strong>12 productos</strong>
+          <span>En tránsito</span><strong>28 productos</strong>
+        </div>
+      </section>
+    </div>
     <AgalaTable
       v-else-if="slug === 'table'"
       :columns="columns"
@@ -522,8 +536,9 @@ function openManagedModal() {
       v-else-if="slug === 'icon'"
       class="preview-row"
     >
-      <AgalaIcon name="settings" :size="16" />
-      <AgalaIcon name="settings" :size="24" />
+      <AgalaIcon name="settings" size="sm" />
+      <AgalaIcon name="settings" size="lg" />
+      <AgalaIcon name="refresh" motion="active" active />
     </div>
   </div>
 </template>
@@ -570,6 +585,23 @@ function openManagedModal() {
 .divider-frame { height: 2.5rem; }
 .muted-copy { color: hsl(var(--agala-muted-foreground)); }
 
+.kervo-settings-demo {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  grid-template-columns: var(--agala-section-nav-width, 13.5rem) minmax(0, 1fr);
+  align-items: start;
+  gap: var(--agala-space-6);
+}
+
+.kervo-settings-demo__content { min-width: 0; padding: var(--agala-space-4) var(--agala-space-2); }
+.kervo-settings-demo__eyebrow { color: hsl(var(--agala-primary)); font-size: var(--agala-font-size-xs); font-weight: var(--agala-font-weight-semibold); letter-spacing: var(--agala-tracking-wide); text-transform: uppercase; }
+.kervo-settings-demo__content h3 { margin: var(--agala-space-1) 0; font-size: var(--agala-font-size-xl); }
+.kervo-settings-demo__content p { max-width: 30rem; margin: 0; color: hsl(var(--agala-muted-foreground)); }
+.kervo-settings-demo__summary { display: grid; margin-top: var(--agala-space-6); grid-template-columns: minmax(0, 1fr) auto; border-top: var(--agala-border-width) solid hsl(var(--agala-border)); }
+.kervo-settings-demo__summary > * { padding: var(--agala-space-3) 0; border-bottom: var(--agala-border-width) solid hsl(var(--agala-border)); }
+.kervo-settings-demo__summary strong { padding-inline-start: var(--agala-space-4); font-weight: var(--agala-font-weight-medium); }
+
 .primitive-comparison {
   display: grid;
   min-width: 0;
@@ -601,5 +633,7 @@ function openManagedModal() {
 
 @media (max-width: 639px) {
   .primitive-comparison { grid-template-columns: minmax(0, 1fr); }
+  .kervo-settings-demo { grid-template-columns: minmax(0, 1fr); gap: var(--agala-space-4); }
+  .kervo-settings-demo__content { padding-inline: 0; }
 }
 </style>

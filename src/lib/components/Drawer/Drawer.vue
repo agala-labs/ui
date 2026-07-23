@@ -227,9 +227,9 @@ onUnmounted(() => bodyResizeObserver?.disconnect())
   --agala-drawer-leave-easing: cubic-bezier(0.4, 0, 1, 1);
   position: fixed;
   inset: 0;
-  z-index: var(--agala-z-modal);
+  z-index: var(--agala-layer-drawer, var(--agala-z-modal));
   display: flex;
-  background: hsl(var(--agala-overlay) / var(--agala-drawer-overlay-opacity, 0.36));
+  background: hsl(var(--agala-overlay) / var(--agala-drawer-overlay-opacity, var(--agala-opacity-overlay)));
   overscroll-behavior: contain;
 }
 

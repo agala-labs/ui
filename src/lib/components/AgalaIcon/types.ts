@@ -1,54 +1,15 @@
-export type IconName =
-  | 'search'
-  | 'mail'
-  | 'eye'
-  | 'eye-off'
-  | 'user'
-  | 'users'
-  | 'flag'
-  | 'chevron'
-  | 'chevron-right'
-  | 'chevron-left'
-  | 'chevron-up'
-  | 'check'
-  | 'x'
-  | 'calendar'
-  | 'clock'
-  | 'refresh'
-  | 'minus'
-  | 'check-circle'
-  | 'alert-triangle'
-  | 'alert-circle'
-  | 'info'
-  | 'more-vertical'
-  | 'more-horizontal'
-  | 'arrow-up'
-  | 'arrow-down'
-  | 'trending-up'
-  | 'trending-down'
-  | 'home'
-  | 'bell'
-  | 'bold'
-  | 'settings'
-  | 'menu'
-  | 'panel-left'
-  | 'pencil'
-  | 'italic'
-  | 'link'
-  | 'trash'
-  | 'plus'
-  | 'filter'
-  | 'building'
-  | 'document'
-  | 'credit-card'
-  | 'lock'
-  | 'sign-out'
-  | 'chart-bar'
-  | 'archive'
-  | 'inbox'
-  | 'key'
-  | 'grid'
-  | 'columns'
-  | 'list'
-  | 'list-ordered'
-  | 'spinner'
+import type { iconNames } from './catalog'
+
+/** Vendor-neutral icon names supported by Agala UI. */
+export type IconName = (typeof iconNames)[number]
+
+export type IconSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+export type IconMotion = 'none' | 'hover' | 'active'
+
+export interface AgalaIconProps {
+  name: IconName
+  size?: IconSize | number | string
+  strokeWidth?: number
+  motion?: IconMotion
+  active?: boolean
+}

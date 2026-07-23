@@ -30,11 +30,31 @@ Every Agala color token stores raw HSL channels. Components add `hsl()` at the u
 | --- | --- |
 | Surfaces | `background`, `foreground`, `card`, `popover` and matching foreground tokens |
 | Actions | `primary`, `secondary`, `accent` and matching foreground tokens |
-| Status | `success`, `warning`, `danger` and matching foreground tokens |
-| Structure | `border`, `input`, `ring`, `overlay` |
-| Shape and depth | `radius*`, `shadow-*` |
-| Typography | `font-*`, `font-size-*`, `line-height-*`, `letter-spacing-*` |
-| Layout | control heights, navbar/sidebar dimensions, z-index, and breakpoint tokens |
+| Status | `success`, `warning`, `danger`, `info` and matching foreground tokens |
+| Structure | `border`, `input`, `input-background`, `ring`, `overlay`, `opacity-*` |
+| Spacing | `space-0` through `space-16`, including half steps for compact controls |
+| Shape and depth | `radius-xs` through `radius-full`, `shadow-*`, `shadow-popover`, `shadow-overlay` |
+| Typography | `font-*`, `font-size-xs` through `font-size-4xl`, `leading-*`, `tracking-*` |
+| Icons | `icon-size-xs` through `icon-size-xl`, stroke width, and motion distance/rotation |
+| Motion | `motion-duration-*`, `motion-easing-*`; existing `transition-*` tokens remain aliases |
+| Layers | `layer-base` through `layer-tooltip`; existing `z-*` tokens remain aliases |
+| Layout | control heights, navbar/sidebar dimensions, and breakpoint tokens |
+
+## Foundation scales
+
+Use the foundation tokens for reusable component decisions, then expose a component-level custom property when consumers need a supported local override.
+
+```css
+.product-panel {
+  gap: var(--agala-space-4);
+  padding: var(--agala-space-5);
+  border-radius: var(--agala-radius-lg);
+  box-shadow: var(--agala-shadow-popover);
+  transition: transform var(--agala-motion-duration-base) var(--agala-motion-easing-out);
+}
+```
+
+Named icon sizes are `xs` (12px), `sm` (14px), `md` (16px), `lg` (20px), and `xl` (24px). Prefer them over one-off dimensions inside controls. Layer tokens describe intent—drawer, modal, dropdown, popover, toast, tooltip—not arbitrary increments.
 
 ## Dark mode
 

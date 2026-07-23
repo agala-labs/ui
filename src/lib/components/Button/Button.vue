@@ -56,11 +56,11 @@ const cls = computed(() => [
     :disabled="disabled || loading"
     :data-loading="loading"
   >
-    <AgalaIcon v-if="loading" name="spinner" :size="14" />
+    <AgalaIcon v-if="loading" name="spinner" size="sm" />
     <AgalaIcon
       v-else-if="icon"
       :name="icon as IconName"
-      :size="14"
+      size="sm"
     />
     <slot />
   </button>
@@ -98,7 +98,7 @@ const cls = computed(() => [
 .btn:disabled,
 .btn[data-loading='true'] {
   pointer-events: none;
-  opacity: 0.5;
+  opacity: var(--agala-opacity-disabled);
 }
 
 /* Sizes */
