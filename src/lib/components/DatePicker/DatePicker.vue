@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { ref, computed, watch, nextTick } from 'vue'
+import { ref, computed, watch, nextTick, useId } from 'vue'
 import { AgalaIcon } from '../AgalaIcon'
 import { useFloatingOverlay } from '../../composables/useFloatingOverlay'
 import { usePopoverBehavior } from '../../composables/usePopoverBehavior'
 import type { DatePickerSize } from './types'
+
+const instanceId = useId()
 
 const props = withDefaults(defineProps<{
   modelValue?: string
@@ -18,6 +20,9 @@ const props = withDefaults(defineProps<{
   inline?: boolean
   highlightDates?: string[]
   displayMonth?: string
+  inputId?: string
+  ariaLabel?: string
+  ariaLabelledby?: string
   class?: string
 }>(), {
   size: 'md',
@@ -457,7 +462,7 @@ watch([viewYear, viewMonth], () => {
 </script>
 
 <template>
-  <div v-if="inline" ref="wrapperRef" class="inlinePanel" :class="$props.class" @keydown="handleGridKeyDown" id="agala-date-grid" role="grid" aria-label="Calendar">
+  <div v-if="inline" ref="wrapperRef" class="inlinePanel" :class="$props.class" @keydown="handleGridKeyDown" :id="`agala-date-grid-${instanceId}`" role="grid" aria-label="Calendar">
     <div class="header">
       <button type="button" class="navBtn" @click="prevMonth" aria-label="Previous month">
         <AgalaIcon name="chevron" :size="14" />
@@ -542,7 +547,7 @@ watch([viewYear, viewMonth], () => {
     </div>
   </div>
   <div v-else ref="wrapperRef" class="wrapper" :class="$props.class">
-    <div ref="triggerRef" :class="triggerRowCls" @click="handleTriggerClick" @keydown="handleTriggerKeyDown" tabindex="0" role="combobox" :aria-expanded="isOpen" aria-haspopup="grid" aria-controls="agala-date-grid" :aria-disabled="disabled">
+    <div ref="triggerRef" :class="triggerRowCls" @click="handleTriggerClick" @keydown="handleTriggerKeyDown" tabindex="0" role="combobox" :aria-expanded="isOpen" aria-haspopup="grid" :id="inputId" :aria-label="ariaLabel" :aria-labelledby="ariaLabelledby" :aria-controls="`agala-date-grid-${instanceId}`" :aria-disabled="disabled">
       <span class="triggerLabel">
         <AgalaIcon name="calendar" :size="14" />
         <span :class="displayValue ? 'triggerValue' : 'triggerPlaceholder'">
@@ -554,7 +559,7 @@ watch([viewYear, viewMonth], () => {
       </span>
     </div>
 
-      <div v-if="isOpen" ref="floatingRef" class="dropdown" popover="manual" :style="floatingStyles" id="agala-date-grid" role="grid" aria-label="Calendar" @keydown="handleGridKeyDown">
+      <div v-if="isOpen" ref="floatingRef" class="dropdown" popover="manual" :style="floatingStyles" :id="`agala-date-grid-${instanceId}`" role="grid" aria-label="Calendar" @keydown="handleGridKeyDown">
         <div class="header">
           <button type="button" class="navBtn" @click="prevMonth" aria-label="Previous month">
             <AgalaIcon name="chevron" :size="14" />

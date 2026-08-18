@@ -23,5 +23,8 @@ export interface SelectProps {
   errorMessage?: string
   maxDisplayed?: number
   maxSelections?: number
+  inputId?: string
+  ariaLabel?: string
+  ariaLabelledby?: string
   class?: string
 }

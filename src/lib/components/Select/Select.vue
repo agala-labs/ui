@@ -4,11 +4,14 @@ import {
   computed,
   watch,
   nextTick,
+  useId,
 } from 'vue'
 import { AgalaIcon } from '../AgalaIcon'
 import { useFloatingOverlay } from '../../composables/useFloatingOverlay'
 import { usePopoverBehavior } from '../../composables/usePopoverBehavior'
 import type { SelectOption, SelectSize } from './types'
+
+const instanceId = useId()
 
 type FlatItem =
   | { type: 'option'; option: SelectOption }
@@ -30,6 +33,9 @@ const props = withDefaults(defineProps<{
   maxDisplayed?: number
   maxSelections?: number
   wrapperClass?: string
+  inputId?: string
+  ariaLabel?: string
+  ariaLabelledby?: string
   class?: string
 }>(), {
   multiple: false,
@@ -133,7 +139,7 @@ const showClear = computed(() => {
 const activeDescendant = computed(() => {
   if (!isOpen.value) return undefined
   const item = flatFiltered.value[highlightedIdx.value]
-  if (item?.type === 'option') return `agala-opt-${highlightedIdx.value}`
+  if (item?.type === 'option') return `agala-opt-${instanceId}-${highlightedIdx.value}`
   return undefined
 })
 
@@ -394,7 +400,10 @@ watch(highlightedIdx, () => {
         :tabindex="disabled || loading ? -1 : 0"
         aria-haspopup="listbox"
         :aria-expanded="isOpen"
-        aria-controls="agala-select-listbox"
+        :id="inputId"
+        :aria-label="ariaLabel"
+        :aria-labelledby="ariaLabelledby"
+        :aria-controls="`agala-select-listbox-${instanceId}`"
         :aria-activedescendant="activeDescendant"
         :aria-disabled="disabled || loading"
         class="trigger"
@@ -467,7 +476,7 @@ watch(highlightedIdx, () => {
 
         <ul
           ref="listRef"
-          id="agala-select-listbox"
+          :id="`agala-select-listbox-${instanceId}`"
           class="list"
           role="listbox"
           :aria-multiselectable="multiple"
@@ -487,7 +496,7 @@ watch(highlightedIdx, () => {
             </li>
             <li
               v-else
-              :id="`agala-opt-${idx}`"
+              :id="`agala-opt-${instanceId}-${idx}`"
               role="option"
               :aria-selected="isSelected(item.option.value)"
               :aria-disabled="item.option.disabled || (isMaxed && !isSelected(item.option.value))"

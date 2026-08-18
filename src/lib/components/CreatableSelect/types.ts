@@ -15,5 +15,8 @@ export interface CreatableSelectProps {
   idKey?: string
   maxDisplayed?: number
   debounce?: number
+  inputId?: string
+  ariaLabel?: string
+  ariaLabelledby?: string
   class?: string
 }

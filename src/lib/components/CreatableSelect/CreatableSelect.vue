@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { ref, computed, watch, nextTick } from 'vue'
+import { ref, computed, watch, nextTick, useId } from 'vue'
 import { AgalaIcon } from '../AgalaIcon'
 import { useChipDisplay } from '../../composables/useChipDisplay'
 import { useKeyboardNav } from '../../composables/useKeyboardNav'
 import { useFloatingOverlay } from '../../composables/useFloatingOverlay'
 import { usePopoverBehavior } from '../../composables/usePopoverBehavior'
 import type { CreatableSelectProps } from './types'
+
+const instanceId = useId()
 
 const props = withDefaults(defineProps<CreatableSelectProps>(), {
   disabled: false,
@@ -310,7 +312,10 @@ watch(highlightedIdx, () => {
       :tabindex="disabled ? -1 : 0"
       aria-haspopup="listbox"
       :aria-expanded="isOpen"
-      aria-controls="agala-creatable-listbox"
+      :id="inputId"
+      :aria-label="ariaLabel"
+      :aria-labelledby="ariaLabelledby"
+      :aria-controls="`agala-creatable-listbox-${instanceId}`"
       :aria-disabled="disabled"
       class="triggerRow"
       :class="{
@@ -386,7 +391,7 @@ watch(highlightedIdx, () => {
         <!-- List -->
         <ul
           ref="listRef"
-          id="agala-creatable-listbox"
+          :id="`agala-creatable-listbox-${instanceId}`"
           class="list"
           role="listbox"
           tabindex="-1"
@@ -400,7 +405,7 @@ watch(highlightedIdx, () => {
             <!-- Create option -->
             <li
               v-if="item.type === 'create'"
-              :id="`agala-create-opt-${idx}`"
+              :id="`agala-create-opt-${instanceId}-${idx}`"
               role="option"
               aria-selected="false"
               class="option createOption"
@@ -419,7 +424,7 @@ watch(highlightedIdx, () => {
             <!-- Regular option -->
             <li
               v-else
-              :id="`agala-opt-${idx}`"
+              :id="`agala-opt-${instanceId}-${idx}`"
               role="option"
               :aria-selected="isSelected(item.value)"
               :aria-disabled="item.disabled"

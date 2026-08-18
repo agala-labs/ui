@@ -14,5 +14,8 @@ export interface DatePickerProps {
   inline?: boolean
   highlightDates?: string[]
   displayMonth?: string
+  inputId?: string
+  ariaLabel?: string
+  ariaLabelledby?: string
   class?: string
 }
