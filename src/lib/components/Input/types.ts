@@ -14,4 +14,7 @@ export interface InputProps {
   iconEndActionable?: boolean
   type?: string
   placeholder?: string
+  inputId?: string
+  ariaLabel?: string
+  ariaLabelledby?: string
 }

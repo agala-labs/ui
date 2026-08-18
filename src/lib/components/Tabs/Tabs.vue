@@ -7,6 +7,7 @@ let idCounter = 0
 
 const props = withDefaults(defineProps<TabsProps>(), {
   variant: 'underline',
+  orientation: 'horizontal',
   ariaLabel: undefined,
 })
 
@@ -33,8 +34,13 @@ function checkOverflow() {
   const list = tabListRef.value
   if (!list) return
   const tolerance = 2
-  canScrollStart.value = list.scrollLeft > tolerance
-  canScrollEnd.value = list.scrollLeft + list.clientWidth < list.scrollWidth - tolerance
+  if (props.orientation === 'vertical') {
+    canScrollStart.value = list.scrollTop > tolerance
+    canScrollEnd.value = list.scrollTop + list.clientHeight < list.scrollHeight - tolerance
+  } else {
+    canScrollStart.value = list.scrollLeft > tolerance
+    canScrollEnd.value = list.scrollLeft + list.clientWidth < list.scrollWidth - tolerance
+  }
 }
 
 onMounted(() => {
@@ -50,6 +56,8 @@ onUnmounted(() => {
 })
 
 watch(() => props.tabs, () => nextTick(checkOverflow), { deep: true })
+
+watch(() => props.orientation, () => nextTick(checkOverflow))
 
 watch(() => props.modelValue, () => {
   nextTick(() => {
@@ -89,6 +97,7 @@ function focusAndSelect(tab: TabItem) {
 
 const overflowCls = computed(() => [
   'tabListShell',
+  props.orientation === 'vertical' ? 'tabListShellVertical' : undefined,
   canScrollStart.value ? 'canScrollStart' : undefined,
   canScrollEnd.value ? 'canScrollEnd' : undefined,
 ].filter(Boolean).join(' '))
@@ -96,6 +105,12 @@ const overflowCls = computed(() => [
 const tabListCls = computed(() => [
   'tabList',
   props.variant === 'pills' ? 'tabsPills' : undefined,
+].filter(Boolean).join(' '))
+
+const rootCls = computed(() => [
+  'tabs',
+  props.class,
+  props.orientation === 'vertical' ? 'tabsVertical' : undefined,
 ].filter(Boolean).join(' '))
 
 const enabledTabs = computed(() => props.tabs.filter(t => !t.disabled))
@@ -109,17 +124,30 @@ function handleKeyDown(e: KeyboardEvent, currentValue: string) {
   const idx = tabs.findIndex(t => t.value === currentValue)
   if (idx === -1) return
 
+  const vertical = props.orientation === 'vertical'
   let next = -1
-  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
-    e.preventDefault()
-    next = (idx + 1) % tabs.length
-  } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-    e.preventDefault()
-    next = (idx - 1 + tabs.length) % tabs.length
-  } else if (e.key === 'Home') {
+  if (vertical) {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      next = (idx + 1) % tabs.length
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      next = (idx - 1 + tabs.length) % tabs.length
+    }
+  } else {
+    if (e.key === 'ArrowRight') {
+      e.preventDefault()
+      next = (idx + 1) % tabs.length
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault()
+      next = (idx - 1 + tabs.length) % tabs.length
+    }
+  }
+
+  if (next === -1 && e.key === 'Home') {
     e.preventDefault()
     next = 0
-  } else if (e.key === 'End') {
+  } else if (next === -1 && e.key === 'End') {
     e.preventDefault()
     next = tabs.length - 1
   }
@@ -137,13 +165,13 @@ function tabCls(tab: TabItem) {
 </script>
 
 <template>
-  <div :class="['tabs', props.class].filter(Boolean).join(' ')">
+  <div :class="rootCls">
     <div :class="overflowCls">
       <div
         ref="tabListRef"
         :class="tabListCls"
         role="tablist"
-        aria-orientation="horizontal"
+        :aria-orientation="orientation"
         :aria-label="ariaLabel"
         @scroll="checkOverflow"
       >
@@ -290,6 +318,86 @@ function tabCls(tab: TabItem) {
     flex-shrink: 0;
     min-height: 2.75rem;
   }
+}
+
+/* Vertical orientation */
+.tabsVertical {
+  flex-direction: row;
+  align-items: stretch;
+}
+
+.tabListShellVertical {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.tabListShellVertical .tabList {
+  width: auto;
+  min-width: var(--agala-tab-vertical-rail-min-width, 11rem);
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: stretch;
+  border-bottom: none;
+  border-right: var(--agala-tab-vertical-rail-border, var(--agala-border-width) solid hsl(var(--agala-border)));
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: none;
+  min-height: 0;
+}
+
+.tabListShellVertical .tabList::-webkit-scrollbar {
+  display: none;
+}
+
+.tabListShellVertical .tabList:not(.tabsPills) .tabBtn {
+  border-bottom: none;
+  border-right: 2px solid transparent;
+  margin-bottom: 0;
+  margin-right: calc(-1 * var(--agala-border-width));
+  text-align: left;
+}
+
+.tabListShellVertical .tabList:not(.tabsPills) .tabBtn:focus-visible {
+  border-radius: var(--agala-radius-sm) 0 0 var(--agala-radius-sm);
+  outline-offset: -2px;
+}
+
+.tabListShellVertical .tabList:not(.tabsPills) .tabBtnActive {
+  border-bottom: none;
+  border-right: var(--agala-tab-active-vertical-border, 2px solid hsl(var(--agala-primary)));
+}
+
+.tabListShellVertical .tabList.tabsPills {
+  width: auto;
+  flex-direction: column;
+  align-items: flex-start;
+  align-self: flex-start;
+  border-right: none;
+}
+
+.tabsVertical > .tabPanel {
+  padding-top: 0;
+  padding-left: 1.25rem;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.tabListShellVertical.canScrollStart:not(.canScrollEnd) .tabList {
+  mask-image: linear-gradient(to bottom, transparent, black 1rem);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 1rem);
+}
+
+.tabListShellVertical.canScrollEnd:not(.canScrollStart) .tabList {
+  mask-image: linear-gradient(to bottom, black calc(100% - 1rem), transparent);
+  -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 1rem), transparent);
+}
+
+.tabListShellVertical.canScrollStart.canScrollEnd .tabList {
+  mask-image: linear-gradient(to bottom, transparent, black 1rem, black calc(100% - 1rem), transparent);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 1rem, black calc(100% - 1rem), transparent);
 }
 
 /* Pills variant */

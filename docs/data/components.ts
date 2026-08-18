@@ -58,7 +58,6 @@ const additionalExamples: Record<string, AdditionalExample> = {
   sidebar: { label: 'Comfortable tree', description: 'Use comfortable indentation when nested destinations need stronger hierarchy.', snippet: `<AgalaSidebar v-model:active-value="active" v-model:expanded="expanded" :items="items" indent="comfortable" />` },
   'section-nav': { label: 'Kervo plain', description: 'The same component can become an icon-led, comfortable local navigation through props and theme tokens.', snippet: `<AgalaSectionNav v-model="section" :items="settings" variant="plain" density="comfortable" />` },
   table: { label: 'Loading and empty', description: 'Tables preserve their columns while loading and explain an empty result.', snippet: `<AgalaTable :columns="columns" :rows="[]" loading :loading-rows="3" empty-message="No matching members" />` },
-  tabs: { label: 'Pills navigation', description: 'Use loose pills for secondary content navigation; they remain tabs, not form values or mode toggles.', snippet: `<AgalaTabs v-model="tab" :tabs="tabs" variant="pills" aria-label="Project sections"><template #panel-overview>Project overview</template></AgalaTabs>` },
   calendar: { label: 'List view', description: 'List view prioritizes chronological scanning in narrow or agenda-focused contexts.', snippet: `<AgalaCalendar v-model:view="view" v-model:current-date="date" :events="events" :available-views="['list']" />` },
   'list-group': { label: 'Card rows', description: 'Card rows suit independently actionable records with clear separation.', snippet: `<AgalaListGroup variant="cards" gap="0.5rem"><AgalaListGroupItem label="Main warehouse" subtitle="184 products" action-icon="chevron-right" /></AgalaListGroup>` },
   avatar: { label: 'Shapes', description: 'Choose shape from the represented object, not decoration.', snippet: `<AgalaAvatar fallback="AL" shape="circle" />\n<AgalaAvatar fallback="HQ" shape="square" />` },
@@ -121,8 +120,8 @@ export const components: ComponentMeta[] = [
   },
   {
     slug: 'input', name: 'Input', exports: ['AgalaInput'], description: 'Captures a single line of text with optional icons and validation.',
-    props: [p('modelValue', 'string', 'Value used by v-model.'), p('size', "'sm' | 'md' | 'lg'", 'Control size.', "'md'"), p('variant', "'default' | 'ghost'", 'Visual treatment.', "'default'"), p('type', 'string', 'Native input type.', "'text'"), p('placeholder', 'string', 'Placeholder text.'), p('iconStart / iconEnd', 'string', 'Agala icon names.'), p('iconEndActionable', 'boolean', 'Makes the trailing icon interactive.', 'false'), p('error', 'boolean', 'Sets invalid styling.', 'false'), p('errorMessage', 'string', 'Inline error copy.'), p('disabled / readonly', 'boolean', 'Native input states.', 'false')],
-    events: ['update:modelValue(value: string)', 'icon-end-click'], accessibility: 'For a visible label, pair with FormField. Invalid state is exposed with aria-invalid.',
+    props: [p('modelValue', 'string', 'Value used by v-model.'), p('size', "'sm' | 'md' | 'lg'", 'Control size.', "'md'"), p('variant', "'default' | 'ghost'", 'Visual treatment.', "'default'"), p('type', 'string', 'Native input type.', "'text'"), p('placeholder', 'string', 'Placeholder text.'), p('iconStart / iconEnd', 'string', 'Agala icon names.'), p('iconEndActionable', 'boolean', 'Makes the trailing icon interactive.', 'false'), p('error', 'boolean', 'Sets invalid styling.', 'false'), p('errorMessage', 'string', 'Inline error copy.'), p('disabled / readonly', 'boolean', 'Native input states.', 'false'), p('inputId', 'string', 'ID bound to the native input; use for FormField htmlFor.'), p('ariaLabel', 'string', 'Accessible name bound to the native input.'), p('ariaLabelledby', 'string', 'Referenced label id bound to the native input.')],
+    events: ['update:modelValue(value: string)', 'icon-end-click'], accessibility: 'For a visible label, pair with FormField. Invalid state is exposed with aria-invalid. inputId, ariaLabel, and ariaLabelledby bind to the native input, never the wrapper.',
     snippet: `<AgalaInput v-model="email" type="email" icon-start="mail" placeholder="you@example.com" />`,
   },
   {
@@ -300,9 +299,14 @@ export const components: ComponentMeta[] = [
   },
   {
     slug: 'tabs', name: 'Tabs', exports: ['AgalaTabs'], description: 'Navigates among related content panels while preserving context.',
-    props: [p('tabs', 'TabItem[]', 'Required tab definitions.'), p('modelValue', 'string', 'Required active tab.'), p('variant', "'underline' | 'pills'", 'Visual treatment.', "'underline'"), p('ariaLabel', 'string', 'Accessible name for the tab list.'), p('class', 'string', 'Consumer override class.')],
-    events: ['update:modelValue(value: string)'], slots: ['panel-<value>', 'tab-<value> — receives { tab, active }'], accessibility: 'Implements tablist, tab, and tabpanel relationships. Arrow keys, Home, and End move focus and skip disabled tabs. Use Segmented Control instead when changing a form value or immediate view mode.',
+    props: [p('tabs', 'TabItem[]', 'Required tab definitions.'), p('modelValue', 'string', 'Required active tab.'), p('variant', "'underline' | 'pills'", 'Visual treatment.', "'underline'"), p('orientation', "'horizontal' | 'vertical'", 'Axis of the tab strip and its arrows.', "'horizontal'"), p('ariaLabel', 'string', 'Accessible name for the tab list.'), p('class', 'string', 'Consumer override class.')],
+    events: ['update:modelValue(value: string)'], slots: ['panel-<value>', 'tab-<value> — receives { tab, active }'], accessibility: 'Implements tablist, tab, and tabpanel relationships. Arrow keys follow the configured orientation (Left/Right horizontally, Up/Down vertically), Home, and End skip disabled tabs. Use Segmented Control instead when changing a form value or immediate view mode.',
     snippet: `<AgalaTabs v-model="tab" :tabs="tabs"><template #panel-overview>Overview</template></AgalaTabs>`,
+    examples: [
+      { id: 'default', label: 'Default', snippet: `<AgalaTabs v-model="tab" :tabs="tabs"><template #panel-overview>Overview</template></AgalaTabs>` },
+      { id: 'pills', label: 'Pills navigation', description: 'Use loose pills for secondary content navigation; they remain tabs, not form values or mode toggles.', snippet: `<AgalaTabs v-model="tab" :tabs="tabs" variant="pills" aria-label="Project sections"><template #panel-overview>Project overview</template></AgalaTabs>` },
+      { id: 'vertical', label: 'Vertical rail', description: 'A side rail works for configuration lists: tabs read top-to-bottom beside one adjacent panel.', snippet: `<AgalaTabs v-model="tab" :tabs="tabs" orientation="vertical" variant="underline" aria-label="Project sections"><template #panel-overview>Project overview</template></AgalaTabs>` },
+    ],
   },
   {
     slug: 'calendar', name: 'Calendar', exports: ['AgalaCalendar'], description: 'Displays events in month, week, day, or list views and supports time-slot selection.',

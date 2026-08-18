@@ -18,6 +18,9 @@ const props = withDefaults(defineProps<{
   type?: string
   placeholder?: string
   wrapperClass?: string
+  inputId?: string
+  ariaLabel?: string
+  ariaLabelledby?: string
   class?: string
 }>(), {
   size: 'md',
@@ -97,12 +100,15 @@ const cls = computed(() => [
         <AgalaIcon :name="iconStart as IconName" size="sm" />
       </span>
       <input
+        :id="inputId"
         ref="inputRef"
         :class="cls"
         :value="modelValue"
         :disabled="disabled"
         :readonly="readonly"
         :aria-invalid="error"
+        :aria-label="ariaLabel"
+        :aria-labelledby="ariaLabelledby"
         :type="effectiveType"
         :placeholder="placeholder"
         @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"

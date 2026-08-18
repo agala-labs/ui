@@ -571,6 +571,8 @@ const events = [
       v-else-if="slug === 'tabs'"
       v-model="tab"
       :tabs="tabs"
+      :variant="example === 'pills' ? 'pills' : undefined"
+      :orientation="example === 'vertical' ? 'vertical' : undefined"
       aria-label="Project sections"
     >
       <template #tab-activity>

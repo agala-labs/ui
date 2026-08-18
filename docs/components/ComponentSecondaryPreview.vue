@@ -396,20 +396,6 @@ function openManagedModal() {
       :loading-rows="3"
       empty-message="No matching members"
     />
-    <AgalaTabs
-      v-else-if="slug === 'tabs'"
-      v-model="tab"
-      :tabs="tabs"
-      variant="pills"
-      aria-label="Project sections"
-    >
-      <template #panel-overview>
-        <p>Project overview</p>
-      </template>
-      <template #panel-activity>
-        <p>Recent project activity</p>
-      </template>
-    </AgalaTabs>
     <div
       v-else-if="slug === 'calendar'"
       class="calendar-frame"
