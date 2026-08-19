@@ -22,6 +22,10 @@ test.describe('AgalaIcon registry', () => {
     await search.fill('stock')
     await expect(cards).toHaveCount(1)
     await expect(cards.first()).toContainText('stock-location')
+
+    await search.fill('arrow-left')
+    await expect(cards).toHaveCount(2)
+    await expect(cards.locator('[data-icon="arrow-left"]')).toHaveCount(1)
     await expectNoDocumentOverflow(page)
   })
 

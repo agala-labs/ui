@@ -1,6 +1,6 @@
 import type { Component } from 'vue'
 import {
-  Archive, ArrowDown, ArrowLeftRight, ArrowUp, Barcode, Bell, Bold, Bot, Boxes,
+  Archive, ArrowDown, ArrowLeft, ArrowLeftRight, ArrowUp, Barcode, Bell, Bold, Bot, Boxes,
   Building2, Calendar, ChartBar, Check, ChevronDown, ChevronLeft, ChevronRight,
   ChevronUp, CircleAlert, CircleCheck, ClipboardPlus, Clock, Columns3, Copy,
   CreditCard, Database, Download, Ellipsis, EllipsisVertical, ExternalLink, Eye,
@@ -38,7 +38,8 @@ const iconRegistry = {
   check: Check, x: X, calendar: Calendar, clock: Clock, refresh: RefreshCw, minus: Minus,
   'check-circle': CircleCheck, 'alert-triangle': TriangleAlert, 'alert-circle': CircleAlert,
   info: Info, 'more-vertical': EllipsisVertical, 'more-horizontal': Ellipsis,
-  'arrow-up': ArrowUp, 'arrow-down': ArrowDown, 'arrow-left-right': ArrowLeftRight,
+  'arrow-up': ArrowUp, 'arrow-down': ArrowDown, 'arrow-left': ArrowLeft,
+  'arrow-left-right': ArrowLeftRight,
   'trending-up': TrendingUp, 'trending-down': TrendingDown, home: House, bell: Bell,
   bold: Bold, settings: Settings, menu: Menu, 'panel-left': PanelLeft, pencil: Pencil,
   italic: Italic, link: Link, 'external-link': ExternalLink, copy: Copy, trash: Trash2,

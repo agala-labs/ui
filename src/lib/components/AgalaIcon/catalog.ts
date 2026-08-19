@@ -36,6 +36,7 @@ export const iconCatalog = [
   { name: 'more-horizontal', category: 'actions', origin: 'lucide' },
   { name: 'arrow-up', category: 'navigation', origin: 'lucide' },
   { name: 'arrow-down', category: 'navigation', origin: 'lucide' },
+  { name: 'arrow-left', category: 'navigation', origin: 'lucide' },
   { name: 'arrow-left-right', category: 'navigation', origin: 'lucide' },
   { name: 'trending-up', category: 'status', origin: 'lucide' },
   { name: 'trending-down', category: 'status', origin: 'lucide' },
