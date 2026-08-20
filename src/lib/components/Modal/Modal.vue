@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import { nextTick, onMounted, ref, watch } from 'vue'
+import { onBeforeMount, onMounted, ref, watch } from 'vue'
+import {
+  DialogContent,
+  DialogPortal,
+  DialogRoot,
+  DialogTitle,
+} from 'reka-ui'
 import { useBodyScrollLock } from '../../composables/useBodyScrollLock'
 import { AgalaIcon } from '../AgalaIcon'
 import type { ModalSize } from './types'
@@ -25,13 +31,17 @@ const emit = defineEmits<{
   'after-leave': []
 }>()
 
-const dialogRef = ref<HTMLElement | null>(null)
+// Reka owns the dialog focus scope and outside interaction handling. Keep a
+// small outer presence state so the public after-leave lifecycle and existing
+// visual motion remain unchanged.
+const rendered = ref(props.open)
 const lockActive = ref(props.open)
 let previouslyFocused: HTMLElement | null = null
 
 useBodyScrollLock(lockActive)
 
 function requestClose() {
+  if (!props.open) return
   emit('update:open', false)
   emit('close')
 }
@@ -44,65 +54,51 @@ const sizeMap: Record<ModalSize, string> = {
   full: 'dialogFull',
 }
 
-function handleBackdropClick(e: MouseEvent) {
-  const target = e.target as HTMLElement
-  const current = e.currentTarget as HTMLElement
-  if (target === current && props.dismissible) {
-    requestClose()
-  }
-}
-
-function handleKeyDown(e: KeyboardEvent) {
-  if (e.key === 'Escape' && props.escapeCloses) {
-    e.preventDefault()
-    requestClose()
+function handleRootOpenChange(value: boolean) {
+  if (value) {
+    emit('update:open', true)
     return
   }
 
-  if (e.key !== 'Tab') return
-  const focusable = getFocusableElements()
-  if (focusable.length === 0) {
-    e.preventDefault()
-    dialogRef.value?.focus()
-    return
-  }
-
-  const first = focusable[0]
-  const last = focusable[focusable.length - 1]
-  if (e.shiftKey && (document.activeElement === first || document.activeElement === dialogRef.value)) {
-    e.preventDefault()
-    last?.focus()
-  } else if (!e.shiftKey && document.activeElement === last) {
-    e.preventDefault()
-    first?.focus()
-  }
+  // DialogContent emits this through Reka's dismissable layer. Respect the
+  // existing controlled API and emit the legacy close event once.
+  requestClose()
 }
 
-function getFocusableElements() {
-  if (!dialogRef.value) return []
-  return Array.from(dialogRef.value.querySelectorAll<HTMLElement>(
-    'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
-  )).filter(element => !element.hidden && element.getAttribute('aria-hidden') !== 'true')
+function handleEscapeKeyDown(event: KeyboardEvent) {
+  if (!props.escapeCloses || !props.open) event.preventDefault()
 }
 
-async function activateModal() {
+function handlePointerDownOutside(event: Event) {
+  if (!props.dismissible || !props.open) event.preventDefault()
+}
+
+function rememberFocus() {
   if (!previouslyFocused) {
     previouslyFocused = document.activeElement instanceof HTMLElement
       ? document.activeElement
       : null
   }
-  lockActive.value = true
-  await nextTick()
-  const autofocus = dialogRef.value?.querySelector<HTMLElement>('[autofocus]')
-  ;(autofocus || getFocusableElements()[0] || dialogRef.value)?.focus({ preventScroll: true })
 }
 
+onBeforeMount(() => {
+  if (props.open) rememberFocus()
+})
+
 watch(() => props.open, (open) => {
-  if (open) void activateModal()
+  if (open) {
+    rememberFocus()
+    rendered.value = true
+    lockActive.value = true
+  } else {
+    // Keep the Reka content force-mounted until the outer transition has
+    // finished so the dialog itself participates in the leave animation.
+    rendered.value = false
+  }
 })
 
 onMounted(() => {
-  if (props.open) void activateModal()
+  if (props.open) lockActive.value = true
 })
 
 function onAfterLeave() {
@@ -115,69 +111,75 @@ function onAfterLeave() {
 </script>
 
 <template>
-  <Teleport to="body">
-    <Transition
-      name="modal"
-      appear
-      @after-leave="onAfterLeave"
-    >
-      <div
-        v-if="open"
-        class="overlay"
-        role="presentation"
-        @click="handleBackdropClick"
-        @keydown="handleKeyDown"
+  <DialogRoot
+    :open="open"
+    :modal="true"
+    @update:open="handleRootOpenChange"
+  >
+    <DialogPortal>
+      <Transition
+        name="modal"
+        appear
+        @after-leave="onAfterLeave"
       >
         <div
-          ref="dialogRef"
-          :class="[ 'dialog', sizeMap[size] ].filter(Boolean).join(' ')"
-          role="dialog"
-          aria-modal="true"
-          :aria-label="title || 'Dialog'"
-          tabindex="-1"
+          v-if="rendered"
+          class="overlay"
+          role="presentation"
         >
-          <div
-            v-if="!hideHeader"
-            class="header"
+          <DialogContent
+            :force-mount="true"
+            :class="[ 'dialog', sizeMap[size] ].filter(Boolean).join(' ')"
+            aria-modal="true"
+            :aria-label="title || 'Dialog'"
+            @escape-key-down="handleEscapeKeyDown"
+            @pointer-down-outside="handlePointerDownOutside"
           >
-            <h2
-              v-if="title"
-              class="title"
+            <div
+              v-if="!hideHeader"
+              class="header"
             >
-              {{ title }}
-            </h2>
-            <span v-else />
-            <button
-              v-if="dismissible"
-              type="button"
-              class="closeBtn"
-              aria-label="Close dialog"
-              @click="requestClose"
+              <DialogTitle
+                v-if="title"
+                as-child
+              >
+                <h2 class="title">
+                  {{ title }}
+                </h2>
+              </DialogTitle>
+              <span v-else />
+              <button
+                v-if="dismissible"
+                type="button"
+                class="closeBtn"
+                aria-label="Close dialog"
+                @click="requestClose"
+              >
+                <AgalaIcon
+                  name="x"
+                  :size="16"
+                />
+              </button>
+            </div>
+
+            <div class="body">
+              <slot />
+            </div>
+
+            <div
+              v-if="$slots.footer"
+              class="footer"
             >
-              <AgalaIcon
-                name="x"
-                :size="16"
+              <slot
+                name="footer"
+                :close="requestClose"
               />
-            </button>
-          </div>
-
-          <div class="body">
-            <slot />
-          </div>
-
-          <div
-            v-if="$slots.footer"
-            class="footer"
-          >
-            <slot
-              name="footer"
-              :close="requestClose"
-            />
-          </div>
+            </div>
+          </DialogContent>
         </div>
-      </div>
-    </Transition>
-  </Teleport>
+      </Transition>
+    </DialogPortal>
+  </DialogRoot>
 </template>
 
 <style scoped>
@@ -192,6 +194,7 @@ function onAfterLeave() {
   display: flex;
   align-items: center;
   justify-content: center;
+  pointer-events: auto;
   padding: 1.5rem;
   background-color: hsl(var(--agala-overlay) / var(--agala-opacity-overlay));
   overscroll-behavior: contain;

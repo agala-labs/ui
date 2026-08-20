@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { SwitchRoot, SwitchThumb } from 'reka-ui'
 import type { ToggleProps, ToggleSize } from './types'
 
 const props = withDefaults(defineProps<ToggleProps>(), {
@@ -25,24 +26,20 @@ const cls = computed(() => [
   props.class,
 ].filter(Boolean).join(' '))
 
-function onClick() {
-  if (!props.disabled) {
-    emit('update:modelValue', !props.modelValue)
-  }
+function onUpdate(value: boolean) {
+  emit('update:modelValue', value)
 }
 </script>
 
 <template>
-  <button
-    type="button"
-    role="switch"
-    :aria-checked="modelValue"
+  <SwitchRoot
+    :model-value="modelValue"
     :disabled="disabled"
     :class="cls"
-    @click="onClick"
+    @update:model-value="onUpdate"
   >
-    <span class="thumb" />
-  </button>
+    <SwitchThumb class="thumb" />
+  </SwitchRoot>
 </template>
 
 <style scoped>

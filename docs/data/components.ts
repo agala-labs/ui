@@ -199,7 +199,7 @@ export const components: ComponentMeta[] = [
   {
     slug: 'alert', name: 'Alert', exports: ['AgalaAlert'], description: 'Communicates contextual status or a recoverable issue.',
     props: [p('variant', "'info' | 'success' | 'warning' | 'danger'", 'Semantic status.', "'info'"), p('title', 'string', 'Optional heading.'), p('dismissible', 'boolean', 'Shows an internal close action.', 'false'), p('flat', 'boolean', 'Removes the neutral surface and radius.', 'false'), p('icon', 'string | false', 'Overrides or hides the icon.'), p('class', 'string', 'Consumer override class.')],
-    slots: ['default — alert body', 'action — recovery or follow-up control'], accessibility: 'Icon, content, action, and dismissal remain in DOM order. Actions wrap below narrow messages while staying keyboard reachable. Urgent messages should be announced by the consuming workflow when appropriate.',
+    slots: ['default — alert body', 'action — recovery or follow-up control'], accessibility: 'Icon, content, action, and dismissal remain in DOM order. Actions wrap below narrow messages while staying keyboard reachable. Urgent messages should be announced by the consuming workflow when appropriate. Dismissal collapses and fades the alert out; the transition respects reduced motion.',
     snippet: `<AgalaAlert variant="danger" title="Could not load"><template #default>Try again.</template><template #action><AgalaButton size="sm" variant="outline">Retry</AgalaButton></template></AgalaAlert>`,
   },
   {
@@ -265,7 +265,7 @@ export const components: ComponentMeta[] = [
   {
     slug: 'dropdown-menu', name: 'Dropdown Menu', exports: ['AgalaDropdownMenu'], description: 'Offers contextual commands in a top-layer menu that flips and shifts around viewport collisions.',
     props: [p('items', 'DropdownMenuItem[]', 'Required command collection.'), p('placement', "'bottom-start' | 'bottom-end'", 'Preferred menu alignment; the vertical side flips when needed.', "'bottom-end'"), p('class', 'string', 'Consumer override class.')],
-    slots: ['trigger'], accessibility: 'Supports Arrow keys, Enter, Escape, outside click, and disabled menu items.',
+    slots: ['trigger'], accessibility: 'Supports Arrow keys, Enter, Escape, outside click, and disabled menu items. Focus stays trapped inside an open menu — Tab cycles within it rather than closing it, matching the WAI-ARIA menu button pattern.',
     snippet: `<AgalaDropdownMenu :items="actions"><template #trigger><AgalaButton variant="outline">Actions</AgalaButton></template></AgalaDropdownMenu>`,
   },
   {

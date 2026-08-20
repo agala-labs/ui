@@ -1,13 +1,21 @@
 <script setup lang="ts">
-import { ref, computed, watch, nextTick, useId } from 'vue'
+import { ref, computed, useId, watch, nextTick } from 'vue'
+import {
+  ComboboxAnchor,
+  ComboboxContent,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxPortal,
+  ComboboxRoot,
+  ComboboxTrigger,
+  ComboboxViewport,
+} from 'reka-ui'
 import { AgalaIcon } from '../AgalaIcon'
 import { useChipDisplay } from '../../composables/useChipDisplay'
-import { useKeyboardNav } from '../../composables/useKeyboardNav'
-import { useFloatingOverlay } from '../../composables/useFloatingOverlay'
-import { usePopoverBehavior } from '../../composables/usePopoverBehavior'
 import type { CreatableSelectProps } from './types'
 
 const instanceId = useId()
+const listboxId = `agala-creatable-listbox-${instanceId}`
 
 const props = withDefaults(defineProps<CreatableSelectProps>(), {
   disabled: false,
@@ -28,12 +36,7 @@ const emit = defineEmits<{
 /* ─── Refs ─── */
 const isOpen = ref(false)
 const query = ref('')
-const highlightedIdx = ref(0)
-const wrapperRef = ref<HTMLDivElement>()
 const triggerRef = ref<HTMLDivElement>()
-const searchRef = ref<HTMLInputElement>()
-const listRef = ref<HTMLUListElement>()
-const floatingRef = ref<HTMLDivElement>()
 
 /** Internal value for uncontrolled mode */
 const internalValue = ref<string[]>([])
@@ -97,45 +100,6 @@ const createOptionLabel = computed(() => {
   return q ? `Crear "${q}"` : ''
 })
 
-/* ─── Flat items for keyboard nav ─── */
-type FlatItemType = 'option' | 'create'
-
-interface FlatItemEntry {
-  type: FlatItemType
-  label: string
-  value: string
-  disabled?: boolean
-}
-
-const flatItems = computed<FlatItemEntry[]>(() => {
-  const items: FlatItemEntry[] = []
-
-  if (showCreateOption.value) {
-    items.push({
-      type: 'create',
-      label: createOptionLabel.value,
-      value: query.value.trim(),
-    })
-  }
-
-  for (const opt of filteredOptions.value) {
-    items.push({
-      type: 'option',
-      label: String(opt[props.labelKey!] ?? opt.label),
-      value: String(opt[props.idKey!] ?? opt.value),
-      disabled: opt.disabled,
-    })
-  }
-
-  return items
-})
-
-/* ─── Dropdown position ─── */
-const { floatingStyles } = useFloatingOverlay(triggerRef, floatingRef, isOpen, {
-  placement: 'bottom-start',
-  matchReferenceWidth: true,
-})
-
 /* ─── Helpers ─── */
 function updateValue(newValue: string[]) {
   if (!isControlled.value) {
@@ -144,14 +108,10 @@ function updateValue(newValue: string[]) {
   emit('update:modelValue', newValue)
 }
 
-function toggleOption(value: string) {
-  const current = [...selectedValues.value]
-  const idx = current.indexOf(value)
-  if (idx >= 0) {
-    updateValue(current.filter((v) => v !== value))
-  } else {
-    updateValue([...current, value])
-  }
+function handleRootValueChange(value: unknown) {
+  updateValue(Array.isArray(value)
+    ? value.filter((entry): entry is string => typeof entry === 'string')
+    : [])
 }
 
 function isSelected(value: string) {
@@ -161,28 +121,11 @@ function isSelected(value: string) {
 function closeDropdown() {
   isOpen.value = false
   query.value = ''
-  highlightedIdx.value = 0
 }
 
 function openDropdown() {
   isOpen.value = true
   query.value = ''
-  highlightedIdx.value = 0
-}
-
-function removeLastChip() {
-  if (selectedValues.value.length > 0) {
-    const last = selectedValues.value[selectedValues.value.length - 1]
-    updateValue(selectedValues.value.filter((v) => v !== last))
-  }
-}
-
-function highlightItem(idx: number, disabled: boolean | undefined) {
-  if (!disabled) highlightedIdx.value = idx
-}
-
-function selectItem(idx: number, disabled: boolean | undefined) {
-  if (!disabled) toggleOption(flatItems.value[idx].value)
 }
 
 function handleCreate(text: string) {
@@ -196,46 +139,7 @@ function handleCreate(text: string) {
   closeDropdown()
 }
 
-/* ─── Keyboard navigation ─── */
-interface KeyboardNavItem {
-  type: FlatItemType
-  label: string
-  value: string
-  disabled?: boolean
-}
-
-const { handleKeyDown } = useKeyboardNav(
-  flatItems as unknown as { value: KeyboardNavItem[] },
-  highlightedIdx,
-  isOpen,
-  {
-    onSelect: (idx) => {
-      const item = flatItems.value[idx]
-      if (item) toggleOption(item.value)
-    },
-    onCreate: () => {
-      const text = query.value.trim()
-      if (text) handleCreate(text)
-      else closeDropdown()
-    },
-    onClose: () => {
-      closeDropdown()
-      triggerRef.value?.focus()
-    },
-    onRemoveLast: removeLastChip,
-  }
-)
-
 /* ─── Event handlers ─── */
-function handleTriggerClick() {
-  if (props.disabled) return
-  if (isOpen.value) {
-    closeDropdown()
-  } else {
-    openDropdown()
-  }
-}
-
 function handleTriggerKeyDown(e: KeyboardEvent) {
   if (props.disabled) return
   switch (e.key) {
@@ -264,26 +168,24 @@ function handleTriggerKeyDown(e: KeyboardEvent) {
 
 function handleSearchInput(e: Event) {
   query.value = (e.target as HTMLInputElement).value
-  highlightedIdx.value = 0
 }
 
 let debounceTimer: ReturnType<typeof setTimeout> | null = null
 
-function handleSearchKeyDown(e: KeyboardEvent) {
-  handleKeyDown(e)
-  if (e.key === 'Escape') {
-    query.value = ''
-    triggerRef.value?.focus()
-  }
+function handleCreateSelect(event: Event) {
+  event.preventDefault()
+  const text = query.value.trim()
+  if (text) handleCreate(text)
 }
 
 /* ─── Watches ─── */
-usePopoverBehavior(isOpen, wrapperRef, floatingRef, () => closeDropdown())
-
-// Focus search when opening
 watch(isOpen, (open) => {
   if (open) {
-    nextTick(() => searchRef.value?.focus({ preventScroll: true }))
+    nextTick(() => {
+      document.getElementById(listboxId)?.querySelector<HTMLInputElement>('.search')?.focus({ preventScroll: true })
+    })
+  } else {
+    query.value = ''
   }
 })
 
@@ -296,157 +198,194 @@ watch(query, (q) => {
   }
 })
 
-watch(highlightedIdx, () => {
-  if (!isOpen.value || !listRef.value) return
-  const el = listRef.value.children[highlightedIdx.value] as HTMLElement | undefined
-  el?.scrollIntoView({ block: 'nearest' })
-})
 </script>
 
 <template>
-  <div ref="wrapperRef" class="wrapper" :class="$props.class">
-    <!-- Trigger -->
-    <div
-      ref="triggerRef"
-      role="combobox"
-      :tabindex="disabled ? -1 : 0"
-      aria-haspopup="listbox"
-      :aria-expanded="isOpen"
-      :id="inputId"
-      :aria-label="ariaLabel"
-      :aria-labelledby="ariaLabelledby"
-      :aria-controls="`agala-creatable-listbox-${instanceId}`"
-      :aria-disabled="disabled"
-      class="triggerRow"
-      :class="{
-        triggerRowOpen: isOpen,
-        triggerRowDisabled: disabled,
-      }"
-      @click="handleTriggerClick"
-      @keydown="handleTriggerKeyDown"
+  <div
+    class="wrapper"
+    :class="$props.class"
+  >
+    <ComboboxRoot
+      v-model:open="isOpen"
+      :model-value="selectedValues"
+      multiple
+      ignore-filter
+      :disabled="disabled"
+      @update:model-value="handleRootValueChange"
     >
-      <!-- Chips -->
-      <div v-if="visibleChips.length > 0" class="chips">
-        <span
-          v-for="chip in visibleChips"
-          :key="chip.value"
-          class="chip"
+      <ComboboxAnchor as-child>
+        <ComboboxTrigger
+          as-child
+          :disabled="disabled"
         >
-          {{ chip.label }}
-          <button
-            type="button"
-            tabindex="-1"
-            class="chipRemove"
-            :aria-label="`Remove ${chip.label}`"
-            @click.stop="removeChip(chip.value)"
+          <div
+            :id="inputId"
+            ref="triggerRef"
+            class="triggerRow"
+            :class="{
+              triggerRowOpen: isOpen,
+              triggerRowDisabled: disabled,
+            }"
+            role="combobox"
+            :tabindex="disabled ? -1 : 0"
+            aria-haspopup="listbox"
+            :aria-expanded="isOpen"
+            :aria-controls="listboxId"
+            :aria-label="ariaLabel"
+            :aria-labelledby="ariaLabelledby"
+            :aria-disabled="disabled"
+            @keydown="handleTriggerKeyDown"
           >
-            <AgalaIcon name="x" :size="10" />
-          </button>
-        </span>
-        <span v-if="remainingCount > 0" class="moreChip">
-          +{{ remainingCount }} more
-        </span>
-      </div>
-      <span v-else class="triggerPlaceholder">{{ placeholder ?? 'Choose…' }}</span>
-
-      <!-- Clear -->
-      <button
-        v-if="selectedValues.length > 0 && !disabled"
-        type="button"
-        tabindex="-1"
-        class="clearBtn"
-        aria-label="Clear selection"
-        @click.stop="updateValue([])"
-      >
-        <AgalaIcon name="x" :size="12" />
-      </button>
-
-      <!-- Chevron -->
-      <span class="chevron" :class="isOpen ? 'chevronOpen' : undefined" aria-hidden="true">
-        <AgalaIcon name="chevron" :size="14" />
-      </span>
-    </div>
-
-    <!-- Dropdown -->
-      <div
-        v-if="isOpen"
-        ref="floatingRef"
-        class="dropdown"
-        popover="manual"
-        :style="floatingStyles"
-      >
-        <!-- Search -->
-        <div class="searchWrapper">
-          <input
-            ref="searchRef"
-            type="text"
-            class="search"
-            placeholder="Search or create…"
-            :value="query"
-            @input="handleSearchInput"
-            @keydown="handleSearchKeyDown"
-          />
-        </div>
-
-        <!-- List -->
-        <ul
-          ref="listRef"
-          :id="`agala-creatable-listbox-${instanceId}`"
-          class="list"
-          role="listbox"
-          tabindex="-1"
-          @keydown="handleKeyDown"
-        >
-          <li v-if="flatItems.length === 0" class="emptyMessage">
-            {{ query ? 'No results found.' : 'No options available.' }}
-          </li>
-
-          <template v-for="(item, idx) in flatItems" :key="`${item.type}-${item.value}-${idx}`">
-            <!-- Create option -->
-            <li
-              v-if="item.type === 'create'"
-              :id="`agala-create-opt-${instanceId}-${idx}`"
-              role="option"
-              aria-selected="false"
-              class="option createOption"
-              :class="{ optionHighlighted: idx === highlightedIdx }"
-              @mouseenter="highlightedIdx = idx"
-              @click.stop="handleCreate(item.value)"
+            <div
+              v-if="visibleChips.length > 0"
+              class="chips"
             >
-              <span class="createIcon" aria-hidden="true">
-                <AgalaIcon name="plus" :size="12" />
+              <span
+                v-for="chip in visibleChips"
+                :key="chip.value"
+                class="chip"
+              >
+                {{ chip.label }}
+                <button
+                  type="button"
+                  tabindex="-1"
+                  class="chipRemove"
+                  :aria-label="`Remove ${chip.label}`"
+                  @pointerdown.stop
+                  @click.stop="removeChip(chip.value)"
+                >
+                  <AgalaIcon
+                    name="x"
+                    :size="10"
+                  />
+                </button>
               </span>
-              <span class="optionContent">
-                <span class="createLabel">{{ item.label }}</span>
+              <span
+                v-if="remainingCount > 0"
+                class="moreChip"
+              >
+                +{{ remainingCount }} more
               </span>
-            </li>
-
-            <!-- Regular option -->
-            <li
+            </div>
+            <span
               v-else
-              :id="`agala-opt-${instanceId}-${idx}`"
-              role="option"
-              :aria-selected="isSelected(item.value)"
-              :aria-disabled="item.disabled"
-              class="option"
-              :class="{
-                optionHighlighted: idx === highlightedIdx,
-                optionSelected: isSelected(item.value),
-                optionDisabled: item.disabled,
-              }"
-              @mouseenter="highlightItem(idx, item.disabled)"
-              @click.stop="selectItem(idx, item.disabled)"
+              class="triggerPlaceholder"
+            >{{ placeholder ?? 'Choose…' }}</span>
+
+            <button
+              v-if="selectedValues.length > 0 && !disabled"
+              type="button"
+              tabindex="-1"
+              class="clearBtn"
+              aria-label="Clear selection"
+              @pointerdown.stop
+              @click.stop="updateValue([])"
             >
-              <span class="checkBox" aria-hidden="true">
-                <AgalaIcon v-if="isSelected(item.value)" name="check" :size="10" />
-              </span>
-              <span class="optionContent">
-                <span class="optionLabel">{{ item.label }}</span>
-              </span>
-            </li>
-          </template>
-        </ul>
-      </div>
+              <AgalaIcon
+                name="x"
+                :size="12"
+              />
+            </button>
+
+            <span
+              class="chevron"
+              :class="isOpen ? 'chevronOpen' : undefined"
+              aria-hidden="true"
+            >
+              <AgalaIcon
+                name="chevron"
+                :size="14"
+              />
+            </span>
+          </div>
+        </ComboboxTrigger>
+      </ComboboxAnchor>
+
+      <ComboboxPortal>
+        <div
+          :id="listboxId"
+          class="agala-creatable-select-portal"
+          style="display: contents"
+        >
+          <ComboboxContent
+            position="popper"
+            align="start"
+            class="dropdown"
+          >
+            <div class="searchWrapper">
+              <ComboboxInput
+                v-model="query"
+                class="search"
+                placeholder="Search or create…"
+                @input="handleSearchInput"
+              />
+            </div>
+
+            <ComboboxViewport
+              as="ul"
+              class="list"
+            >
+              <li
+                v-if="!showCreateOption && filteredOptions.length === 0"
+                class="emptyMessage"
+              >
+                {{ query ? 'No results found.' : 'No options available.' }}
+              </li>
+
+              <ComboboxItem
+                v-if="showCreateOption"
+                as="li"
+                :value="query.trim()"
+                :text-value="createOptionLabel"
+                class="option createOption"
+                @select="handleCreateSelect"
+              >
+                <span
+                  class="createIcon"
+                  aria-hidden="true"
+                >
+                  <AgalaIcon
+                    name="plus"
+                    :size="12"
+                  />
+                </span>
+                <span class="optionContent">
+                  <span class="createLabel">{{ createOptionLabel }}</span>
+                </span>
+              </ComboboxItem>
+
+              <ComboboxItem
+                v-for="option in filteredOptions"
+                :key="String(option[props.idKey!] ?? option.value)"
+                as="li"
+                :value="String(option[props.idKey!] ?? option.value)"
+                :text-value="String(option[props.labelKey!] ?? option.label)"
+                :disabled="option.disabled"
+                class="option"
+                :class="{
+                  optionSelected: isSelected(String(option[props.idKey!] ?? option.value)),
+                  optionDisabled: option.disabled,
+                }"
+              >
+                <span
+                  class="checkBox"
+                  aria-hidden="true"
+                >
+                  <AgalaIcon
+                    v-if="isSelected(String(option[props.idKey!] ?? option.value))"
+                    name="check"
+                    :size="10"
+                  />
+                </span>
+                <span class="optionContent">
+                  <span class="optionLabel">{{ String(option[props.labelKey!] ?? option.label) }}</span>
+                </span>
+              </ComboboxItem>
+            </ComboboxViewport>
+          </ComboboxContent>
+        </div>
+      </ComboboxPortal>
+    </ComboboxRoot>
   </div>
 </template>
 
@@ -595,17 +534,25 @@ watch(highlightedIdx, () => {
   background: hsl(var(--agala-muted));
 }
 
+/*
+ * Reka teleports this content via its own internal <Teleport>, which Vue's
+ * compiler can't see, so the scoped data-v-* attribute never lands on it.
+ * These rules are marked :global() (scoped to .agala-creatable-select-portal,
+ * a static class on the portal wrapper, to avoid colliding with the
+ * similarly-named Select/DatePicker portal rules) so they still apply to
+ * the portaled DOM.
+ */
+
 /* ── Dropdown ── */
-.dropdown {
-  position: fixed;
-  inset: auto;
+:global(.agala-creatable-select-portal .dropdown) {
   margin: 0;
   box-sizing: border-box;
   z-index: var(--agala-z-dropdown);
   display: flex;
   flex-direction: column;
-  max-width: var(--agala-floating-available-width, calc(100vw - 1rem));
-  max-height: min(24rem, 60vh, var(--agala-floating-available-height, 60vh));
+  width: var(--reka-combobox-trigger-width, auto);
+  max-width: var(--reka-combobox-content-available-width, calc(100vw - 1rem));
+  max-height: min(24rem, 60vh, var(--reka-combobox-content-available-height, 60vh));
   background-color: hsl(var(--agala-popover));
   color: hsl(var(--agala-popover-foreground));
   border: var(--agala-border-width) solid hsl(var(--agala-border));
@@ -615,12 +562,12 @@ watch(highlightedIdx, () => {
 }
 
 /* Search */
-.searchWrapper {
+:global(.agala-creatable-select-portal .searchWrapper) {
   padding: 0.5rem;
   border-bottom: var(--agala-border-width) solid hsl(var(--agala-border));
 }
 
-.search {
+:global(.agala-creatable-select-portal .search) {
   width: 100%;
   height: 2rem;
   padding: 0 0.5rem;
@@ -634,17 +581,17 @@ watch(highlightedIdx, () => {
   transition: border-color var(--agala-transition-fast), box-shadow var(--agala-transition-fast);
 }
 
-.search::placeholder {
+:global(.agala-creatable-select-portal .search::placeholder) {
   color: hsl(var(--agala-muted-foreground));
 }
 
-.search:focus {
+:global(.agala-creatable-select-portal .search:focus) {
   border-color: hsl(var(--agala-ring));
   box-shadow: 0 0 0 2px hsl(var(--agala-ring) / 0.15);
 }
 
 /* ── List ── */
-.list {
+:global(.agala-creatable-select-portal .list) {
   list-style: none;
   margin: 0;
   padding: 0.25rem;
@@ -653,7 +600,7 @@ watch(highlightedIdx, () => {
 }
 
 /* ── Option ── */
-.option {
+:global(.agala-creatable-select-portal .option) {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -664,32 +611,38 @@ watch(highlightedIdx, () => {
   transition: background-color var(--agala-transition-fast);
 }
 
-.option:not(.optionDisabled):hover {
+:global(.agala-creatable-select-portal .option:not(.optionDisabled):hover) {
   background-color: hsl(var(--agala-accent));
   color: hsl(var(--agala-accent-foreground));
 }
 
-.optionHighlighted {
+:global(.agala-creatable-select-portal .optionHighlighted) {
   background-color: hsl(var(--agala-accent));
   color: hsl(var(--agala-accent-foreground));
 }
 
-.optionSelected {
+:global(.agala-creatable-select-portal .option[data-highlighted]) {
+  background-color: hsl(var(--agala-accent));
+  color: hsl(var(--agala-accent-foreground));
+}
+
+:global(.agala-creatable-select-portal .optionSelected) {
   background-color: hsl(var(--agala-primary) / 0.08);
   color: hsl(var(--agala-primary));
 }
 
-.optionSelected.optionHighlighted {
+:global(.agala-creatable-select-portal .optionSelected.optionHighlighted),
+:global(.agala-creatable-select-portal .optionSelected[data-highlighted]) {
   background-color: hsl(var(--agala-primary) / 0.15);
 }
 
-.optionDisabled {
+:global(.agala-creatable-select-portal .optionDisabled) {
   cursor: default;
   opacity: 0.4;
 }
 
 /* Option content */
-.optionContent {
+:global(.agala-creatable-select-portal .optionContent) {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -697,7 +650,7 @@ watch(highlightedIdx, () => {
   min-width: 0;
 }
 
-.optionLabel {
+:global(.agala-creatable-select-portal .optionLabel) {
   line-height: var(--agala-line-height-normal);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -705,7 +658,7 @@ watch(highlightedIdx, () => {
 }
 
 /* Checkbox */
-.checkBox {
+:global(.agala-creatable-select-portal .checkBox) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -718,28 +671,29 @@ watch(highlightedIdx, () => {
   transition: background-color var(--agala-transition-fast), border-color var(--agala-transition-fast);
 }
 
-.optionSelected .checkBox {
+:global(.agala-creatable-select-portal .optionSelected .checkBox) {
   background-color: hsl(var(--agala-primary));
   border-color: hsl(var(--agala-primary));
 }
 
 /* Create option */
-.createOption {
+:global(.agala-creatable-select-portal .createOption) {
   color: hsl(var(--agala-primary));
   font-weight: var(--agala-font-weight-medium);
 }
 
-.createOption.optionHighlighted {
+:global(.agala-creatable-select-portal .createOption.optionHighlighted),
+:global(.agala-creatable-select-portal .createOption[data-highlighted]) {
   background-color: hsl(var(--agala-primary) / 0.08);
 }
 
-.createIcon {
+:global(.agala-creatable-select-portal .createIcon) {
   display: inline-flex;
   align-items: center;
   flex-shrink: 0;
 }
 
-.createLabel {
+:global(.agala-creatable-select-portal .createLabel) {
   line-height: var(--agala-line-height-normal);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -747,7 +701,7 @@ watch(highlightedIdx, () => {
 }
 
 /* ── Messages ── */
-.emptyMessage {
+:global(.agala-creatable-select-portal .emptyMessage) {
   padding: 0.75rem 0.625rem;
   text-align: center;
   font-size: var(--agala-font-size-base);

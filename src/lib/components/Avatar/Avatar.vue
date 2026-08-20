@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { computed } from 'vue'
+import { AvatarFallback, AvatarImage, AvatarRoot } from 'reka-ui'
 import { AgalaIcon } from '../AgalaIcon'
 import type { AvatarProps } from './types'
 
@@ -7,8 +8,6 @@ const props = withDefaults(defineProps<AvatarProps>(), {
   size: 'md',
   shape: 'circle',
 })
-
-const imgError = ref(false)
 
 const presetSizes = ['xs', 'sm', 'md', 'lg', 'xl'] as const
 
@@ -53,19 +52,31 @@ const displayFallback = computed(() => props.fallback?.slice(0, 2).toUpperCase()
 </script>
 
 <template>
-  <span :class="cls" :style="customSizeStyle">
-    <img
-      v-if="src && !imgError"
+  <AvatarRoot
+    :class="cls"
+    :style="customSizeStyle"
+  >
+    <AvatarImage
+      v-if="src"
       :src="src"
       :alt="alt"
       class="avatarImg"
-      @error="imgError = true"
     />
-    <span v-else-if="displayFallback" class="avatarFallback" aria-hidden="true">
-      {{ displayFallback }}
-    </span>
-    <AgalaIcon v-else name="user" :size="iconSize" aria-hidden="true" />
-  </span>
+    <AvatarFallback aria-hidden="true">
+      <span
+        v-if="displayFallback"
+        class="avatarFallback"
+      >
+        {{ displayFallback }}
+      </span>
+      <AgalaIcon
+        v-else
+        name="user"
+        :size="iconSize"
+        aria-hidden="true"
+      />
+    </AvatarFallback>
+  </AvatarRoot>
 </template>
 
 <style scoped>

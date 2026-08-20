@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
+import { ToggleGroupItem, ToggleGroupRoot } from 'reka-ui'
 import { AgalaIcon } from '../AgalaIcon'
 import { useMediaQuery } from '../../composables/useMediaQuery'
 import type { SegmentedControlProps, SegmentedControlOption } from './types'
@@ -22,23 +23,11 @@ const sizeMap: Record<string, string> = {
   lg: 'segLg',
 }
 
-const enabledOptions = computed(() => props.options.filter((o) => !o.disabled))
-const rovingValue = computed(() => {
-  const selected = enabledOptions.value.find(option => option.value === props.modelValue)
-  return selected?.value ?? enabledOptions.value[0]?.value
-})
-
 const rootRef = ref<HTMLDivElement | null>(null)
-const optionRefs = new Map<string, HTMLButtonElement>()
 const canScrollStart = ref(false)
 const canScrollEnd = ref(false)
 const { matches: reduceMotion } = useMediaQuery('(prefers-reduced-motion: reduce)')
 let resizeObserver: ResizeObserver | undefined
-
-function setOptionRef(value: string, element: unknown) {
-  if (element instanceof HTMLButtonElement) optionRefs.set(value, element)
-  else optionRefs.delete(value)
-}
 
 function updateOverflow() {
   const root = rootRef.value
@@ -49,7 +38,9 @@ function updateOverflow() {
 }
 
 function revealOption(value: string) {
-  optionRefs.get(value)?.scrollIntoView({
+  const option = Array.from(rootRef.value?.querySelectorAll<HTMLElement>('[data-seg]') ?? [])
+    .find(element => element.dataset.seg === value)
+  option?.scrollIntoView({
     behavior: reduceMotion.value ? 'auto' : 'smooth',
     inline: 'nearest',
     block: 'nearest',
@@ -104,94 +95,77 @@ function optionCls(opt: SegmentedControlOption): string {
   return classes.join(' ')
 }
 
-function select(opt: SegmentedControlOption) {
-  if (props.disabled || opt.disabled) return
-  emit('update:modelValue', opt.value)
+function handleGroupUpdate(value: unknown) {
+  // ToggleGroup deselects a selected item; SegmentedControl has always been
+  // a required single-choice control, so keep the current value instead.
+  const nextValue = typeof value === 'string' ? value : props.modelValue
+  if (!nextValue) return
+  emit('update:modelValue', nextValue)
   nextTick(() => {
-    optionRefs.get(opt.value)?.focus({ preventScroll: true })
-    revealOption(opt.value)
+    const option = Array.from(rootRef.value?.querySelectorAll<HTMLElement>('[data-seg]') ?? [])
+      .find(element => element.dataset.seg === nextValue)
+    option?.focus({ preventScroll: true })
+    revealOption(nextValue)
   })
-}
-
-function handleKeyDown(e: KeyboardEvent, currentValue: string) {
-  const opts = enabledOptions.value
-  if (opts.length <= 1) return
-
-  const idx = opts.findIndex((o) => o.value === currentValue)
-  if (idx === -1) return
-
-  let next = -1
-
-  switch (e.key) {
-    case 'ArrowLeft':
-    case 'ArrowUp':
-      e.preventDefault()
-      next = (idx - 1 + opts.length) % opts.length
-      break
-    case 'ArrowRight':
-    case 'ArrowDown':
-      e.preventDefault()
-      next = (idx + 1) % opts.length
-      break
-    case 'Home':
-      e.preventDefault()
-      next = 0
-      break
-    case 'End':
-      e.preventDefault()
-      next = opts.length - 1
-      break
-  }
-
-  if (next !== -1) {
-    select(opts[next])
-  }
 }
 
 const iconSize = computed(() => props.size === 'lg' ? 16 : 14)
 </script>
 
 <template>
-  <div
-    ref="rootRef"
-    :class="wrapperCls"
-    role="radiogroup"
-    aria-orientation="horizontal"
-    :aria-label="ariaLabel"
-    :aria-disabled="disabled || undefined"
-    @scroll="updateOverflow"
+  <ToggleGroupRoot
+    as-child
+    type="single"
+    orientation="horizontal"
+    :model-value="modelValue"
+    :disabled="disabled"
+    @update:model-value="handleGroupUpdate"
   >
-    <button
-      v-for="opt in options"
-      :key="opt.value"
-      :ref="element => setOptionRef(opt.value, element)"
-      :data-seg="opt.value"
-      role="radio"
-      type="button"
-      :aria-label="opt.label"
-      :aria-checked="modelValue === opt.value"
-      :tabindex="rovingValue === opt.value ? 0 : -1"
-      :disabled="disabled || opt.disabled"
-      :class="optionCls(opt)"
-      @click="select(opt)"
-      @keydown="handleKeyDown($event, opt.value)"
+    <div
+      ref="rootRef"
+      :class="wrapperCls"
+      role="radiogroup"
+      aria-orientation="horizontal"
+      :aria-label="ariaLabel"
+      :aria-disabled="disabled || undefined"
+      @scroll="updateOverflow"
     >
-      <AgalaIcon
-        v-if="opt.icon"
-        :name="opt.icon"
-        :size="iconSize"
-      />
-      <span class="segLabel">
-        <slot
-          :name="`option-${opt.value}`"
-          :option="opt"
-          :selected="modelValue === opt.value"
-        >
-          {{ opt.label }}
-        </slot>
-      </span>
-    </button>
-  </div>
+      <!--
+        role="radio" implies the native radiogroup convention where arrow-key
+        navigation selects as it moves focus, not just Enter/Space. Reka's
+        ToggleGroupItem only provides roving focus (a toggle button's normal
+        keyboard model), so @focus re-adds selection-follows-focus to match
+        what the role promises to assistive tech.
+      -->
+      <ToggleGroupItem
+        v-for="opt in options"
+        :key="opt.value"
+        :data-seg="opt.value"
+        role="radio"
+        :aria-label="opt.label"
+        :aria-checked="modelValue === opt.value"
+        :disabled="disabled || opt.disabled"
+        :class="optionCls(opt)"
+        :value="opt.value"
+        @focus="!disabled && !opt.disabled && handleGroupUpdate(opt.value)"
+      >
+        <AgalaIcon
+          v-if="opt.icon"
+          :name="opt.icon"
+          :size="iconSize"
+        />
+        <span class="segLabel">
+          <slot
+            :name="`option-${opt.value}`"
+            :option="opt"
+            :selected="modelValue === opt.value"
+          >
+            {{ opt.label }}
+          </slot>
+        </span>
+      </ToggleGroupItem>
+    </div>
+  </ToggleGroupRoot>
 </template>
 
 <style scoped>

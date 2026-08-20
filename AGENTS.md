@@ -5,7 +5,7 @@ Agala Labs UI - Agent Instructions
 **Agala Labs UI** (`@agala-labs/ui`) is a Vue 3 component library with scoped CSS, semantic HSL design tokens, accessible primitives, and a companion charts workspace package.
 
 - **Tech stack:** Vue 3 + TypeScript + Vite + scoped CSS. No CSS Modules.
-- **Runtime:** Vue peer dependency (`^3.3.0`); current source also uses `date-fns` for date/calendar utilities.
+- **Runtime:** Vue peer dependency (`>=3.5.0 <4`); components use `reka-ui` as headless behavior primitives internally, plus `date-fns` for date/calendar utilities.
 - **Style system:** Semantic CSS custom properties in HSL format with built-in dark mode and optional themes.
 - **Current phase:** Active development; check source before assuming component APIs.
 
@@ -88,22 +88,23 @@ Public components include Button, Input, FormField, Select, CreatableSelect, Dat
 
 Public utilities currently exported from `src/lib/index.ts` are `useMediaQuery` and date helpers. Other composables in `src/lib/composables` are internal unless explicitly exported.
 
-## AI Skill Maintenance
+## AI Skill & Documentation Maintenance
 
 The versioned consumer guidance shipped with this repository lives in:
 
 - `skills/agala-ui/SKILL.md` for `@agala-labs/ui`.
 - `skills/agala-charts/SKILL.md` for `@agala-labs/charts`.
 
-Update the affected skill in the same change whenever consumer-visible behavior changes. This includes adding, removing, or renaming components; changing props, defaults, emits, slots, `v-model` contracts, exports, plugin registration, icons, tokens, themes, public utilities, chart inputs, accessibility behavior, responsive behavior, or documented limitations.
+Whenever consumer-visible behavior changes, update **both** the affected skill **and** the matching VitePress documentation in the same change — updating the skill alone is not sufficient. This includes adding, removing, or renaming components; changing props, defaults, emits, slots, `v-model` contracts, exports, plugin registration, icons, tokens, themes, public utilities, chart inputs, accessibility behavior, responsive behavior, or documented limitations.
+
+The component/chart documentation content is **not** the `docs/components/*.md` files directly — those are thin `<ComponentDoc slug="..." />` wrappers. The actual props, slots, events, accessibility notes, and snippets live in `docs/data/components.ts`, keyed by `slug`. Edit the matching entry there.
 
 Keep skill content aligned with the current source and public docs:
 
 - Add new public APIs and examples when they become available.
 - Remove or correct renamed, deleted, or changed APIs immediately.
 - Do not describe internal composables or types as package imports unless the package entry point exports them.
-- Update the matching VitePress component or chart documentation when the same change affects public usage.
-- Internal refactors that do not affect consumers do not require a skill update.
+- Internal refactors that do not affect consumers do not require a skill or docs update — but if the refactor fixes a bug so the component now matches what the docs already promised (e.g. a restored keyboard behavior), no doc change is needed either; only update docs when the true consumer-facing contract itself changes.
 
 ## Build & Publish
 
@@ -152,4 +153,4 @@ npm run lint
 - Do not revert unrelated local changes; this repo is actively edited.
 
 ---
-*Last updated: 2026-07-15*
+*Last updated: 2026-08-19*

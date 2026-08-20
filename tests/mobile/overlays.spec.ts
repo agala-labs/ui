@@ -106,9 +106,10 @@ test('Modal remains bounded and restores its opener', async ({ page }) => {
   await page.keyboard.press('Escape')
   await expect(page.locator('.overlay')).toHaveClass(/modal-leave-active/)
   await expect(page.locator('body')).toHaveCSS('position', 'fixed')
-  await expect(trigger).not.toBeFocused()
-  await expect(dialog).toBeHidden()
+  // Reka's DialogContent restores focus to the trigger as soon as `open`
+  // flips false, rather than waiting for the leave transition to finish.
   await expect(trigger).toBeFocused()
+  await expect(dialog).toBeHidden()
   await expect.poll(() => page.locator('body').evaluate(element => getComputedStyle(element).position)).not.toBe('fixed')
 })
 
@@ -124,7 +125,9 @@ test('Modal uses one leave lifecycle for controls, backdrop, Escape, and rapid r
   const closePaths = [
     async () => page.getByRole('button', { name: 'Close dialog' }).click(),
     async () => page.getByRole('button', { name: 'Cancel' }).click(),
-    async () => page.locator('.overlay').dispatchEvent('click'),
+    // Reka dismisses via a real pointerdown-outside event, not a bare
+    // synthetic 'click', so exercise the actual backdrop click gesture.
+    async () => page.locator('.overlay').click({ position: { x: 5, y: 5 } }),
     async () => page.keyboard.press('Escape'),
   ]
 
@@ -242,14 +245,22 @@ for (const floatingCase of floatingCases) {
 test('Tooltip uses collision-aware top-layer positioning for hover and focus', async ({ page }) => {
   await openWithTheme(page, '/components/tooltip')
   const trigger = page.getByRole('button', { name: 'Copy link' })
-  await trigger.hover()
+  // Reka's grace-area hover tracking doesn't register Playwright's
+  // locator.hover() (which isn't a continuous pointer trajectory) the same
+  // way it registers a real mouse move; use page.mouse.move like the rest
+  // of this test already does for the mouse-away step below.
+  const triggerBox = (await trigger.boundingBox())!
+  await page.mouse.move(triggerBox.x + triggerBox.width / 2, triggerBox.y + triggerBox.height / 2)
 
   const tooltip = page.getByRole('tooltip')
   await expect(tooltip).toBeVisible()
+  // Reka teleports tooltip content into a portal (no longer a DOM descendant
+  // of its trigger), so "attached to its trigger" is verified through the
+  // aria-describedby relationship and open state instead of DOM nesting.
   const shell = tooltip.locator('..')
-  expect(await shell.evaluate(element => element.matches(':popover-open'))).toBe(true)
+  await expect(shell).toHaveAttribute('data-state', /open/)
   await expectInsideViewport(page, shell, 8)
-  expect(await shell.evaluate(element => element.parentElement?.classList.contains('tooltipWrapper'))).toBe(true)
+  expect(await trigger.getAttribute('aria-describedby')).toBeTruthy()
 
   await page.mouse.move(0, 0)
   await expect(tooltip).toBeHidden()
@@ -277,7 +288,10 @@ test('Dropdown menu escapes overflow, flips above the final table row, and track
   }))
   await container.evaluate(element => { element.scrollTop = element.scrollHeight })
 
-  const trigger = page.getByRole('button', { name: 'Actions for Team member 7' })
+  // A plain attribute locator (not getByRole) so bounding-box reads still
+  // resolve once the menu opens: Reka aria-hides the rest of the app while
+  // the menu is open, including this trigger, which role-based locators respect.
+  const trigger = page.locator('[aria-label="Actions for Team member 7"]')
   await trigger.evaluate(element => {
     const delta = element.getBoundingClientRect().bottom - window.innerHeight + 12
     window.scrollBy(0, delta)
@@ -287,8 +301,8 @@ test('Dropdown menu escapes overflow, flips above the final table row, and track
   const menu = page.getByRole('menu')
   await expect(menu).toBeVisible()
   await expectInsideViewport(page, menu, 8)
-  await expect(menu).toHaveJSProperty('popover', 'manual')
-  expect(await menu.evaluate(element => element.matches(':popover-open'))).toBe(true)
+  await expect(menu).toHaveAttribute('data-state', 'open')
+  await settleVisuals(page)
 
   const flipped = await Promise.all([trigger.boundingBox(), menu.boundingBox()])
   expect(flipped[0]).not.toBeNull()
@@ -314,24 +328,34 @@ test('Dropdown placements align and overflow-hidden ancestors do not clip the me
   test.skip(testInfo.project.name !== 'mobile-390', 'Run the full collision fixture at one representative viewport.')
   await openWithTheme(page, '/components/dropdown-menu')
 
-  const startTrigger = page.getByRole('button', { name: 'Start aligned' })
+  // Plain text locators (not getByRole): Reka aria-hides the rest of the app
+  // while a menu is open, including these triggers, so a role-based locator
+  // stops resolving for the post-open bounding-box read.
+  const startTrigger = page.locator('[data-testid="dropdown-alignment"] button', { hasText: 'Start aligned' })
   await startTrigger.click()
   let menu = page.getByRole('menu')
+  await expect(menu).toBeVisible()
+  await settleVisuals(page)
   let boxes = await Promise.all([startTrigger.boundingBox(), menu.boundingBox()])
   expect(Math.abs(boxes[0]!.x - boxes[1]!.x)).toBeLessThanOrEqual(1)
   await page.keyboard.press('Escape')
+  await expect(menu).toBeHidden()
 
-  const endTrigger = page.getByRole('button', { name: 'End aligned' })
+  const endTrigger = page.locator('[data-testid="dropdown-alignment"] button', { hasText: 'End aligned' })
   await endTrigger.click()
   menu = page.getByRole('menu')
+  await expect(menu).toBeVisible()
+  await settleVisuals(page)
   boxes = await Promise.all([endTrigger.boundingBox(), menu.boundingBox()])
   expect(Math.abs((boxes[0]!.x + boxes[0]!.width) - (boxes[1]!.x + boxes[1]!.width))).toBeLessThanOrEqual(1)
   await page.keyboard.press('Escape')
+  await expect(menu).toBeHidden()
 
   const hiddenContainer = page.getByTestId('dropdown-hidden-container')
   await hiddenContainer.getByRole('button', { name: 'Overflow hidden' }).click()
   menu = page.getByRole('menu')
   await expect(menu).toBeVisible()
+  await settleVisuals(page)
   const escapes = await Promise.all([hiddenContainer.boundingBox(), menu.boundingBox()])
   expect(escapes[1]!.y + escapes[1]!.height).toBeGreaterThan(escapes[0]!.y + escapes[0]!.height)
   expect(await menu.evaluate(element => {
@@ -343,26 +367,50 @@ test('Dropdown placements align and overflow-hidden ancestors do not clip the me
 test('Dropdown mouse and keyboard dismissal remain functional', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'mobile-390', 'Run interaction coverage once.')
   await openWithTheme(page, '/components/dropdown-menu')
-  const trigger = page.getByRole('button', { name: 'Start aligned' })
+  const trigger = page.locator('[data-testid="dropdown-alignment"] button', { hasText: 'Start aligned' })
 
+  // Reka's layer stack restores `body { pointer-events }` asynchronously
+  // after the last open layer closes; wait for that too, not just for the
+  // menu to disappear, or the next interaction can land while it's still
+  // locked out.
+  async function expectMenuFullyClosed() {
+    await expect(page.getByRole('menu')).toBeHidden()
+    await expect.poll(() => page.evaluate(() => getComputedStyle(document.body).pointerEvents)).not.toBe('none')
+  }
+
+  // Once the menu opens, Reka aria-hides the rest of the app (including this
+  // trigger) and moves DOM focus into the menu, so subsequent key presses go
+  // through page.keyboard rather than re-resolving the trigger locator.
   await trigger.focus()
   await trigger.press('ArrowDown')
-  await trigger.press('ArrowDown')
-  await trigger.press('Enter')
+  await page.keyboard.press('ArrowDown')
+  await page.keyboard.press('Enter')
   await expect(page.getByTestId('dropdown-activations')).toHaveText('Activations: 1')
-  await expect(page.getByRole('menu')).toBeHidden()
+  await expectMenuFullyClosed()
 
   await trigger.click()
   await page.keyboard.press('Escape')
-  await expect(page.getByRole('menu')).toBeHidden()
+  await expectMenuFullyClosed()
 
+  // Reka traps focus inside an open menu rather than closing on Tab (the
+  // old custom implementation closed on Tab; Reka's focus containment
+  // matches the WAI-ARIA menu pattern more closely).
   await trigger.click()
-  await trigger.press('Tab')
-  await expect(page.getByRole('menu')).toBeHidden()
+  await page.keyboard.press('Tab')
+  await expect(page.getByRole('menu')).toBeVisible()
+  await page.keyboard.press('Escape')
+  await expectMenuFullyClosed()
 
+  // Reka sets `body { pointer-events: none }` while the menu is open, so a
+  // real click here lands on <html> underneath rather than the heading —
+  // that's how its outside-click detection works. Playwright's locator
+  // .click() refuses to click through an intercepting layer, so dispatch
+  // at raw coordinates instead, matching what a real click gesture does.
   await trigger.click()
-  await page.getByRole('heading', { name: 'Dropdown Menu' }).click()
-  await expect(page.getByRole('menu')).toBeHidden()
+  const heading = page.locator('h1', { hasText: 'Dropdown Menu' })
+  const headingBox = (await heading.boundingBox())!
+  await page.mouse.click(headingBox.x + headingBox.width / 2, headingBox.y + headingBox.height / 2)
+  await expectMenuFullyClosed()
 })
 
 test('Dropdown menu enters the top layer above modal and drawer overlays', async ({ page }, testInfo) => {
@@ -379,10 +427,12 @@ test('Dropdown menu enters the top layer above modal and drawer overlays', async
 
     const menu = page.getByRole('menu')
     await expect(menu).toBeVisible()
+    await expect(menu).toHaveAttribute('data-state', 'open')
+    await settleVisuals(page)
     expect(await menu.evaluate(element => {
       const rect = element.getBoundingClientRect()
       const hit = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2)
-      return element.matches(':popover-open') && element.contains(hit)
+      return element.contains(hit)
     })).toBe(true)
     await page.keyboard.press('Escape')
     await expect(menu).toBeHidden()

@@ -38,58 +38,95 @@ const cls = computed(() => [
 </script>
 
 <template>
-  <div
-    v-if="!dismissed"
-    role="alert"
-    aria-atomic="true"
-    :class="cls"
-  >
-    <span
-      v-if="props.icon !== false"
-      class="alert__icon"
-      aria-hidden="true"
+  <Transition name="alertShell">
+    <div
+      v-if="!dismissed"
+      class="alertShell"
     >
-      <AgalaIcon
-        :name="(props.icon as IconName) || iconMap[props.variant]"
-        size="md"
-      />
-    </span>
-    <div class="alert__content">
-      <h4
-        v-if="props.title && !props.flat"
-        class="alert__title"
-      >
-        {{ props.title }}
-      </h4>
-      <div
-        v-if="$slots.default"
-        class="alert__body"
-      >
-        <slot />
+      <div class="alertShellInner">
+        <div
+          role="alert"
+          aria-atomic="true"
+          :class="cls"
+        >
+          <span
+            v-if="props.icon !== false"
+            class="alert__icon"
+            aria-hidden="true"
+          >
+            <AgalaIcon
+              :name="(props.icon as IconName) || iconMap[props.variant]"
+              size="md"
+            />
+          </span>
+          <div class="alert__content">
+            <h4
+              v-if="props.title && !props.flat"
+              class="alert__title"
+            >
+              {{ props.title }}
+            </h4>
+            <div
+              v-if="$slots.default"
+              class="alert__body"
+            >
+              <slot />
+            </div>
+          </div>
+          <div
+            v-if="$slots.action"
+            class="alert__action"
+          >
+            <slot name="action" />
+          </div>
+          <button
+            v-if="props.dismissible"
+            type="button"
+            class="alert__dismiss"
+            aria-label="Dismiss alert"
+            @click="dismissed = true"
+          >
+            <AgalaIcon
+              name="x"
+              size="md"
+            />
+          </button>
+        </div>
       </div>
     </div>
-    <div
-      v-if="$slots.action"
-      class="alert__action"
-    >
-      <slot name="action" />
-    </div>
-    <button
-      v-if="props.dismissible"
-      type="button"
-      class="alert__dismiss"
-      aria-label="Dismiss alert"
-      @click="dismissed = true"
-    >
-      <AgalaIcon
-        name="x"
-        size="md"
-      />
-    </button>
-  </div>
+  </Transition>
 </template>
 
 <style scoped>
+/* CSS grid trick for smooth height animation — no JS height calc needed */
+.alertShell {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows var(--agala-transition-base), opacity var(--agala-transition-base);
+}
+
+.alertShellInner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.alertShell-leave-to,
+.alertShell-enter-from {
+  grid-template-rows: 0fr;
+  opacity: 0;
+}
+
+.alertShell-leave-active,
+.alertShell-enter-active {
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .alertShell {
+    transition: opacity var(--agala-transition-fast);
+  }
+}
+
 .alert {
   display: grid;
   grid-template-columns: minmax(0, 1fr);

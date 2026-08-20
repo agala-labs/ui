@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import { computed, nextTick, onUnmounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeMount, onMounted, onUnmounted, ref, watch } from 'vue'
+import {
+  DrawerContent,
+  DrawerPortal,
+  DrawerRoot,
+  DrawerTitle,
+} from 'reka-ui'
 import { useBodyScrollLock } from '../../composables/useBodyScrollLock'
 import AgalaIcon from '../AgalaIcon/AgalaIcon.vue'
 import type { DrawerProps, DrawerPlacement } from './types'
@@ -15,9 +21,13 @@ const emit = defineEmits<{
   close: []
 }>()
 
+// Reka owns the focus scope, escape handling and outside interaction layer.
+// The local presence state keeps the existing edge transition and close
+// lifecycle while a controlled drawer prop changes immediately.
 const drawerRef = ref<HTMLElement | null>(null)
 const bodyRef = ref<HTMLElement | null>(null)
 const isOpen = computed(() => props.open)
+const rendered = ref(props.open)
 const lockActive = ref(false)
 const isScrolled = ref(false)
 const canScrollFurther = ref(false)
@@ -38,54 +48,39 @@ const drawerStyle = computed(() => ({
   '--agala-drawer-size': props.size,
 }))
 
+const swipeDirection = computed(() => {
+  const map: Record<DrawerPlacement, 'left' | 'right' | 'up' | 'down'> = {
+    left: 'left',
+    right: 'right',
+    top: 'up',
+    bottom: 'down',
+  }
+  return map[props.placement]
+})
+
 useBodyScrollLock(lockActive)
 
 function emitClose() {
-  emit('close')
+  if (props.open) emit('close')
 }
 
-function requestDismiss() {
-  if (props.dismissible) emitClose()
+function handleRootOpenChange(value: boolean) {
+  if (!value) emitClose()
 }
 
-function onBackdropClick(event: MouseEvent) {
-  if (event.target === event.currentTarget) requestDismiss()
+function handleEscapeKeyDown(event: KeyboardEvent) {
+  if (!props.escapeCloses || !props.open) event.preventDefault()
 }
 
-function getFocusableElements() {
-  if (!drawerRef.value) return []
-  return Array.from(drawerRef.value.querySelectorAll<HTMLElement>(
-    'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
-  )).filter(element => !element.hidden && element.getAttribute('aria-hidden') !== 'true')
+function handlePointerDownOutside(event: Event) {
+  if (!props.dismissible || !props.open) event.preventDefault()
 }
 
-function onKeydown(event: KeyboardEvent) {
-  if (event.key === 'Escape' && props.escapeCloses) {
-    event.preventDefault()
-    event.stopPropagation()
-    emitClose()
-    return
-  }
-
-  if (event.key !== 'Tab') return
-
-  const focusable = getFocusableElements()
-  if (focusable.length === 0) {
-    event.preventDefault()
-    drawerRef.value?.focus()
-    return
-  }
-
-  const first = focusable[0]
-  const last = focusable[focusable.length - 1]
-  const active = document.activeElement
-
-  if (event.shiftKey && (active === first || active === drawerRef.value)) {
-    event.preventDefault()
-    last?.focus()
-  } else if (!event.shiftKey && active === last) {
-    event.preventDefault()
-    first?.focus()
+function rememberFocus() {
+  if (!previouslyFocused) {
+    previouslyFocused = document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : null
   }
 }
 
@@ -108,26 +103,46 @@ function observeBodySize() {
   bodyResizeObserver.observe(bodyRef.value)
 }
 
+async function focusFallback() {
+  await nextTick()
+  const drawer = drawerRef.value
+  if (!drawer || drawer.contains(document.activeElement)) return
+  const autofocus = drawer.querySelector<HTMLElement>('[autofocus]')
+  const firstFocusable = drawer.querySelector<HTMLElement>(
+    'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+  )
+  ;(autofocus || firstFocusable || drawer)?.focus({ preventScroll: true })
+}
+
+onBeforeMount(() => {
+  if (props.open) rememberFocus()
+})
+
 watch(isOpen, async (open) => {
   if (open) {
-    if (!lockActive.value) {
-      previouslyFocused = document.activeElement instanceof HTMLElement
-        ? document.activeElement
-        : null
-    }
+    rememberFocus()
+    rendered.value = true
     lockActive.value = true
     await nextTick()
     observeBodySize()
     updateScrollEdges()
-
-    const autofocus = drawerRef.value?.querySelector<HTMLElement>('[autofocus]')
-    const firstFocusable = getFocusableElements()[0]
-    ;(autofocus || firstFocusable || drawerRef.value)?.focus({ preventScroll: true })
+    // Reka normally focuses the first candidate. This only covers a rapid
+    // controlled reopen while the force-mounted content is still present.
+    await focusFallback()
     return
   }
 
   bodyResizeObserver?.disconnect()
   bodyResizeObserver = null
+  rendered.value = false
+})
+
+onMounted(async () => {
+  if (!props.open) return
+  lockActive.value = true
+  observeBodySize()
+  updateScrollEdges()
+  await focusFallback()
 })
 
 function onAfterLeave() {
@@ -143,80 +158,94 @@ onUnmounted(() => bodyResizeObserver?.disconnect())
 </script>
 
 <template>
-  <Teleport to="body">
-    <Transition
-      name="drawer"
-      appear
-      @after-leave="onAfterLeave"
-    >
-      <div
-        v-if="open"
-        class="drawer-backdrop"
-        role="presentation"
-        @click="onBackdropClick"
-        @keydown="onKeydown"
+  <DrawerRoot
+    :open="open"
+    modal="trap-focus"
+    :swipe-direction="swipeDirection"
+    @update:open="handleRootOpenChange"
+  >
+    <DrawerPortal>
+      <Transition
+        name="drawer"
+        appear
+        @after-leave="onAfterLeave"
       >
-        <section
-          ref="drawerRef"
-          class="drawer"
-          :class="[placementClasses, props.class]"
-          :style="drawerStyle"
-          role="dialog"
-          aria-modal="true"
-          :aria-label="title || 'Drawer'"
-          tabindex="-1"
+        <div
+          v-if="rendered"
+          class="drawer-backdrop"
+          role="presentation"
         >
-          <header
-            v-if="$slots.header || title || dismissible"
-            class="drawer__header"
-            :class="{ 'drawer__header--elevated': isScrolled }"
+          <DrawerContent
+            :force-mount="true"
+            as-child
+            aria-modal="true"
+            :aria-label="title || 'Drawer'"
+            @escape-key-down="handleEscapeKeyDown"
+            @pointer-down-outside="handlePointerDownOutside"
           >
-            <div class="drawer__heading">
-              <slot name="header">
-                <h2
-                  v-if="title"
-                  class="drawer__title"
-                >
-                  {{ title }}
-                </h2>
-              </slot>
-            </div>
-            <button
-              v-if="dismissible"
-              type="button"
-              class="drawer__close"
-              aria-label="Close drawer"
-              @click="requestDismiss"
+            <section
+              ref="drawerRef"
+              class="drawer"
+              :class="[placementClasses, props.class]"
+              :style="drawerStyle"
+              role="dialog"
+              tabindex="-1"
             >
-              <AgalaIcon
-                name="x"
-                :size="16"
-              />
-            </button>
-          </header>
+              <header
+                v-if="$slots.header || title || dismissible"
+                class="drawer__header"
+                :class="{ 'drawer__header--elevated': isScrolled }"
+              >
+                <div class="drawer__heading">
+                  <slot name="header">
+                    <DrawerTitle
+                      v-if="title"
+                      as-child
+                    >
+                      <h2 class="drawer__title">
+                        {{ title }}
+                      </h2>
+                    </DrawerTitle>
+                  </slot>
+                </div>
+                <button
+                  v-if="dismissible"
+                  type="button"
+                  class="drawer__close"
+                  aria-label="Close drawer"
+                  @click="emitClose"
+                >
+                  <AgalaIcon
+                    name="x"
+                    :size="16"
+                  />
+                </button>
+              </header>
 
-          <div
-            ref="bodyRef"
-            class="drawer__body"
-            @scroll.passive="updateScrollEdges"
-          >
-            <slot />
-          </div>
+              <div
+                ref="bodyRef"
+                class="drawer__body"
+                @scroll.passive="updateScrollEdges"
+              >
+                <slot />
+              </div>
 
-          <footer
-            v-if="$slots.footer"
-            class="drawer__footer"
-            :class="{ 'drawer__footer--elevated': canScrollFurther }"
-          >
-            <slot
-              name="footer"
-              :close="emitClose"
-            />
-          </footer>
-        </section>
-      </div>
-    </Transition>
-  </Teleport>
+              <footer
+                v-if="$slots.footer"
+                class="drawer__footer"
+                :class="{ 'drawer__footer--elevated': canScrollFurther }"
+              >
+                <slot
+                  name="footer"
+                  :close="emitClose"
+                />
+              </footer>
+            </section>
+          </DrawerContent>
+        </div>
+      </Transition>
+    </DrawerPortal>
+  </DrawerRoot>
 </template>
 
 <style scoped>
@@ -229,6 +258,7 @@ onUnmounted(() => bodyResizeObserver?.disconnect())
   inset: 0;
   z-index: var(--agala-layer-drawer, var(--agala-z-modal));
   display: flex;
+  pointer-events: auto;
   background: hsl(var(--agala-overlay) / var(--agala-drawer-overlay-opacity, var(--agala-opacity-overlay)));
   overscroll-behavior: contain;
 }

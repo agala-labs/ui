@@ -15,6 +15,7 @@ playwright-report
 test-results
 blob-report
 *.local
+/.ui-context/
 
 # Editor directories and files
 .vscode/*

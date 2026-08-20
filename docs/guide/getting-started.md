@@ -12,7 +12,7 @@ Agala Labs UI is a Vue 3 component library built with scoped CSS and semantic HS
 npm install @agala-labs/ui
 ```
 
-Vue `^3.3.0` is a peer dependency. If the application does not already provide it, install Vue alongside the package.
+Vue `>=3.5.0 <4` is a peer dependency. If the application does not already provide it, install Vue alongside the package.
 
 ## Register the plugin
 

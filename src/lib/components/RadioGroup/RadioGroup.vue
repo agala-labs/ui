@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
+import { RadioGroupItem, RadioGroupRoot } from 'reka-ui'
 import type { RadioGroupProps, RadioOption, RadioOrientation } from './types'
-
-let idCounter = 0
 
 const props = withDefaults(defineProps<RadioGroupProps>(), {
   orientation: 'vertical',
@@ -14,8 +13,8 @@ const emit = defineEmits<{
   'update:modelValue': [value: string]
 }>()
 
-idCounter += 1
-const groupName = `agala-radio-${idCounter}`
+const internalValue = ref(props.modelValue ?? '')
+const selectedValue = computed(() => props.modelValue ?? internalValue.value)
 
 const orientationMap: Record<RadioOrientation, string> = {
   vertical:   'groupVertical',
@@ -29,7 +28,7 @@ const cls = computed(() => [
 ].filter(Boolean).join(' '))
 
 function circleCls(option: RadioOption) {
-  const selected = props.modelValue === option.value
+  const selected = selectedValue.value === option.value
   const isError = props.error
   return [
     'circle',
@@ -40,13 +39,25 @@ function circleCls(option: RadioOption) {
 
 function select(option: RadioOption) {
   if (props.disabled || option.disabled) return
+  if (props.modelValue === undefined) internalValue.value = option.value
   emit('update:modelValue', option.value)
+}
+
+function onUpdate(value: unknown) {
+  if (typeof value === 'string') select({ value, label: value })
 }
 </script>
 
 <template>
-  <div :class="cls" role="radiogroup">
-    <label
+  <RadioGroupRoot
+    :model-value="selectedValue"
+    :disabled="disabled"
+    :orientation="orientation"
+    :class="cls"
+    role="radiogroup"
+    @update:model-value="onUpdate"
+  >
+    <div
       v-for="option in options"
       :key="option.value"
       :class="[
@@ -54,21 +65,24 @@ function select(option: RadioOption) {
         (disabled || option.disabled) ? 'radioItemDisabled' : undefined,
       ].filter(Boolean).join(' ')"
     >
-      <input
-        type="radio"
-        class="radioInput"
-        :name="groupName"
+      <RadioGroupItem
         :value="option.value"
-        :checked="modelValue === option.value"
         :disabled="disabled || option.disabled"
-        @change="select(option)"
-      />
-      <span :class="circleCls(option)" aria-hidden="true">
-        <span v-if="modelValue === option.value" class="dot" />
-      </span>
+        class="radioInput"
+      >
+        <span
+          :class="circleCls(option)"
+          aria-hidden="true"
+        >
+          <span
+            v-if="selectedValue === option.value"
+            class="dot"
+          />
+        </span>
+      </RadioGroupItem>
       <span class="radioLabel">{{ option.label }}</span>
-    </label>
-  </div>
+    </div>
+  </RadioGroupRoot>
 </template>
 
 <style scoped>
@@ -84,7 +98,6 @@ function select(option: RadioOption) {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  cursor: pointer;
   user-select: none;
   min-width: 0;
 }
@@ -94,17 +107,16 @@ function select(option: RadioOption) {
   opacity: var(--agala-opacity-disabled);
 }
 
-/* Visually hidden native input */
+/* Reka's radio item is the keyboard-focusable control. */
 .radioInput {
-  position: absolute;
-  width: 1px;
-  height: 1px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
   padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
   border: 0;
+  background: transparent;
+  cursor: pointer;
 }
 
 /* Custom circle */
@@ -127,9 +139,13 @@ function select(option: RadioOption) {
   border-color: hsl(var(--agala-primary));
 }
 
-.radioInput:focus-visible + .circle {
+.radioInput:focus-visible .circle {
   outline: none;
   box-shadow: 0 0 0 2px hsl(var(--agala-background)), 0 0 0 4px hsl(var(--agala-ring));
+}
+
+.radioInput:disabled {
+  cursor: not-allowed;
 }
 
 .circleSelected {

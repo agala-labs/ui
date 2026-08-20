@@ -1,58 +1,74 @@
 <script setup lang="ts">
-import { computed, inject, useId, type Ref } from 'vue'
+import { onMounted, ref } from 'vue'
+import { AccordionContent, AccordionHeader, AccordionItem as AccordionItemRoot, AccordionTrigger } from 'reka-ui'
 import type { AccordionItemProps } from './types'
 
-const props = defineProps<AccordionItemProps>()
+defineProps<AccordionItemProps>()
 
-const accordion = inject<{
-  openItems: Ref<string[]>
-  toggle: (value: string) => void
-} | null>('agala-accordion', null)
-
-const isOpen = computed(() => !!accordion?.openItems.value.includes(props.value))
-const itemId = useId()
-const triggerId = `agala-accordion-trigger-${itemId}`
-const panelId = `agala-accordion-panel-${itemId}`
-
-function handleClick() {
-  if (!props.disabled) accordion?.toggle(props.value)
-}
+// Reka links the trigger's aria-controls to the content's id via a plain
+// (non-reactive) field on their shared context, set when the content
+// component's own setup() runs. Since it isn't a ref, the trigger's first
+// render — which happens before the content component's setup, as it's
+// declared first in this template — captures it empty and only picks up
+// the real value later, incidentally, on the next unrelated re-render (e.g.
+// the first time the item opens). By the time this component's own
+// onMounted fires, every child's setup() has already run (content's
+// included), so bumping a value the trigger reads forces the one extra
+// re-render needed to pick up the by-then-correct id.
+const mountTick = ref(0)
+onMounted(() => {
+  mountTick.value += 1
+})
 </script>
 
 <template>
-  <div :class="['item', disabled ? 'itemDisabled' : undefined].filter(Boolean).join(' ')">
-    <button
-      type="button"
-      class="trigger"
-      :id="triggerId"
-      :aria-expanded="isOpen"
-      :aria-controls="panelId"
-      :disabled="disabled"
-      @click="handleClick"
+  <AccordionItemRoot
+    v-slot="{ open }"
+    :value="value"
+    :disabled="disabled"
+    :class="['item', disabled ? 'itemDisabled' : undefined].filter(Boolean).join(' ')"
+  >
+    <AccordionHeader
+      class="header"
+      as="div"
     >
-      <span class="triggerTitle">{{ title }}</span>
-      <span :class="['chevron', isOpen ? 'chevronOpen' : undefined].filter(Boolean).join(' ')" aria-hidden="true">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="6 9 12 15 18 9" />
-        </svg>
-      </span>
-    </button>
+      <AccordionTrigger
+        class="trigger"
+        :data-mount-tick="mountTick"
+      >
+        <span class="triggerTitle">{{ title }}</span>
+        <span
+          :class="['chevron', open ? 'chevronOpen' : undefined].filter(Boolean).join(' ')"
+          aria-hidden="true"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </span>
+      </AccordionTrigger>
+    </AccordionHeader>
 
-    <div
-      :id="panelId"
+    <AccordionContent
+      force-mount
       class="panel"
-      :style="{ gridTemplateRows: isOpen ? '1fr' : '0fr' }"
-      role="region"
-      :aria-labelledby="triggerId"
-      :aria-hidden="!isOpen"
+      :aria-hidden="!open"
     >
       <div class="panelInner">
         <div class="panelContent">
           <slot />
         </div>
       </div>
-    </div>
-  </div>
+    </AccordionContent>
+  </AccordionItemRoot>
 </template>
 
 <style scoped>
@@ -66,6 +82,11 @@ function handleClick() {
 
 .itemDisabled {
   opacity: var(--agala-opacity-disabled);
+}
+
+.header {
+  margin: 0;
+  font: inherit;
 }
 
 .trigger {
@@ -116,7 +137,12 @@ function handleClick() {
 /* CSS grid trick for smooth height animation — no JS height calc needed */
 .panel {
   display: grid;
+  grid-template-rows: 0fr;
   transition: grid-template-rows var(--agala-transition-base);
+}
+
+.panel[data-state='open'] {
+  grid-template-rows: 1fr;
 }
 
 .panelInner {

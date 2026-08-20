@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { Separator } from 'reka-ui'
 import type { DividerProps } from './types'
 
 const props = withDefaults(defineProps<DividerProps>(), {
@@ -17,13 +18,22 @@ const rootCls = computed(() => [
 </script>
 
 <template>
-  <div :class="rootCls" role="separator" :aria-orientation="orientation">
+  <Separator
+    :class="rootCls"
+    :orientation="orientation"
+  >
     <template v-if="label">
-      <span v-if="labelPosition !== 'start'" class="dividerLine" />
+      <span
+        v-if="labelPosition !== 'start'"
+        class="dividerLine"
+      />
       <span class="dividerLabel">{{ label }}</span>
-      <span v-if="labelPosition !== 'end'" class="dividerLine" />
+      <span
+        v-if="labelPosition !== 'end'"
+        class="dividerLine"
+      />
     </template>
-  </div>
+  </Separator>
 </template>
 
 <style scoped>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { Label } from 'reka-ui'
 
 const props = withDefaults(defineProps<{
   label?: string
@@ -21,17 +22,31 @@ const labelCls = computed(() => [
 
 <template>
   <div class="field">
-    <label
+    <Label
       v-if="label"
       :for="htmlFor"
       :class="labelCls"
     >
       {{ label }}
-      <span v-if="required" class="required" aria-hidden="true"> *</span>
-    </label>
+      <span
+        v-if="required"
+        class="required"
+        aria-hidden="true"
+      > *</span>
+    </Label>
     <slot />
-    <p v-if="error" class="errorText">{{ error }}</p>
-    <p v-else-if="helper" class="helperText">{{ helper }}</p>
+    <p
+      v-if="error"
+      class="errorText"
+    >
+      {{ error }}
+    </p>
+    <p
+      v-else-if="helper"
+      class="helperText"
+    >
+      {{ helper }}
+    </p>
   </div>
 </template>
 

@@ -29,7 +29,7 @@ npm run build:lib
 npm run build --workspace @agala-labs/charts
 ```
 
-The UI package is ESM and requires Vue `^3.3.0` as a peer dependency. Charts are published separately and depend on `echarts` and `vue-echarts`.
+The UI package is ESM and requires Vue `>=3.5.0 <4` as a peer dependency. Charts are published separately and depend on `echarts` and `vue-echarts`.
 
 Package publication stays local. Build and publish UI first, then charts:
 
