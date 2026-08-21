@@ -5,6 +5,7 @@ import type { CardProps, CardPadding } from './types'
 const props = withDefaults(defineProps<CardProps>(), {
   padding: 'md',
   headerVariant: 'default',
+  as: 'div',
 })
 const slots = useSlots()
 
@@ -54,7 +55,8 @@ const cardStyle = computed(() => {
 </script>
 
 <template>
-  <div
+  <component
+    :is="as"
     :class="cls"
     :style="cardStyle"
   >
@@ -75,7 +77,7 @@ const cardStyle = computed(() => {
     >
       <slot name="footer" />
     </div>
-  </div>
+  </component>
 </template>
 
 <style scoped>

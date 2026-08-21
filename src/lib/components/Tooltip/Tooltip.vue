@@ -112,7 +112,7 @@ const props = withDefaults(defineProps<TooltipProps>(), {
   line-height: var(--agala-line-height-normal);
   border-radius: var(--agala-radius-sm);
   width: max-content;
-  max-width: min(18rem, calc(100vw - 1rem), var(--agala-floating-available-width, calc(100vw - 1rem)));
+  max-width: min(18rem, calc(100vw - 1rem), var(--reka-tooltip-content-available-width, var(--agala-floating-available-width, calc(100vw - 1rem))));
   white-space: normal;
   overflow-wrap: anywhere;
   pointer-events: none;

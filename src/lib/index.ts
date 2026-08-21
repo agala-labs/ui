@@ -43,6 +43,7 @@ export { default as AgalaCalendar } from './components/Calendar/Calendar.vue'
 export type { CalendarEvent, CalendarView, CalendarProps, CalendarEmits, SlotSelectPayload } from './components/Calendar'
 
 export { default as AgalaCenter } from './components/Center/Center.vue'
+export type { CenterProps } from './components/Center/Center.vue'
 
 export { default as AgalaColorPicker } from './components/ColorPicker/ColorPicker.vue'
 export type { ColorPickerProps, ColorPickerSize } from './components/ColorPicker'

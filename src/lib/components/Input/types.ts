@@ -17,4 +17,6 @@ export interface InputProps {
   inputId?: string
   ariaLabel?: string
   ariaLabelledby?: string
+  wrapperClass?: string
+  class?: string
 }

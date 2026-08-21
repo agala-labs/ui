@@ -84,7 +84,7 @@ Component folders should expose local `index.ts` and `types.ts` when public type
 
 ## Current Public Surface
 
-Public components include Button, Input, FormField, Select, CreatableSelect, DatePicker, Calendar, ColorPicker, Checkbox, RadioGroup, Textarea, Toggle, FileUpload, Alert, Badge, Drawer, Modal, ToastProvider, Tooltip, Progress, Skeleton, EmptyState, DevEnvBanner, Accordion, DropdownMenu, Navbar, Pagination, Sidebar, Table, Tabs, Avatar, Card, Center, Divider, Stack/HStack/VStack, Spacer, Stat, Tag, ListGroup, and AgalaIcon.
+Public components include Button, Input, FormField, Select, CreatableSelect, DatePicker, Calendar, ColorPicker, Checkbox, RadioGroup, Textarea, MarkdownEditor, MarkdownPreview, Toggle, FileUpload, Alert, Badge, Drawer, Modal, ToastProvider, Tooltip, Progress, Skeleton, EmptyState, DevEnvBanner, Accordion, DropdownMenu, Navbar, Pagination, SectionNav, Sidebar, Table, Tabs, Avatar, Card, Center, Divider, Stack/HStack/VStack, Spacer, Stat, Tag, ListGroup, and AgalaIcon.
 
 Public utilities currently exported from `src/lib/index.ts` are `useMediaQuery` and date helpers. Other composables in `src/lib/composables` are internal unless explicitly exported.
 

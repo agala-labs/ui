@@ -76,9 +76,9 @@ Internal source composables include `useSelectFilter`, `useChipDisplay`, `useKey
 
 ## Component API Notes
 
-- `AgalaButton`: `variant` `default|secondary|outline|ghost|danger|link`; `size` `sm|md|lg|icon`; `type`, `loading`, `block`, `icon?: IconName|string`, `disabled`.
-- `AgalaInput`: `v-model`, `size`, `variant` `default|ghost`, `error`, `errorMessage`, `disabled`, `readonly`, `iconStart`, `iconEnd`, `iconEndActionable`, `type`, `placeholder`, `wrapperClass`, `inputId`, `ariaLabel`, `ariaLabelledby`; password inputs use an eye toggle. Accessible naming props bind to the native `<input>`, never the wrapper; pair `inputId` with `AgalaFormField` `htmlFor` to activate the label.
-- `AgalaFormField`: `label`, `helper`, `error`, `disabled`, `htmlFor`, `required`; default slot for the control.
+- `AgalaButton`: `variant` `default|secondary|outline|ghost|danger|link`; `size` `sm|md|lg|icon`; `type`, `loading`, `block`, `icon?: IconName|string`, `disabled`, `as`, and `asChild`. Use `asChild` with one element/component root (for example a router link) when the button's visual treatment should follow another semantic element; do not combine it with the built-in icon/loading content.
+- `AgalaInput`: `v-model`, `size`, `variant` `default|ghost`, `error`, `errorMessage`, `disabled`, `readonly`, `iconStart`, `iconEnd`, `iconEndActionable`, `type`, `placeholder`, `class`, `wrapperClass`, `inputId`, `ariaLabel`, `ariaLabelledby`; password inputs use an eye toggle. `class` targets the native `<input>` and `wrapperClass` targets the outer wrapper. Accessible naming props bind to the native `<input>`; pair `inputId` with `AgalaFormField` `htmlFor` to activate the label.
+- `AgalaFormField`: `label`, `helper`, `error`, `disabled`, `htmlFor`, `required`, `class`; default slot for the control.
 - `AgalaSelect`: `options`, `v-model`, `multiple`, `searchable`, `clearable`, `loading`, `onSearch`, `maxDisplayed`, `maxSelections`; uses a collision-aware, viewport-anchored listbox and supports grouped/subtitled disabled options.
 - `AgalaCreatableSelect`: multi-select chips with `options`, `v-model`, `creatable`, `labelKey`, `idKey`, `maxDisplayed`, `debounce`; emits `create` and `search`.
 - `AgalaDatePicker`: `v-model`, `size`, `min`, `max`, `clearable`, `inline`, `highlightDates`, `displayMonth`; emits `update:displayMonth`.
@@ -98,7 +98,7 @@ Internal source composables include `useSelectFilter`, `useChipDisplay`, `useKey
 - `AgalaSidebarItem`: `icon`, `label`, `active`, `badge`, `badgeVariant`, `dot`, `dotVariant`, `disabled`; slots `icon` and default.
 - `AgalaSidebarToggle`: emits `click`; props `ariaExpanded`, `ariaControls`, `ariaLabel`.
 - `AgalaListGroup`: `variant divided|cards`, `gap`, `borderless`, `dividers`; `AgalaListGroupItem` has label/subtitle/icon/badge/actionIcon/radius, semantic `badgeVariant default|primary|success|warning|danger`, and `leading`, default, `trailing`, `badge` slots. The badge and trailing slots override the built-in badge treatment.
-- `AgalaCard`: quiet outlined content container with no default elevation; `padding none|sm|md|lg`, `headerVariant default|compact`, `accent top|left|right|bottom`, `accentColor`; slots `header`, default, `footer`. Accents render as short inset edge markers rather than full-edge borders.
+- `AgalaCard`: quiet outlined content container with no default elevation; `padding none|sm|md|lg`, `headerVariant default|compact`, `accent top|left|right|bottom`, `accentColor`, and `as` for a semantic root element; slots `header`, default, `footer`. Accents render as short inset edge markers rather than full-edge borders.
 - `AgalaStat`: `label`, `value`, neutral `secondaryValue`, `trend`, `trendLabel`, `icon`, `iconBg`, `layout vertical|row|inline`, `bordered` (default `true`), `labelTransform`. The default surface is quiet and shadowless; labels use sentence case and optional icons render in every layout. Use vertical for comparable dashboard cards, row for icon-led exception summaries, and intrinsic-height inline with `bordered=false` for dense list or toolbar summaries. Secondary values render before trends without sign or percentage formatting and can be themed with `--agala-stat-secondary-size`, `--agala-stat-secondary-color`, and `--agala-stat-secondary-weight`.
 - `AgalaBadge`: passive status/count/metadata with `variant default|secondary|outline|subtle|success|warning|danger`, `size sm|md`, `dot`, and any valid CSS `color`. Default and secondary variants are quiet neutral treatments; semantic variants use restrained tints. Badge always renders a non-focusable `span`; dots must accompany meaningful text and represent a real current state.
 - `AgalaTag`: a user-applied label/filter token with `label`, `variant default|primary|secondary|success|warning|danger|outline`, `size sm|md`, `removable`, `interactive`, `disabled`, and any valid CSS `color`; emits `remove` and `click`. Passive tags are non-focusable spans. Set `interactive` for a native root button and `click` emission. Removable tags expose only their labeled remove button; if `interactive` and `removable` are both set, removal takes precedence and development builds warn. Use `AgalaBadge` instead for system-reported state, count, or metadata.
@@ -108,11 +108,17 @@ Internal source composables include `useSelectFilter`, `useChipDisplay`, `useKey
 - `AgalaAccordion`/`AgalaAccordionItem`: `multiple`; items use `value`, `title`, `disabled`. Tune spacing with `--agala-accordion-trigger-padding` and `--agala-accordion-content-padding`; expanded content includes a restrained top inset, normalizes first/last child margins, and disables height/chevron interpolation under reduced motion.
 - `AgalaDropdownMenu`: trigger slot; items have `label`, `icon`, `variant default|danger`, `disabled`, `separator`, `onClick`; placement `bottom-start|bottom-end` defaults to `bottom-end`. The menu flips vertically, shifts within an 8px viewport margin, and stays anchored during ancestor scrolling (z-index stacking, not the native browser Popover API). Focus stays trapped inside an open menu — Tab cycles within it rather than closing it, matching the WAI-ARIA menu button pattern; Escape, an item selection, or an outside click close it.
 - `AgalaTooltip`: default slot trigger, `content`, `placement top|bottom|left|right`, `delay`, `block`.
-- `AgalaNavbar`: slots `brand`, default nav content, `actions`.
-- Layout primitives: `AgalaStack` supports `direction`, `gap`, `align`, `justify`, `wrap`, `as`; `AgalaHStack` and `AgalaVStack` omit `direction`; `AgalaSpacer` flexes; `AgalaCenter` centers; `AgalaDivider` supports `orientation`, `label`, `labelPosition`.
+- `AgalaNavbar`: slots `brand`, default nav content, `actions`, and `as` for a semantic root element.
+- Layout primitives: `AgalaStack` supports `direction`, `gap`, `align`, `justify`, `wrap`, and `as` (HTML tag or Vue component); `AgalaHStack` and `AgalaVStack` omit `direction`; `AgalaSpacer` flexes; `AgalaCenter` centers and supports `as`; `AgalaDivider` supports `orientation`, `label`, `labelPosition`.
 - `AgalaSkeleton`: `variant line|circle|rect`, `width`, `height`.
 - `AgalaEmptyState`: required `title`, optional `description`, `size default|compact`; slots `icon`, `action`. Compact mode is intended for tables, drawers, split panes, and secondary panels.
 - `AgalaDevEnvBanner`: dismissible warning banner with `text`.
+
+## Composition
+
+Every component keeps a Vue-native slot surface for app-specific composition. Prefer named slots when a component exposes semantic regions (`header`, `footer`, `actions`, `leading`, `trailing`, or `panel-*`), and use the default slot for arbitrary content. `AgalaStack`, `AgalaCard`, `AgalaCenter`, and `AgalaNavbar` accept `as` so composed layouts can preserve semantic HTML without replacing their styling. `AgalaButton` additionally supports Reka UI's `asChild` for router links and other single-root interactive elements.
+
+For responsive app components, compose with slots and CSS media queries first; keep layout decisions in the consuming component rather than coupling the library to a particular router, page shell, or breakpoint. See the VitePress [Composition guide](/guide/composition) for reusable app-level examples and the `asChild` constraints.
 
 ## Icon System
 

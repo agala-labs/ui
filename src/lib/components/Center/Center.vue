@@ -1,9 +1,19 @@
 <script setup lang="ts">
-defineProps<{ class?: string }>()
+import type { Component } from 'vue'
+
+export interface CenterProps {
+  as?: string | Component
+  class?: string
+}
+
+const props = withDefaults(defineProps<CenterProps>(), {
+  as: 'div',
+  class: '',
+})
 </script>
 
 <template>
-  <div :class="$props.class" style="display: flex; align-items: center; justify-content: center">
+  <component :is="props.as" :class="props.class" style="display: flex; align-items: center; justify-content: center">
     <slot />
-  </div>
+  </component>
 </template>

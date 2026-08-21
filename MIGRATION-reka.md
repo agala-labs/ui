@@ -108,8 +108,8 @@ opt-in.
 
 ## Note on publish state
 
-As of this write-up, the Reka migration exists as **uncommitted local
-changes in `../ui`**, not yet committed, versioned, or published to npm.
-Before any consumer app can start step 2 above, the `ui` maintainer needs
-to: review the diff, commit, bump the package version, and `npm publish`.
-This document assumes that has happened by the time anyone acts on it.
+The Reka migration is part of the current `@agala-labs/ui` source and package
+contract. Release versioning remains maintainer-owned: feature and fix work
+must not edit the package version. Consumers should use the published version
+that contains these APIs, and the release owner should bump and publish the
+package separately when the release is approved.

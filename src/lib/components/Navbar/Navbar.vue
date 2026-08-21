@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import type { NavbarProps } from './types'
 
-const props = defineProps<NavbarProps>()
+const props = withDefaults(defineProps<NavbarProps>(), {
+  as: 'header',
+  class: '',
+})
 </script>
 
 <template>
-  <header :class="['navbar', props.class].filter(Boolean).join(' ')">
+  <component :is="props.as" :class="['navbar', props.class].filter(Boolean).join(' ')">
     <div v-if="$slots.brand" class="navbarBrand">
       <slot name="brand" />
     </div>
@@ -17,7 +20,7 @@ const props = defineProps<NavbarProps>()
     <div v-if="$slots.actions" class="navbarActions">
       <slot name="actions" />
     </div>
-  </header>
+  </component>
 </template>
 
 <style scoped>

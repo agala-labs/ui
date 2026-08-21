@@ -5,6 +5,9 @@ import { libInjectCss } from 'vite-plugin-lib-inject-css'
 import path from 'node:path'
 
 export default defineConfig({
+  // The root public directory belongs to the VitePress docs site. Do not
+  // publish docs-only assets as part of the component library tarball.
+  publicDir: false,
   plugins: [
     vue(),
     dts({

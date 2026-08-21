@@ -1,28 +1,10 @@
 <script setup lang="ts">
 import { ref, computed, nextTick } from 'vue'
 import { AgalaIcon } from '../AgalaIcon'
-import type { InputVariant, InputSize } from './types'
+import type { InputProps, InputSize } from './types'
 import type { IconName } from '../AgalaIcon/types'
 
-const props = withDefaults(defineProps<{
-  modelValue?: string
-  size?: InputSize
-  variant?: InputVariant
-  error?: boolean
-  errorMessage?: string
-  disabled?: boolean
-  readonly?: boolean
-  iconStart?: string
-  iconEnd?: string
-  iconEndActionable?: boolean
-  type?: string
-  placeholder?: string
-  wrapperClass?: string
-  inputId?: string
-  ariaLabel?: string
-  ariaLabelledby?: string
-  class?: string
-}>(), {
+const props = withDefaults(defineProps<InputProps>(), {
   size: 'md',
   variant: 'default',
   error: false,

@@ -1,15 +1,9 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { Label } from 'reka-ui'
+import type { FormFieldProps } from './types'
 
-const props = withDefaults(defineProps<{
-  label?: string
-  helper?: string
-  error?: string
-  disabled?: boolean
-  htmlFor?: string
-  required?: boolean
-}>(), {
+const props = withDefaults(defineProps<FormFieldProps>(), {
   disabled: false,
   required: false,
 })
@@ -21,7 +15,7 @@ const labelCls = computed(() => [
 </script>
 
 <template>
-  <div class="field">
+  <div :class="['field', props.class].filter(Boolean).join(' ')">
     <Label
       v-if="label"
       :for="htmlFor"

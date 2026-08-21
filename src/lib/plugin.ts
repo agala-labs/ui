@@ -50,8 +50,10 @@ import FileUpload from './components/FileUpload/FileUpload.vue'
 import VStack from './components/Stack/VStack.vue'
 import DevEnvBanner from './components/DevEnvBanner/DevEnvBanner.vue'
 import Alert from './components/Alert/Alert.vue'
+import AgalaIcon from './components/AgalaIcon/AgalaIcon.vue'
 
 const componentMap: Record<string, Component> = {
+  AgalaIcon,
   AgalaButton: Button,
   AgalaInput: Input,
   AgalaFormField: FormField,

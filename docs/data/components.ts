@@ -100,7 +100,7 @@ const p = (name: string, type: string, description: string, defaultValue?: strin
 export const components: ComponentMeta[] = [
   {
     slug: 'button', name: 'Button', exports: ['AgalaButton'], description: 'Triggers an action or submits a form.',
-    props: [p('variant', "'default' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'link'", 'Visual emphasis.', "'default'"), p('size', "'sm' | 'md' | 'lg' | 'icon'", 'Control size.', "'md'"), p('type', "'button' | 'submit' | 'reset'", 'Native button type.', "'button'"), p('loading', 'boolean', 'Shows progress and prevents repeated activation.', 'false'), p('block', 'boolean', 'Fills the available width.', 'false'), p('icon', 'string', 'Leading Agala icon name.'), p('disabled', 'boolean', 'Disables interaction.', 'false'), p('class', 'string', 'Consumer override class.')],
+    props: [p('variant', "'default' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'link'", 'Visual emphasis.', "'default'"), p('size', "'sm' | 'md' | 'lg' | 'icon'", 'Control size.', "'md'"), p('type', "'button' | 'submit' | 'reset'", 'Native button type.', "'button'"), p('loading', 'boolean', 'Shows progress and prevents repeated activation.', 'false'), p('block', 'boolean', 'Fills the available width.', 'false'), p('icon', 'string', 'Leading Agala icon name.'), p('disabled', 'boolean', 'Disables interaction.', 'false'), p('as', 'string | Component', 'Rendered element when not using as-child.', "'button'"), p('asChild', 'boolean', 'Merges the button contract onto one child element.', 'false'), p('class', 'string', 'Consumer override class.')],
     slots: ['default — button label'], accessibility: 'Uses a native button. Loading and disabled states prevent activation; icon-only buttons need an accessible name.',
     snippet: `<AgalaButton icon="plus">Create project</AgalaButton>`,
     examples: [
@@ -120,7 +120,7 @@ export const components: ComponentMeta[] = [
   },
   {
     slug: 'input', name: 'Input', exports: ['AgalaInput'], description: 'Captures a single line of text with optional icons and validation.',
-    props: [p('modelValue', 'string', 'Value used by v-model.'), p('size', "'sm' | 'md' | 'lg'", 'Control size.', "'md'"), p('variant', "'default' | 'ghost'", 'Visual treatment.', "'default'"), p('type', 'string', 'Native input type.', "'text'"), p('placeholder', 'string', 'Placeholder text.'), p('iconStart / iconEnd', 'string', 'Agala icon names.'), p('iconEndActionable', 'boolean', 'Makes the trailing icon interactive.', 'false'), p('error', 'boolean', 'Sets invalid styling.', 'false'), p('errorMessage', 'string', 'Inline error copy.'), p('disabled / readonly', 'boolean', 'Native input states.', 'false'), p('inputId', 'string', 'ID bound to the native input; use for FormField htmlFor.'), p('ariaLabel', 'string', 'Accessible name bound to the native input.'), p('ariaLabelledby', 'string', 'Referenced label id bound to the native input.')],
+    props: [p('modelValue', 'string', 'Value used by v-model.'), p('size', "'sm' | 'md' | 'lg'", 'Control size.', "'md'"), p('variant', "'default' | 'ghost'", 'Visual treatment.', "'default'"), p('type', 'string', 'Native input type.', "'text'"), p('placeholder', 'string', 'Placeholder text.'), p('iconStart / iconEnd', 'string', 'Agala icon names.'), p('iconEndActionable', 'boolean', 'Makes the trailing icon interactive.', 'false'), p('error', 'boolean', 'Sets invalid styling.', 'false'), p('errorMessage', 'string', 'Inline error copy.'), p('disabled / readonly', 'boolean', 'Native input states.', 'false'), p('inputId', 'string', 'ID bound to the native input; use for FormField htmlFor.'), p('ariaLabel', 'string', 'Accessible name bound to the native input.'), p('ariaLabelledby', 'string', 'Referenced label id bound to the native input.'), p('class', 'string', 'Class applied to the native input.'), p('wrapperClass', 'string', 'Class applied to the outer input wrapper.')],
     events: ['update:modelValue(value: string)', 'icon-end-click'], accessibility: 'For a visible label, pair with FormField. Invalid state is exposed with aria-invalid. inputId, ariaLabel, and ariaLabelledby bind to the native input, never the wrapper.',
     snippet: `<AgalaInput v-model="email" type="email" icon-start="mail" placeholder="you@example.com" />`,
   },
@@ -270,7 +270,7 @@ export const components: ComponentMeta[] = [
   },
   {
     slug: 'navbar', name: 'Navbar', exports: ['AgalaNavbar'], description: 'Aligns brand, primary navigation, and top-level actions.',
-    props: [p('class', 'string', 'Consumer override class.')], slots: ['brand', 'default — navigation', 'actions'], accessibility: 'Use semantic links inside the navigation region and label icon-only actions.',
+    props: [p('as', 'string | Component', 'Rendered navbar element.', "'header'"), p('class', 'string', 'Consumer override class.')], slots: ['brand', 'default — navigation', 'actions'], accessibility: 'Use semantic links inside the navigation region and label icon-only actions.',
     snippet: `<AgalaNavbar><template #brand>Acme</template><a href="/projects">Projects</a><template #actions><AgalaButton>New</AgalaButton></template></AgalaNavbar>`,
   },
   {
@@ -328,13 +328,13 @@ export const components: ComponentMeta[] = [
   },
   {
     slug: 'card', name: 'Card', exports: ['AgalaCard'], description: 'Groups one coherent piece of content with optional header, footer, and accent.',
-    props: [p('padding', "'none' | 'sm' | 'md' | 'lg'", 'Internal spacing.', "'md'"), p('headerVariant', "'default' | 'compact'", 'Header density.', "'default'"), p('accent', "'top' | 'left' | 'right' | 'bottom'", 'Accent edge.'), p('accentColor', 'string', 'Accent CSS color.'), p('class', 'string', 'Consumer override class.')],
+    props: [p('as', 'string | Component', 'Rendered card element.', "'div'"), p('padding', "'none' | 'sm' | 'md' | 'lg'", 'Internal spacing.', "'md'"), p('headerVariant', "'default' | 'compact'", 'Header density.', "'default'"), p('accent', "'top' | 'left' | 'right' | 'bottom'", 'Accent edge.'), p('accentColor', 'string', 'Accent CSS color.'), p('class', 'string', 'Consumer override class.')],
     slots: ['header', 'default', 'footer'], accessibility: 'Cards are visual grouping only; use headings and semantic elements inside them.',
     snippet: `<AgalaCard accent="top"><template #header>Warehouse sync</template>184 items are up to date.</AgalaCard>`,
   },
   {
     slug: 'center', name: 'Center', exports: ['AgalaCenter'], description: 'Centers content along both axes.',
-    props: [], slots: ['default'], accessibility: 'Layout-only component with no added interaction semantics.',
+    props: [p('as', 'string | Component', 'Rendered element.', "'div'")], slots: ['default'], accessibility: 'Layout-only component with no added interaction semantics.',
     snippet: `<AgalaCenter><AgalaProgress variant="circular" indeterminate /></AgalaCenter>`,
   },
   {
@@ -345,7 +345,7 @@ export const components: ComponentMeta[] = [
   },
   {
     slug: 'stack', name: 'Stack', exports: ['AgalaStack', 'AgalaHStack', 'AgalaVStack'], description: 'Arranges children with consistent direction, alignment, wrapping, and gap.',
-    props: [p('direction', "'vertical' | 'horizontal'", 'Stack direction.', "'vertical'"), p('gap', 'string', 'CSS gap.'), p('align / justify', 'string', 'CSS alignment values.'), p('wrap', 'boolean', 'Allows wrapping.', 'false'), p('as', 'string', 'Rendered HTML element.', "'div'"), p('class', 'string', 'Consumer override class.')],
+    props: [p('direction', "'vertical' | 'horizontal'", 'Stack direction.', "'vertical'"), p('gap', 'string', 'CSS gap.'), p('align / justify', 'string', 'CSS alignment values.'), p('wrap', 'boolean', 'Allows wrapping.', 'false'), p('as', 'string | Component', 'Rendered HTML element or Vue component.', "'div'"), p('class', 'string', 'Consumer override class.')],
     slots: ['default'], accessibility: 'Choose an appropriate as element when the children form a semantic list or navigation region.',
     snippet: `<AgalaHStack gap="0.75rem" align="center"><AgalaButton>Save</AgalaButton><AgalaButton variant="ghost">Cancel</AgalaButton></AgalaHStack>`,
   },

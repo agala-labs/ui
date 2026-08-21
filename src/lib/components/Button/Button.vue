@@ -1,19 +1,11 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { Primitive } from 'reka-ui'
 import { AgalaIcon } from '../AgalaIcon'
-import type { ButtonVariant, ButtonSize, ButtonType } from './types'
+import type { ButtonProps, ButtonVariant, ButtonSize } from './types'
 import type { IconName } from '../AgalaIcon/types'
 
-const props = withDefaults(defineProps<{
-  variant?: ButtonVariant
-  size?: ButtonSize
-  type?: ButtonType
-  loading?: boolean
-  block?: boolean
-  icon?: string
-  disabled?: boolean
-  class?: string
-}>(), {
+const props = withDefaults(defineProps<ButtonProps>(), {
   variant: 'default',
   size: 'md',
   type: 'button',
@@ -21,6 +13,8 @@ const props = withDefaults(defineProps<{
   block: false,
   icon: '',
   disabled: false,
+  as: 'button',
+  asChild: false,
   class: '',
 })
 
@@ -50,11 +44,16 @@ const cls = computed(() => [
 </script>
 
 <template>
-  <button
-    :type="type"
+  <Primitive
+    :as="as"
+    :as-child="asChild"
+    :type="asChild || as !== 'button' ? undefined : type"
     :class="cls"
     :disabled="disabled || loading"
     :data-loading="loading"
+    :aria-disabled="asChild && (disabled || loading) ? 'true' : undefined"
+    :tabindex="asChild && (disabled || loading) ? -1 : undefined"
+    @click="(event: MouseEvent) => (disabled || loading) && event.preventDefault()"
   >
     <AgalaIcon v-if="loading" name="spinner" size="sm" />
     <AgalaIcon
@@ -63,7 +62,7 @@ const cls = computed(() => [
       size="sm"
     />
     <slot />
-  </button>
+  </Primitive>
 </template>
 
 <style scoped>
@@ -96,7 +95,8 @@ const cls = computed(() => [
 }
 
 .btn:disabled,
-.btn[data-loading='true'] {
+.btn[data-loading='true'],
+.btn[aria-disabled='true'] {
   pointer-events: none;
   opacity: var(--agala-opacity-disabled);
 }

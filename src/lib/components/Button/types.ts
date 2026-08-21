@@ -1,3 +1,5 @@
+import type { Component } from 'vue'
+
 export type ButtonVariant = 'default' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'link'
 export type ButtonSize = 'sm' | 'md' | 'lg' | 'icon'
 export type ButtonType = 'button' | 'submit' | 'reset'
@@ -10,5 +12,7 @@ export interface ButtonProps {
   block?: boolean
   icon?: string
   disabled?: boolean
+  as?: string | Component
+  asChild?: boolean
   class?: string
 }

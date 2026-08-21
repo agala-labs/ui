@@ -66,6 +66,7 @@ export default defineConfig({
           { text: 'Getting started', link: '/guide/getting-started' },
           { text: 'Theming', link: '/guide/theming' },
           { text: 'Accessibility', link: '/guide/accessibility' },
+          { text: 'Composition', link: '/guide/composition' },
           { text: 'Utilities', link: '/guide/utilities' },
           { text: 'Component examples', link: '/guide/component-examples' },
         ] },

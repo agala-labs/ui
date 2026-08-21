@@ -7,7 +7,6 @@ const props = withDefaults(defineProps<StackProps>(), {
   gap: '0.5rem',
   align: 'stretch',
   wrap: false,
-  as: 'div',
   class: '',
 })
 
@@ -19,10 +18,12 @@ const style = computed(() => ({
   justifyContent: props.justify,
   flexWrap: (props.wrap ? 'wrap' : undefined) as 'wrap' | undefined,
 }))
+
+const renderedAs = computed(() => props.as ?? 'div')
 </script>
 
 <template>
-  <component :is="as" :class="$props.class" :style="style">
+  <component :is="renderedAs" :class="$props.class" :style="style">
     <slot />
   </component>
 </template>

@@ -5,4 +5,5 @@ export interface FormFieldProps {
   disabled?: boolean
   htmlFor?: string
   required?: boolean
+  class?: string
 }

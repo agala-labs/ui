@@ -245,6 +245,7 @@ for (const floatingCase of floatingCases) {
 test('Tooltip uses collision-aware top-layer positioning for hover and focus', async ({ page }) => {
   await openWithTheme(page, '/components/tooltip')
   const trigger = page.getByRole('button', { name: 'Copy link' })
+  await trigger.evaluate(element => element.scrollIntoView({ block: 'center', inline: 'center' }))
   // Reka's grace-area hover tracking doesn't register Playwright's
   // locator.hover() (which isn't a continuous pointer trajectory) the same
   // way it registers a real mouse move; use page.mouse.move like the rest
