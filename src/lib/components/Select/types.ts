@@ -23,8 +23,18 @@ export interface SelectProps {
   errorMessage?: string
   maxDisplayed?: number
   maxSelections?: number
+  /** Standard HTML id for the combobox trigger. */
+  id?: string
   inputId?: string
+  name?: string
+  required?: boolean
+  autocomplete?: string
   ariaLabel?: string
   ariaLabelledby?: string
+  ariaDescribedby?: string
+  ariaDetails?: string
+  ariaErrorMessage?: string
+  ariaInvalid?: boolean | 'grammar' | 'spelling' | 'false' | 'true'
+  ariaRequired?: boolean | 'false' | 'true'
   class?: string
 }

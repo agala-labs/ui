@@ -19,28 +19,11 @@ import {
   CalendarHeader,
 } from 'reka-ui'
 import { AgalaIcon } from '../AgalaIcon'
-import type { DatePickerSize } from './types'
+import type { DatePickerProps } from './types'
 
 const instanceId = useId()
 const gridId = `agala-date-grid-${instanceId}`
-const props = withDefaults(defineProps<{
-  modelValue?: string
-  size?: DatePickerSize
-  disabled?: boolean
-  error?: boolean
-  errorMessage?: string
-  placeholder?: string
-  min?: string
-  max?: string
-  clearable?: boolean
-  inline?: boolean
-  highlightDates?: string[]
-  displayMonth?: string
-  inputId?: string
-  ariaLabel?: string
-  ariaLabelledby?: string
-  class?: string
-}>(), {
+const props = withDefaults(defineProps<DatePickerProps>(), {
   size: 'md',
   disabled: false,
   error: false,
@@ -58,6 +41,15 @@ const WEEKDAYS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
 const MONTH_LABELS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 const isOpen = ref(false)
 const isYearPanelOpen = ref(false)
+const effectiveAriaInvalid = computed(() => {
+  if (props.error || props.ariaInvalid === true || props.ariaInvalid === 'true') return 'true'
+  if (props.ariaInvalid === 'false') return 'false'
+  return undefined
+})
+const effectiveAriaRequired = computed(() => {
+  if (props.required || props.ariaRequired === true || props.ariaRequired === 'true') return true
+  return undefined
+})
 
 function parseValue(value?: string): CalendarDate | undefined {
   if (!value) return undefined
@@ -184,6 +176,9 @@ function cellCls(day: DateValue, outsideView: boolean, selected: boolean, today:
     :placeholder="placeholderDate"
     :min-value="minDate"
     :max-value="maxDate"
+    :id="id || inputId || undefined"
+    :name="name"
+    :required="required"
     :disabled="disabled"
     :open="inline ? undefined : isOpen"
     :close-on-select="!inline"
@@ -200,7 +195,7 @@ function cellCls(day: DateValue, outsideView: boolean, selected: boolean, today:
       as-child
     >
       <div
-        :id="inputId || undefined"
+        :id="id || inputId || undefined"
         :class="triggerRowCls"
         role="combobox"
         aria-haspopup="grid"
@@ -209,6 +204,11 @@ function cellCls(day: DateValue, outsideView: boolean, selected: boolean, today:
         :aria-disabled="disabled"
         :aria-label="ariaLabel"
         :aria-labelledby="ariaLabelledby"
+        :aria-describedby="ariaDescribedby"
+        :aria-details="ariaDetails"
+        :aria-errormessage="ariaErrorMessage"
+        :aria-invalid="effectiveAriaInvalid"
+        :aria-required="effectiveAriaRequired"
         :tabindex="disabled ? -1 : 0"
         @keydown="handleTriggerKeyDown"
       >
@@ -545,6 +545,19 @@ function cellCls(day: DateValue, outsideView: boolean, selected: boolean, today:
     >
       {{ errorMessage }}
     </p>
+
+    <input
+      v-if="name"
+      class="nativeControl"
+      type="date"
+      :value="modelValue || undefined"
+      :name="name"
+      :required="required"
+      :autocomplete="autocomplete"
+      :disabled="disabled"
+      aria-hidden="true"
+      tabindex="-1"
+    >
   </DatePickerRoot>
 </template>
 
@@ -564,6 +577,7 @@ function cellCls(day: DateValue, outsideView: boolean, selected: boolean, today:
 .triggerPlaceholder { color:hsl(var(--agala-muted-foreground)); }
 .chevron { display:inline-flex; align-items:center; flex-shrink:0; color:hsl(var(--agala-muted-foreground)); transition:transform var(--agala-transition-fast); }
 .chevronOpen { transform:rotate(180deg); }
+.nativeControl { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0; }
 .dropdown { box-sizing:border-box; z-index:var(--agala-z-dropdown); display:flex; flex-direction:column; width:280px; max-width:min(var(--reka-popper-available-width, calc(100vw - 1rem)), var(--agala-floating-available-width, calc(100vw - 1rem))); max-height:min(var(--reka-popper-available-height, calc(100dvh - 1rem)), var(--agala-floating-available-height, calc(100dvh - 1rem))); background-color:hsl(var(--agala-popover)); color:hsl(var(--agala-popover-foreground)); border:var(--agala-border-width) solid hsl(var(--agala-border)); border-radius:calc(var(--agala-radius) - 2px); box-shadow:var(--agala-shadow-md); overflow-x:hidden; overflow-y:auto; overscroll-behavior:contain; padding:.5rem; }
 .inlinePanel { width:280px; }
 .header { display:flex; align-items:center; justify-content:space-between; padding:.25rem .25rem .5rem; margin-bottom:.25rem; border-bottom:var(--agala-border-width) solid hsl(var(--agala-border)); }

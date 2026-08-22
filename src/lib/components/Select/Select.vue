@@ -21,31 +21,14 @@ import {
   SelectViewport,
 } from 'reka-ui'
 import { AgalaIcon } from '../AgalaIcon'
-import type { SelectOption, SelectSize } from './types'
+import type { SelectOption, SelectProps } from './types'
 
 const instanceId = useId()
 const listboxId = `agala-select-listbox-${instanceId}`
 
-const props = withDefaults(defineProps<{
-  options: SelectOption[]
-  modelValue?: string | string[]
-  multiple?: boolean
-  placeholder?: string
-  size?: SelectSize
-  disabled?: boolean
-  loading?: boolean
-  searchable?: boolean
+const props = withDefaults(defineProps<SelectProps & {
   onSearch?: (query: string) => void
-  clearable?: boolean
-  error?: boolean
-  errorMessage?: string
-  maxDisplayed?: number
-  maxSelections?: number
   wrapperClass?: string
-  inputId?: string
-  ariaLabel?: string
-  ariaLabelledby?: string
-  class?: string
 }>(), {
   multiple: false,
   placeholder: 'Choose…',
@@ -71,6 +54,16 @@ const query = ref('')
 const internalValue = ref<string | string[]>(props.multiple ? [] : '')
 
 const triggerRef = ref<HTMLDivElement>()
+
+const effectiveAriaInvalid = computed(() => {
+  if (props.error || props.ariaInvalid === true || props.ariaInvalid === 'true') return 'true'
+  if (props.ariaInvalid === 'false') return 'false'
+  return undefined
+})
+const effectiveAriaRequired = computed(() => {
+  if (props.required || props.ariaRequired === true || props.ariaRequired === 'true') return true
+  return undefined
+})
 
 /* ─── Computed ─── */
 const isControlled = computed(() => props.modelValue !== undefined)
@@ -278,6 +271,9 @@ watch(isOpen, (open) => {
       v-model:open="isOpen"
       :model-value="rootModelValue"
       :multiple="multiple"
+      :name="searchable ? undefined : name"
+      :required="searchable ? undefined : required"
+      :autocomplete="searchable ? undefined : autocomplete"
       :disabled="disabled || loading"
       :ignore-filter="searchable"
       @update:model-value="handleRootValueChange"
@@ -289,7 +285,7 @@ watch(isOpen, (open) => {
           :disabled="disabled || loading"
         >
           <div
-            :id="inputId"
+            :id="id || inputId || undefined"
             ref="triggerRef"
             :class="triggerRowCls"
             role="combobox"
@@ -299,6 +295,11 @@ watch(isOpen, (open) => {
             :aria-controls="listboxId"
             :aria-label="ariaLabel"
             :aria-labelledby="ariaLabelledby"
+            :aria-describedby="ariaDescribedby"
+            :aria-details="ariaDetails"
+            :aria-errormessage="ariaErrorMessage"
+            :aria-invalid="effectiveAriaInvalid"
+            :aria-required="effectiveAriaRequired"
             :aria-disabled="disabled || loading"
             @keydown="handleTriggerKeyDown"
           >
@@ -394,6 +395,7 @@ watch(isOpen, (open) => {
                 v-model="query"
                 class="search"
                 placeholder="Search…"
+                :autocomplete="autocomplete"
                 @input="handleSearchInput"
               />
             </div>
@@ -539,6 +541,17 @@ watch(isOpen, (open) => {
       </component>
     </component>
 
+    <input
+      v-if="searchable && name"
+      class="nativeControl"
+      type="hidden"
+      :name="name"
+      :value="Array.isArray(selectedValue) ? selectedValue.join(',') : selectedValue"
+      :required="required"
+      :autocomplete="autocomplete"
+      :disabled="disabled || loading"
+    >
+
     <p
       v-if="errorMessage"
       class="errorMessage"
@@ -554,6 +567,15 @@ watch(isOpen, (open) => {
   display: flex;
   flex-direction: column;
   min-width: 140px;
+}
+
+.nativeControl {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
 
 /* ── Trigger Row ── */

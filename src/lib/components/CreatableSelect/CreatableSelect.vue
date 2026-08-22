@@ -38,6 +38,16 @@ const isOpen = ref(false)
 const query = ref('')
 const triggerRef = ref<HTMLDivElement>()
 
+const effectiveAriaInvalid = computed(() => {
+  if (props.ariaInvalid === true || props.ariaInvalid === 'true') return 'true'
+  if (props.ariaInvalid === 'false') return 'false'
+  return undefined
+})
+const effectiveAriaRequired = computed(() => {
+  if (props.required || props.ariaRequired === true || props.ariaRequired === 'true') return true
+  return undefined
+})
+
 /** Internal value for uncontrolled mode */
 const internalValue = ref<string[]>([])
 
@@ -219,7 +229,7 @@ watch(query, (q) => {
           :disabled="disabled"
         >
           <div
-            :id="inputId"
+            :id="id || inputId || undefined"
             ref="triggerRef"
             class="triggerRow"
             :class="{
@@ -233,6 +243,11 @@ watch(query, (q) => {
             :aria-controls="listboxId"
             :aria-label="ariaLabel"
             :aria-labelledby="ariaLabelledby"
+            :aria-describedby="ariaDescribedby"
+            :aria-details="ariaDetails"
+            :aria-errormessage="ariaErrorMessage"
+            :aria-invalid="effectiveAriaInvalid"
+            :aria-required="effectiveAriaRequired"
             :aria-disabled="disabled"
             @keydown="handleTriggerKeyDown"
           >
@@ -317,6 +332,7 @@ watch(query, (q) => {
                 v-model="query"
                 class="search"
                 placeholder="Search or create…"
+                :autocomplete="autocomplete"
                 @input="handleSearchInput"
               />
             </div>
@@ -386,6 +402,17 @@ watch(query, (q) => {
         </div>
       </ComboboxPortal>
     </ComboboxRoot>
+
+    <input
+      v-if="name"
+      class="nativeControl"
+      type="hidden"
+      :name="name"
+      :value="selectedValues.join(',')"
+      :required="required"
+      :autocomplete="autocomplete"
+      :disabled="disabled"
+    >
   </div>
 </template>
 
@@ -395,6 +422,15 @@ watch(query, (q) => {
   display: flex;
   flex-direction: column;
   min-width: 160px;
+}
+
+.nativeControl {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
 
 /* ── Trigger Row ── */

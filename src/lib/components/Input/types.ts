@@ -14,9 +14,19 @@ export interface InputProps {
   iconEndActionable?: boolean
   type?: string
   placeholder?: string
+  /** Standard HTML id. `inputId` is kept as a backwards-compatible alias. */
+  id?: string
   inputId?: string
+  name?: string
+  required?: boolean
+  autocomplete?: string
   ariaLabel?: string
   ariaLabelledby?: string
+  ariaDescribedby?: string
+  ariaDetails?: string
+  ariaErrorMessage?: string
+  ariaInvalid?: boolean | 'grammar' | 'spelling' | 'false' | 'true'
+  ariaRequired?: boolean | 'false' | 'true'
   wrapperClass?: string
   class?: string
 }

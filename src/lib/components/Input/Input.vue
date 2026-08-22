@@ -18,6 +18,17 @@ const props = withDefaults(defineProps<InputProps>(), {
   class: '',
 })
 
+const controlId = computed(() => props.id ?? props.inputId)
+const effectiveAriaInvalid = computed(() => {
+  if (props.error || props.ariaInvalid === true || props.ariaInvalid === 'true') return 'true'
+  if (props.ariaInvalid === 'false') return 'false'
+  return undefined
+})
+const effectiveAriaRequired = computed(() => {
+  if (props.required || props.ariaRequired === true || props.ariaRequired === 'true') return true
+  return undefined
+})
+
 const emit = defineEmits<{
   'update:modelValue': [value: string]
   'icon-end-click': []
@@ -82,15 +93,22 @@ const cls = computed(() => [
         <AgalaIcon :name="iconStart as IconName" size="sm" />
       </span>
       <input
-        :id="inputId"
+        :id="controlId || undefined"
         ref="inputRef"
         :class="cls"
         :value="modelValue"
+        :name="name"
+        :required="required"
+        :autocomplete="autocomplete"
         :disabled="disabled"
         :readonly="readonly"
-        :aria-invalid="error"
+        :aria-invalid="effectiveAriaInvalid"
         :aria-label="ariaLabel"
         :aria-labelledby="ariaLabelledby"
+        :aria-describedby="ariaDescribedby"
+        :aria-details="ariaDetails"
+        :aria-errormessage="ariaErrorMessage"
+        :aria-required="effectiveAriaRequired"
         :type="effectiveType"
         :placeholder="placeholder"
         @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
