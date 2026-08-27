@@ -8,6 +8,8 @@ const props = withDefaults(defineProps<ListGroupItemProps>(), {
   badgeVariant: 'default',
   variant: 'default',
   disabled: false,
+  interactive: false,
+  type: 'button',
   class: '',
 })
 
@@ -15,8 +17,12 @@ const emit = defineEmits<{
   click: [e: Event]
 }>()
 
+const renderedElement = computed(() => props.as ?? (props.interactive ? 'button' : 'div'))
+const isActionable = computed(() => renderedElement.value !== 'div')
+
 const itemCls = computed(() => [
   'listItem',
+  isActionable.value ? 'listItemActionable' : undefined,
   props.variant === 'danger' ? 'listItemDanger' : undefined,
   props.disabled ? 'listItemDisabled' : undefined,
   props.radius ? `listItemRadius${props.radius.charAt(0).toUpperCase() + props.radius.slice(1)}` : undefined,
@@ -24,12 +30,21 @@ const itemCls = computed(() => [
 ].filter(Boolean).join(' '))
 
 function handleClick(e: Event) {
-  if (props.disabled) return
+  if (props.disabled) {
+    e.preventDefault()
+    return
+  }
   emit('click', e)
 }
 
 function handleKeydown(e: KeyboardEvent) {
-  if (props.disabled) return
+  if (props.disabled) {
+    e.preventDefault()
+    return
+  }
+  if (isActionable.value) return
+  if (e.key !== 'Enter' && e.key !== ' ') return
+  e.preventDefault()
   emit('click', e)
 }
 
@@ -42,14 +57,19 @@ const badgeCls = computed(() => [
 </script>
 
 <template>
-  <div
+  <component
+    :is="renderedElement"
     :class="itemCls"
-    role="listitem"
+    :role="isActionable ? undefined : 'listitem'"
     :tabindex="disabled ? -1 : 0"
+    :type="isActionable && renderedElement === 'button' ? type : undefined"
+    :href="renderedElement === 'a' ? href : undefined"
+    :target="renderedElement === 'a' ? target : undefined"
+    :rel="renderedElement === 'a' ? rel : undefined"
+    :disabled="renderedElement === 'button' ? disabled : undefined"
     :aria-disabled="disabled || undefined"
     @click="handleClick"
-    @keydown.enter.prevent="handleKeydown"
-    @keydown.space.prevent="handleKeydown"
+    @keydown="handleKeydown"
   >
     <slot name="leading">
       <AgalaIcon v-if="icon" :name="iconName" :size="16" class="listIcon" />
@@ -75,7 +95,7 @@ const badgeCls = computed(() => [
       </slot>
       <AgalaIcon v-if="actionIcon" :name="actionIcon as IconName" :size="14" class="listChevron" />
     </slot>
-  </div>
+  </component>
 </template>
 
 <style scoped>
@@ -86,9 +106,20 @@ const badgeCls = computed(() => [
   padding: var(--agala-list-item-padding, 0.75rem 1rem);
   background: var(--agala-list-item-bg, hsl(var(--agala-card)));
   border-bottom: var(--agala-list-item-border, 1px solid hsl(var(--agala-border)));
-  cursor: pointer;
+  cursor: default;
   outline: none;
   transition: background-color var(--agala-transition-fast);
+}
+
+.listItemActionable {
+  width: 100%;
+  cursor: pointer;
+  text-align: left;
+}
+
+button.listItemActionable {
+  border: 0;
+  font: inherit;
 }
 
 .listItem:last-child {

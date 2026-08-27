@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, useAttrs } from 'vue'
 import type { TextareaProps, TextareaResize } from './types'
+
+defineOptions({ inheritAttrs: false })
 
 const props = withDefaults(defineProps<TextareaProps>(), {
   rows: 3,
   resize: 'vertical',
   disabled: false,
+  readonly: false,
   error: false,
 })
 
@@ -23,22 +26,50 @@ const cls = computed(() => [
   'textarea',
   resizeMap[props.resize],
   props.error ? 'textareaError' : undefined,
+  props.readonly ? 'textareaReadonly' : undefined,
 ].filter(Boolean).join(' '))
 
 const wrapperCls = computed(() => [
   'wrapper',
   props.class,
 ].filter(Boolean).join(' '))
+
+const attrs = useAttrs()
+const controlId = computed(() => props.id)
+const effectiveAriaInvalid = computed(() => {
+  if (props.error || props.ariaInvalid === true || props.ariaInvalid === 'true') return 'true'
+  if (props.ariaInvalid === 'false') return 'false'
+  return undefined
+})
+const effectiveAriaRequired = computed(() => {
+  if (props.required || props.ariaRequired === true || props.ariaRequired === 'true') return true
+  return undefined
+})
+const dataAndAriaAttrs = computed(() => Object.fromEntries(
+  Object.entries(attrs).filter(([name]) => name.startsWith('aria-') || name.startsWith('data-')),
+))
 </script>
 
 <template>
   <div :class="wrapperCls">
     <textarea
+      v-bind="dataAndAriaAttrs"
       :class="cls"
+      :id="controlId || undefined"
       :value="modelValue"
       :rows="rows"
+      :name="name"
+      :required="required"
+      :autocomplete="autocomplete"
       :disabled="disabled"
-      :aria-invalid="error"
+      :readonly="readonly"
+      :aria-invalid="effectiveAriaInvalid"
+      :aria-label="ariaLabel"
+      :aria-labelledby="ariaLabelledby"
+      :aria-describedby="ariaDescribedby"
+      :aria-details="ariaDetails"
+      :aria-errormessage="ariaErrorMessage"
+      :aria-required="effectiveAriaRequired"
       :placeholder="placeholder"
       @input="$emit('update:modelValue', ($event.target as HTMLTextAreaElement).value)"
     />
@@ -84,6 +115,10 @@ const wrapperCls = computed(() => [
 .textarea:disabled {
   cursor: not-allowed;
   opacity: var(--agala-opacity-disabled);
+  background-color: hsl(var(--agala-muted));
+}
+
+.textareaReadonly {
   background-color: hsl(var(--agala-muted));
 }
 

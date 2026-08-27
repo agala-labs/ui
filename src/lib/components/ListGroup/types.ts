@@ -9,6 +9,7 @@ export interface ListGroupProps {
 }
 
 export type ListGroupItemVariant = 'default' | 'danger'
+export type ListGroupItemElement = 'div' | 'button' | 'a'
 
 export interface ListGroupItemProps {
   label: string
@@ -20,5 +21,13 @@ export interface ListGroupItemProps {
   variant?: ListGroupItemVariant
   radius?: ListGroupRadius
   actionIcon?: string
+  /** Render an actionable item as a native button or link. */
+  as?: ListGroupItemElement
+  /** Enables native button semantics when `as` is not specified. */
+  interactive?: boolean
+  href?: string
+  target?: string
+  rel?: string
+  type?: 'button' | 'submit' | 'reset'
   class?: string
 }

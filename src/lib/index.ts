@@ -55,7 +55,7 @@ export { default as AgalaHStack } from './components/Stack/HStack.vue'
 
 export { default as AgalaListGroup } from './components/ListGroup/ListGroup.vue'
 export { default as AgalaListGroupItem } from './components/ListGroup/ListGroupItem.vue'
-export type { ListGroupProps, ListGroupItemProps, ListGroupItemVariant } from './components/ListGroup'
+export type { ListGroupProps, ListGroupItemProps, ListGroupItemVariant, ListGroupItemElement } from './components/ListGroup'
 
 export { default as AgalaModal } from './components/Modal/Modal.vue'
 export { default as AgalaModalProvider } from './components/Modal/ModalProvider.vue'

@@ -168,7 +168,7 @@ export const components: ComponentMeta[] = [
   },
   {
     slug: 'textarea', name: 'Textarea', exports: ['AgalaTextarea'], description: 'Captures multi-line plain text.',
-    props: [p('modelValue', 'string', 'Value used by v-model.'), p('rows', 'number', 'Visible text rows.'), p('resize', "'none' | 'vertical' | 'both'", 'Resize behavior.', "'vertical'"), p('placeholder', 'string', 'Placeholder copy.'), p('error / errorMessage', 'boolean / string', 'Validation state and copy.'), p('disabled', 'boolean', 'Disables editing.', 'false')],
+    props: [p('modelValue', 'string', 'Value used by v-model.'), p('rows', 'number', 'Visible text rows.'), p('resize', "'none' | 'vertical' | 'both'", 'Resize behavior.', "'vertical'"), p('placeholder', 'string', 'Placeholder copy.'), p('id / name', 'string', 'Native textarea identifiers.'), p('required / readonly', 'boolean', 'Native form and editing state.'), p('autocomplete', 'string', 'Native autocomplete hint.'), p('aria* / data-*', 'string', 'Forwarded accessibility and data attributes.'), p('error / errorMessage', 'boolean / string', 'Validation state and copy.'), p('disabled', 'boolean', 'Disables editing.', 'false')],
     events: ['update:modelValue(value: string)'], accessibility: 'Pair with FormField for a persistent label and clear error relationship.',
     snippet: `<AgalaTextarea v-model="notes" :rows="5" placeholder="Add notes" />`,
   },
@@ -316,8 +316,8 @@ export const components: ComponentMeta[] = [
   },
   {
     slug: 'list-group', name: 'List Group', exports: ['AgalaListGroup', 'AgalaListGroupItem'], description: 'Displays scan-friendly related records or actions.',
-    props: [p('variant', "'divided' | 'cards'", 'Group presentation.', "'divided'"), p('gap', 'string', 'Custom gap.'), p('borderless / dividers', 'boolean', 'Border controls.'), p('label', 'string', 'Required item label.'), p('subtitle', 'string', 'Item supporting copy.'), p('icon / actionIcon', 'string', 'Agala icon names.'), p('badge', 'string | number', 'Trailing count/status.'), p('badgeVariant', "'default' | 'primary' | 'success' | 'warning' | 'danger'", 'Built-in badge semantic treatment.', "'default'"), p('disabled', 'boolean', 'Disables an item.', 'false')],
-    slots: ['ListGroup: default', 'ListGroupItem: leading, default, trailing, badge'], accessibility: 'Choose semantic content inside each item and label action icons.',
+    props: [p('variant', "'divided' | 'cards'", 'Group presentation.', "'divided'"), p('gap', 'string', 'Custom gap.'), p('borderless / dividers', 'boolean', 'Border controls.'), p('label', 'string', 'Required item label.'), p('subtitle', 'string', 'Item supporting copy.'), p('icon / actionIcon', 'string', 'Agala icon names.'), p('badge', 'string | number', 'Trailing count/status.'), p('badgeVariant', "'default' | 'primary' | 'success' | 'warning' | 'danger'", 'Built-in badge semantic treatment.', "'default'"), p('as', "'div' | 'button' | 'a'", 'Native element for actionable items.', "'div'"), p('interactive', 'boolean', 'Uses a native button when true.', 'false'), p('href / target / rel', 'string', 'Native link attributes.'), p('type', "'button' | 'submit' | 'reset'", 'Native button type.', "'button'"), p('disabled', 'boolean', 'Disables an item.', 'false')],
+    slots: ['ListGroup: default', 'ListGroupItem: leading, default, trailing, badge'], accessibility: 'Items are listitem elements by default. Use interactive or as="button"/as="a" for native actionable semantics; disabled links prevent navigation and expose aria-disabled.',
     snippet: `<AgalaListGroup><AgalaListGroupItem label="Invoices" subtitle="12 open" icon="document" /></AgalaListGroup>`,
   },
   {
