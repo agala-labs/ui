@@ -237,6 +237,7 @@ const events = [
     <AgalaFileUpload
       v-else-if="slug === 'file-upload'"
       v-model="files"
+      class="file-upload-composition-demo"
       accept="image/*"
       multiple
       :max-files="4"
@@ -377,6 +378,9 @@ const events = [
       <AgalaModal
         v-model:open="modalOpen"
         :size="modalSize"
+        class="modal-composition-demo"
+        overlay-class="modal-overlay-composition-demo"
+        content-class="modal-content-composition-demo"
         title="Archive record"
       >
         <p>This record will move to the archive.</p><template #footer>

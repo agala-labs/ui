@@ -186,7 +186,7 @@ export const components: ComponentMeta[] = [
   },
   {
     slug: 'file-upload', name: 'File Upload', exports: ['AgalaFileUpload'], description: 'Selects files through an inline action or drag-and-drop surface.',
-    props: [p('modelValue', 'FileItem[]', 'Files used by v-model.'), p('variant', "'dropzone' | 'inline'", 'Presentation.', "'dropzone'"), p('accept', 'string', 'Accepted MIME types/extensions.'), p('multiple', 'boolean', 'Allows multiple files.', 'false'), p('maxSize / maxFiles', 'number', 'Size and count constraints.'), p('label / helper', 'string', 'Visible field copy.'), p('dragText / browseText / buttonText', 'string', 'Action copy.'), p('disabled', 'boolean', 'Disables selection.', 'false')],
+    props: [p('modelValue', 'FileItem[]', 'Files used by v-model.'), p('variant', "'dropzone' | 'inline'", 'Presentation.', "'dropzone'"), p('accept', 'string', 'Accepted MIME types/extensions.'), p('multiple', 'boolean', 'Allows multiple files.', 'false'), p('maxSize / maxFiles', 'number', 'Size and count constraints.'), p('label / helper', 'string', 'Visible field copy.'), p('dragText / browseText / buttonText', 'string', 'Action copy.'), p('disabled', 'boolean', 'Disables selection.', 'false'), p('class', 'string', 'Consumer class for public composition variables.')],
     events: ['update:modelValue(files: FileItem[])', 'change(files)', 'remove(file)', 'error(message)'], accessibility: 'Retains a keyboard-operable native file input behind the custom surface.',
     snippet: `<AgalaFileUpload v-model="files" accept="image/*" multiple :max-files="4" />`,
   },
@@ -216,7 +216,7 @@ export const components: ComponentMeta[] = [
   },
   {
     slug: 'modal', name: 'Modal', exports: ['AgalaModal', 'AgalaModalProvider', 'modalManager'], description: 'Presents a blocking decision either declaratively or through the modal manager.',
-    props: [p('open', 'boolean', 'Visibility used by v-model:open.'), p('title', 'string', 'Dialog heading.'), p('size', "'sm' | 'md' | 'lg' | 'xl' | 'full'", 'Dialog width.', "'md'"), p('dismissible', 'boolean', 'Allows outside-click dismissal.', 'true'), p('escapeCloses', 'boolean', 'Allows Escape dismissal.', 'true'), p('hideHeader', 'boolean', 'Hides the built-in header.', 'false')],
+    props: [p('open', 'boolean', 'Visibility used by v-model:open.'), p('title', 'string', 'Dialog heading.'), p('size', "'sm' | 'md' | 'lg' | 'xl' | 'full'", 'Dialog width.', "'md'"), p('dismissible', 'boolean', 'Allows outside-click dismissal.', 'true'), p('escapeCloses', 'boolean', 'Allows Escape dismissal.', 'true'), p('hideHeader', 'boolean', 'Hides the built-in header.', 'false'), p('class', 'string', 'Consumer class applied to the dialog surface.'), p('contentClass', 'string', 'Additional consumer class applied to the dialog surface.'), p('overlayClass', 'string', 'Consumer class applied to the teleported overlay.')],
     events: ['update:open(value: boolean)', 'close', 'after-leave'], slots: ['default', 'footer — receives { close }'], accessibility: 'Traps focus while present, retains background scroll lock through leave, and restores the opener after exit. Mount exactly one ModalProvider when using modalManager. Reduced motion removes meaningful transform travel.',
     snippet: `<AgalaModal v-model:open="open" title="Archive record">Confirm the action.</AgalaModal>`,
   },

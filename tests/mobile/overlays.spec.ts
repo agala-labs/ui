@@ -102,6 +102,9 @@ test('Modal remains bounded and restores its opener', async ({ page }) => {
   await trigger.click()
   const dialog = page.getByRole('dialog')
   await expect(dialog).toBeVisible()
+  await expect(dialog).toHaveClass(/modal-composition-demo/)
+  await expect(dialog).toHaveClass(/modal-content-composition-demo/)
+  await expect(page.locator('.modal-overlay-composition-demo')).toHaveCount(1)
   await expectInsideViewport(page, dialog, 8)
   await page.keyboard.press('Escape')
   await expect(page.locator('.overlay')).toHaveClass(/modal-leave-active/)
@@ -111,6 +114,29 @@ test('Modal remains bounded and restores its opener', async ({ page }) => {
   await expect(trigger).toBeFocused()
   await expect(dialog).toBeHidden()
   await expect.poll(() => page.locator('body').evaluate(element => getComputedStyle(element).position)).not.toBe('fixed')
+})
+
+test('File Upload exposes consumer composition variables without private selectors', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'mobile-390', 'Composition API coverage runs once.')
+  await openWithTheme(page, '/components/file-upload')
+
+  const upload = page.locator('.file-upload-composition-demo')
+  await expect(upload).toHaveCount(1)
+  await upload.evaluate((element) => {
+    const root = element as HTMLElement
+    root.style.setProperty('--agala-file-upload-zone-min-height', '13rem')
+    root.style.setProperty('--agala-file-upload-zone-padding', '2rem')
+    root.style.setProperty('--agala-file-upload-zone-background', 'rgb(245, 247, 250)')
+    root.style.setProperty('--agala-file-upload-drag-text-weight', '700')
+  })
+
+  const zone = upload.locator('.fileUpload__zone')
+  await expect(zone).toHaveCSS('min-height', '208px')
+  await expect(zone).toHaveCSS('padding-top', '32px')
+  await expect(zone).toHaveCSS('background-color', 'rgb(245, 247, 250)')
+  await expect(upload.locator('.fileUpload__dragText')).toHaveCSS('font-weight', '700')
+  await zone.locator('input[type="file"]').focus()
+  await expect(zone).not.toHaveCSS('box-shadow', 'none')
 })
 
 test('Modal uses one leave lifecycle for controls, backdrop, Escape, and rapid reopen', async ({ page }, testInfo) => {

@@ -40,6 +40,51 @@ for the visual structure, interaction behavior, and accessible states.
 components through `as`. Choose the element that matches the meaning of the
 content; do not use `div` everywhere simply because it is the default.
 
+## Composing teleported and file-upload surfaces
+
+`AgalaModal` exposes `overlay-class` and `content-class` because both elements
+are teleported outside the consumer component tree. Use those hooks with
+`--agala-modal-align`, `--agala-modal-overlay-padding`,
+`--agala-modal-overlay-opacity`, and `--agala-modal-body-padding` for product
+surfaces such as command palettes. Ordinary blocking dialogs should keep the
+defaults.
+
+`AgalaFileUpload` accepts a consumer `class` and exposes dropzone variables for
+`zone-min-height`, `zone-padding`, `zone-border-width`, `zone-border-color`,
+`zone-radius`, `zone-background`, hover/dragging border and background,
+`zone-focus-ring`, and `drag-text-weight`. Prefix every variable with
+`--agala-file-upload-`; do not target the component's internal selectors.
+
+```vue
+<AgalaModal
+  v-model:open="open"
+  overlay-class="command-overlay"
+  content-class="command-dialog"
+  hide-header
+>
+  ...
+</AgalaModal>
+
+<AgalaFileUpload class="invoice-dropzone" v-model="files" />
+
+<style>
+.command-overlay {
+  --agala-modal-align: flex-start;
+  --agala-modal-overlay-padding: 5rem 1.5rem 1.5rem;
+  --agala-modal-overlay-opacity: 0;
+}
+
+.command-dialog {
+  --agala-modal-body-padding: 0;
+}
+
+.invoice-dropzone {
+  --agala-file-upload-zone-min-height: 12rem;
+  --agala-file-upload-zone-background: hsl(var(--agala-muted) / 0.25);
+}
+</style>
+```
+
 ## Router links and custom actions
 
 ```vue

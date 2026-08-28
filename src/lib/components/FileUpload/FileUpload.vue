@@ -302,22 +302,28 @@ function statusColor(status: FileStatus): string {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1.5rem;
-  border: 2px dashed hsl(var(--agala-border));
-  border-radius: var(--agala-radius-lg);
-  background: hsl(var(--agala-background));
+  min-height: var(--agala-file-upload-zone-min-height, auto);
+  padding: var(--agala-file-upload-zone-padding, 1.5rem);
+  border: var(--agala-file-upload-zone-border-width, 2px) dashed var(--agala-file-upload-zone-border-color, hsl(var(--agala-border)));
+  border-radius: var(--agala-file-upload-zone-radius, var(--agala-radius-lg));
+  background: var(--agala-file-upload-zone-background, hsl(var(--agala-background)));
   cursor: pointer;
   transition: border-color var(--agala-transition-fast), background var(--agala-transition-fast);
 }
 
 .fileUpload__zone:hover:not(.fileUpload__zone--disabled) {
-  border-color: hsl(var(--agala-primary));
-  background: hsl(var(--agala-accent));
+  border-color: var(--agala-file-upload-zone-hover-border-color, hsl(var(--agala-primary)));
+  background: var(--agala-file-upload-zone-hover-background, hsl(var(--agala-accent)));
 }
 
 .fileUpload__zone--dragging {
-  border-color: hsl(var(--agala-primary));
-  background: hsl(var(--agala-accent));
+  border-color: var(--agala-file-upload-zone-dragging-border-color, hsl(var(--agala-primary)));
+  background: var(--agala-file-upload-zone-dragging-background, hsl(var(--agala-accent)));
+}
+
+.fileUpload__zone:focus-within:not(.fileUpload__zone--disabled) {
+  outline: none;
+  box-shadow: var(--agala-file-upload-zone-focus-ring, 0 0 0 2px hsl(var(--agala-ring) / 0.35));
 }
 
 .fileUpload__zone--disabled {
@@ -363,7 +369,7 @@ function statusColor(status: FileStatus): string {
 .fileUpload__dragText {
   margin: 0;
   font-size: var(--agala-font-size-base);
-  font-weight: var(--agala-font-weight-medium);
+  font-weight: var(--agala-file-upload-drag-text-weight, var(--agala-font-weight-medium));
   color: hsl(var(--agala-foreground));
 }
 

@@ -17,12 +17,18 @@ const props = withDefaults(defineProps<{
   hideHeader?: boolean
   dismissible?: boolean
   escapeCloses?: boolean
+  class?: string
+  overlayClass?: string
+  contentClass?: string
 }>(), {
   size: 'md',
   title: undefined,
   hideHeader: false,
   dismissible: true,
   escapeCloses: true,
+  class: undefined,
+  overlayClass: undefined,
+  contentClass: undefined,
 })
 
 const emit = defineEmits<{
@@ -125,11 +131,12 @@ function onAfterLeave() {
         <div
           v-if="rendered"
           class="overlay"
+          :class="props.overlayClass"
           role="presentation"
         >
           <DialogContent
             :force-mount="true"
-            :class="[ 'dialog', sizeMap[size] ].filter(Boolean).join(' ')"
+            :class="[ 'dialog', sizeMap[size], props.class, props.contentClass ].filter(Boolean).join(' ')"
             aria-modal="true"
             :aria-label="title || 'Dialog'"
             @escape-key-down="handleEscapeKeyDown"
@@ -192,11 +199,11 @@ function onAfterLeave() {
   inset: 0;
   z-index: var(--agala-layer-modal, var(--agala-z-modal));
   display: flex;
-  align-items: center;
+  align-items: var(--agala-modal-align, center);
   justify-content: center;
   pointer-events: auto;
-  padding: 1.5rem;
-  background-color: hsl(var(--agala-overlay) / var(--agala-opacity-overlay));
+  padding: var(--agala-modal-overlay-padding, 1.5rem);
+  background-color: hsl(var(--agala-overlay) / var(--agala-modal-overlay-opacity, var(--agala-opacity-overlay)));
   overscroll-behavior: contain;
 }
 
@@ -297,7 +304,7 @@ function onAfterLeave() {
 .body {
   flex: 1 1 auto;
   min-height: 0;
-  padding: 1.25rem;
+  padding: var(--agala-modal-body-padding, 1.25rem);
   overflow-y: auto;
   overscroll-behavior: contain;
   font-size: var(--agala-font-size-base);
@@ -318,11 +325,13 @@ function onAfterLeave() {
 
 @media (max-width: 639px) {
   .overlay {
-    padding:
+    padding: var(
+      --agala-modal-overlay-padding,
       max(0.75rem, env(safe-area-inset-top))
       max(0.75rem, env(safe-area-inset-right))
       max(0.75rem, env(safe-area-inset-bottom))
-      max(0.75rem, env(safe-area-inset-left));
+      max(0.75rem, env(safe-area-inset-left))
+    );
   }
 
   .dialogSm,
@@ -346,7 +355,7 @@ function onAfterLeave() {
   }
 
   .body {
-    padding: 1rem;
+    padding: var(--agala-modal-body-padding, 1rem);
   }
 
   .footer {
