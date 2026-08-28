@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, onUnmounted, ref, useId, watch } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, useId, useSlots, watch } from 'vue'
 import { TabsContent, TabsList, TabsRoot, TabsTrigger } from 'reka-ui'
 import { useMediaQuery } from '../../composables/useMediaQuery'
 import type { TabsProps, TabItem } from './types'
@@ -10,6 +10,7 @@ const props = withDefaults(defineProps<TabsProps>(), {
   ariaLabel: undefined,
 })
 const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
+const slots = useSlots()
 const uid = `agala-tabs-${useId()}`
 const { matches: reduceMotion } = useMediaQuery('(prefers-reduced-motion: reduce)')
 const tabListRef = ref<HTMLElement | null>(null)
@@ -51,7 +52,11 @@ function onModelUpdate(value: string | number) {
   const nextValue = String(value)
   emit('update:modelValue', nextValue)
   nextTick(() => {
-    const trigger = listElement()?.querySelector<HTMLElement>(`[id$="-tab-${safeId(nextValue)}"]`)
+    const selectedTab = props.tabs.find(tab => tab.value === nextValue)
+    const triggerId = selectedTab ? getTabId(selectedTab) : undefined
+    const trigger = triggerId
+      ? Array.from(listElement()?.querySelectorAll<HTMLElement>('[role="tab"]') ?? []).find(element => element.id === triggerId)
+      : undefined
     trigger?.scrollIntoView({ behavior: reduceMotion.value ? 'auto' : 'smooth', inline: 'nearest', block: 'nearest' })
     checkOverflow()
   })
@@ -59,8 +64,11 @@ function onModelUpdate(value: string | number) {
 function safeId(value: string) {
   return encodeURIComponent(value).replaceAll('%', '-')
 }
-function tabId(value: string) { return `${uid}-tab-${safeId(value)}` }
-function panelId(value: string) { return `${uid}-panel-${safeId(value)}` }
+function getTabId(tab: TabItem) { return tab.tabId ?? `${uid}-tab-${safeId(tab.value)}` }
+function getPanelId(tab: TabItem) { return tab.panelId ?? `${uid}-panel-${safeId(tab.value)}` }
+function hasPanel(tab: TabItem) {
+  return Boolean(slots[`panel-${tab.value}`] || tab.panelId)
+}
 const overflowCls = computed(() => [
   'tabListShell',
   props.orientation === 'vertical' ? 'tabListShellVertical' : undefined,
@@ -96,10 +104,10 @@ function tabCls(tab: TabItem) {
           as-child
         >
           <button
-            :id="tabId(tab.value)"
+            :id="getTabId(tab)"
             type="button"
             :class="tabCls(tab)"
-            :aria-controls="panelId(tab.value)"
+            :aria-controls="hasPanel(tab) ? getPanelId(tab) : undefined"
             :aria-label="tab.label"
           >
             <slot
@@ -119,9 +127,9 @@ function tabCls(tab: TabItem) {
     >
       <TabsContent
         v-if="$slots[`panel-${tab.value}`]"
-        :id="panelId(tab.value)"
+        :id="getPanelId(tab)"
         :value="tab.value"
-        :aria-labelledby="tabId(tab.value)"
+        :aria-labelledby="getTabId(tab)"
         class="tabPanel"
       >
         <slot :name="`panel-${tab.value}`" />

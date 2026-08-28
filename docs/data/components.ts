@@ -299,13 +299,14 @@ export const components: ComponentMeta[] = [
   },
   {
     slug: 'tabs', name: 'Tabs', exports: ['AgalaTabs'], description: 'Navigates among related content panels while preserving context.',
-    props: [p('tabs', 'TabItem[]', 'Required tab definitions.'), p('modelValue', 'string', 'Required active tab.'), p('variant', "'underline' | 'pills'", 'Visual treatment.', "'underline'"), p('orientation', "'horizontal' | 'vertical'", 'Axis of the tab strip and its arrows.', "'horizontal'"), p('ariaLabel', 'string', 'Accessible name for the tab list.'), p('class', 'string', 'Consumer override class.')],
+    props: [p('tabs', 'TabItem[]', 'Required tab definitions; items may include tabId and panelId for explicit relationships.'), p('modelValue', 'string', 'Required active tab.'), p('variant', "'underline' | 'pills'", 'Visual treatment.', "'underline'"), p('orientation', "'horizontal' | 'vertical'", 'Axis of the tab strip and its arrows.', "'horizontal'"), p('ariaLabel', 'string', 'Accessible name for the tab list.'), p('class', 'string', 'Consumer override class.')],
     events: ['update:modelValue(value: string)'], slots: ['panel-<value>', 'tab-<value> — receives { tab, active }'], accessibility: 'Implements tablist, tab, and tabpanel relationships. Arrow keys follow the configured orientation (Left/Right horizontally, Up/Down vertically), Home, and End skip disabled tabs. Use Segmented Control instead when changing a form value or immediate view mode.',
     snippet: `<AgalaTabs v-model="tab" :tabs="tabs"><template #panel-overview>Overview</template></AgalaTabs>`,
     examples: [
       { id: 'default', label: 'Default', snippet: `<AgalaTabs v-model="tab" :tabs="tabs"><template #panel-overview>Overview</template></AgalaTabs>` },
       { id: 'pills', label: 'Pills navigation', description: 'Use loose pills for secondary content navigation; they remain tabs, not form values or mode toggles.', snippet: `<AgalaTabs v-model="tab" :tabs="tabs" variant="pills" aria-label="Project sections"><template #panel-overview>Project overview</template></AgalaTabs>` },
       { id: 'vertical', label: 'Vertical rail', description: 'A side rail works for configuration lists: tabs read top-to-bottom beside one adjacent panel.', snippet: `<AgalaTabs v-model="tab" :tabs="tabs" orientation="vertical" variant="underline" aria-label="Project sections"><template #panel-overview>Project overview</template></AgalaTabs>` },
+      { id: 'external', label: 'External panels', description: 'Give each tab and its externally composed panel explicit IDs when the panel must live in another layout shell.', snippet: "const tabs = [{ value: 'overview', label: 'Overview', tabId: 'tab-overview', panelId: 'panel-overview' }]\nconst panel = { id: 'panel-overview', tabId: 'tab-overview' }\n<AgalaTabs v-model=\"tab\" :tabs=\"tabs\" aria-label=\"Project sections\" />\n<section v-if=\"tab === 'overview'\" role=\"tabpanel\" :id=\"panel.id\" :aria-labelledby=\"panel.tabId\">Project overview</section>" },
     ],
   },
   {

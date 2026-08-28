@@ -82,6 +82,16 @@ const tabs = [
   { value: 'milestones', label: 'Milestones' },
   { value: 'settings', label: 'Settings', disabled: true },
 ]
+const externalTabs = [
+  { value: 'overview', label: 'Overview', tabId: 'external-tab-overview', panelId: 'external-panel-overview' },
+  { value: 'activity', label: 'Activity', tabId: 'external-tab-activity', panelId: 'external-panel-activity' },
+  { value: 'milestones', label: 'Milestones', tabId: 'external-tab-milestones', panelId: 'external-panel-milestones' },
+]
+const externalTabPanels = [
+  { value: 'overview', id: 'external-panel-overview', tabId: 'external-tab-overview', content: 'Project health and recent milestones.' },
+  { value: 'activity', id: 'external-panel-activity', tabId: 'external-tab-activity', content: 'Recent workspace activity.' },
+  { value: 'milestones', id: 'external-panel-milestones', tabId: 'external-tab-milestones', content: 'Delivery milestones and upcoming release gates.' },
+]
 const sideItems = [{ label: 'Workspace', items: [
   { value: 'overview', label: 'Overview', icon: 'home' as const },
   { value: 'workspace', label: 'Projects', icon: 'grid' as const, children: [
@@ -567,6 +577,30 @@ const events = [
         </AgalaBadge>
       </template>
     </AgalaTable>
+    <div
+      v-else-if="slug === 'tabs' && example === 'external'"
+      class="tabs-external-demo"
+    >
+      <AgalaTabs
+        v-model="tab"
+        :tabs="externalTabs"
+        aria-label="Project sections"
+      />
+      <template
+        v-for="panel in externalTabPanels"
+        :key="panel.value"
+      >
+        <section
+          v-if="tab === panel.value"
+          :id="panel.id"
+          role="tabpanel"
+          :aria-labelledby="panel.tabId"
+          class="tabPanel"
+        >
+          <p>{{ panel.content }}</p>
+        </section>
+      </template>
+    </div>
     <AgalaTabs
       v-else-if="slug === 'tabs'"
       v-model="tab"
@@ -808,6 +842,8 @@ const events = [
 .section-nav-demo__details dt { color: hsl(var(--agala-muted-foreground)); }
 .section-nav-demo__details dd { min-width: 0; margin: 0; font-weight: var(--agala-font-weight-medium); overflow-wrap: anywhere; }
 .calendar-demo { min-width: 0; height: 32rem; overflow: hidden; }
+.tabs-external-demo { display: flex; flex-direction: column; gap: 0; }
+.tabs-external-demo .tabPanel { padding-top: 1.25rem; }
 .tab-label { display: inline-flex; align-items: center; gap: 0.4rem; }
 .tab-count { display: inline-flex; min-width: 1.25rem; height: 1.25rem; align-items: center; justify-content: center; border-radius: 999px; background: hsl(var(--agala-primary) / 0.12); color: hsl(var(--agala-primary)); font-size: 0.6875rem; font-weight: var(--agala-font-weight-semibold); }
 .segment-label { display: inline-flex; min-width: 0; align-items: center; gap: 0.3rem; }

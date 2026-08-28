@@ -31,6 +31,7 @@ test.describe('AgalaTabs orientation', () => {
     const milestones = tabs.nth(2)
     const settings = tabs.nth(3)
     await expect(settings).toBeDisabled()
+    await expect(settings).not.toHaveAttribute('aria-controls')
 
     await expect(overview).toHaveAttribute('aria-selected', 'true')
     const panelId = await page.getByRole('tabpanel').getAttribute('id')
@@ -59,6 +60,28 @@ test.describe('AgalaTabs orientation', () => {
     await expectSelection(page, milestones, /Milestones/)
     await page.keyboard.press('ArrowUp')
     await expectSelection(page, milestones, /Milestones/)
+  })
+
+  test('external panels use explicit tab relationships and preserve keyboard selection', async ({ page }) => {
+    await openTabs(page, 'external')
+
+    const tabs = previewTabs(page)
+    const overview = tabs.nth(0)
+    const activity = tabs.nth(1)
+    await expect(overview).toHaveAttribute('id', 'external-tab-overview')
+    await expect(overview).toHaveAttribute('aria-controls', 'external-panel-overview')
+
+    const panel = page.getByRole('tabpanel')
+    await expect(panel).toHaveAttribute('id', 'external-panel-overview')
+    await expect(panel).toHaveAttribute('aria-labelledby', 'external-tab-overview')
+
+    await overview.focus()
+    await page.keyboard.press('ArrowRight')
+    await expectSelection(page, activity, /Activity/)
+    await expect(activity).toHaveAttribute('id', 'external-tab-activity')
+    await expect(activity).toHaveAttribute('aria-controls', 'external-panel-activity')
+    await expect(panel).toHaveAttribute('id', 'external-panel-activity')
+    await expect(panel).toHaveAttribute('aria-labelledby', 'external-tab-activity')
   })
 
   test('preview example switcher drives dynamic aria-orientation on a live instance', async ({ page }, testInfo) => {

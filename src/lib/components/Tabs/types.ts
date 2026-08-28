@@ -2,6 +2,8 @@ export interface TabItem {
   value: string
   label: string
   disabled?: boolean
+  tabId?: string
+  panelId?: string
 }
 
 export interface TabsProps {
