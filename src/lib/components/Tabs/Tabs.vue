@@ -19,8 +19,11 @@ const canScrollEnd = ref(false)
 let resizeObserver: ResizeObserver | undefined
 
 function listElement() {
-  const list = tabListRef.value
-  return typeof Element !== 'undefined' && list instanceof Element ? list as HTMLElement : null
+  const list = tabListRef.value as unknown
+  if (typeof Element === 'undefined' || !list) return null
+  if (list instanceof Element) return list as HTMLElement
+  if (typeof list === 'object' && '$el' in list && list.$el instanceof Element) return list.$el as HTMLElement
+  return null
 }
 
 function checkOverflow() {
@@ -35,8 +38,50 @@ function checkOverflow() {
     canScrollEnd.value = list.scrollLeft + list.clientWidth < list.scrollWidth - tolerance
   }
 }
-onMounted(() => {
+function revealSelected(initial = false) {
+  const list = listElement()
+  const selectedTab = props.tabs.find(tab => tab.value === props.modelValue)
+  const triggerId = selectedTab ? getTabId(selectedTab) : undefined
+  const trigger = triggerId
+    ? Array.from(list?.querySelectorAll<HTMLElement>('[role="tab"]') ?? []).find(element => element.id === triggerId)
+    : undefined
+  if (list && trigger) {
+    const listRect = list.getBoundingClientRect()
+    const triggerRect = trigger.getBoundingClientRect()
+    const behavior = initial || reduceMotion.value ? 'auto' : 'smooth'
+    if (props.orientation === 'vertical') {
+      const triggerTop = triggerRect.top - listRect.top + list.scrollTop
+      const triggerBottom = triggerTop + triggerRect.height
+      const target = triggerTop < list.scrollTop
+        ? triggerTop
+        : triggerBottom > list.scrollTop + list.clientHeight
+          ? triggerBottom - list.clientHeight
+          : list.scrollTop
+      if (target !== list.scrollTop) list.scrollTo({ top: target, behavior })
+    } else {
+      const triggerLeft = triggerRect.left - listRect.left + list.scrollLeft
+      const triggerRight = triggerLeft + triggerRect.width
+      const target = triggerLeft < list.scrollLeft
+        ? triggerLeft
+        : triggerRight > list.scrollLeft + list.clientWidth
+          ? triggerRight - list.clientWidth
+          : list.scrollLeft
+      if (target !== list.scrollLeft) list.scrollTo({ left: target, behavior })
+    }
+  }
   checkOverflow()
+}
+function scheduleRevealSelected(initial = false) {
+  nextTick(() => {
+    if (typeof requestAnimationFrame === 'function') requestAnimationFrame(() => revealSelected(initial))
+    else revealSelected(initial)
+  })
+}
+onMounted(() => {
+  scheduleRevealSelected(true)
+  if (typeof document !== 'undefined' && document.fonts) {
+    document.fonts.ready.then(() => scheduleRevealSelected(true))
+  }
   const list = listElement()
   if (typeof ResizeObserver !== 'undefined' && list) {
     resizeObserver = new ResizeObserver(checkOverflow)
@@ -44,22 +89,12 @@ onMounted(() => {
   }
 })
 onUnmounted(() => resizeObserver?.disconnect())
-watch(() => props.tabs, () => nextTick(checkOverflow), { deep: true })
-watch(() => props.orientation, () => nextTick(checkOverflow))
-watch(() => props.modelValue, () => nextTick(checkOverflow))
+watch(() => props.tabs, () => scheduleRevealSelected(), { deep: true })
+watch(() => props.orientation, () => scheduleRevealSelected())
+watch(() => props.modelValue, () => scheduleRevealSelected())
 
 function onModelUpdate(value: string | number) {
-  const nextValue = String(value)
-  emit('update:modelValue', nextValue)
-  nextTick(() => {
-    const selectedTab = props.tabs.find(tab => tab.value === nextValue)
-    const triggerId = selectedTab ? getTabId(selectedTab) : undefined
-    const trigger = triggerId
-      ? Array.from(listElement()?.querySelectorAll<HTMLElement>('[role="tab"]') ?? []).find(element => element.id === triggerId)
-      : undefined
-    trigger?.scrollIntoView({ behavior: reduceMotion.value ? 'auto' : 'smooth', inline: 'nearest', block: 'nearest' })
-    checkOverflow()
-  })
+  emit('update:modelValue', String(value))
 }
 function safeId(value: string) {
   return encodeURIComponent(value).replaceAll('%', '-')

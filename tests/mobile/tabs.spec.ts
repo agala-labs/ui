@@ -84,6 +84,23 @@ test.describe('AgalaTabs orientation', () => {
     await expect(panel).toHaveAttribute('aria-labelledby', 'external-tab-activity')
   })
 
+  test('controlled initial example selection reveals the active tab inside the mobile tablist', async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== 'mobile-390', 'Initial deep selection coverage runs once.')
+    await openTabs(page, 'external')
+    const tablist = page.getByRole('tablist', { name: 'Component examples' })
+    const selected = tablist.getByRole('tab', { name: 'External panels' })
+    await expect(selected).toHaveAttribute('aria-selected', 'true')
+
+    const listBox = await tablist.boundingBox()
+    const tabBox = await selected.boundingBox()
+    expect(listBox).not.toBeNull()
+    expect(tabBox).not.toBeNull()
+    if (!listBox || !tabBox) return
+    expect(tabBox.x).toBeGreaterThanOrEqual(listBox.x - 1)
+    expect(tabBox.x + tabBox.width).toBeLessThanOrEqual(listBox.x + listBox.width + 1)
+    await expect.poll(() => tablist.evaluate(element => (element as HTMLElement).scrollLeft)).toBeGreaterThan(0)
+  })
+
   test('preview example switcher drives dynamic aria-orientation on a live instance', async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== 'mobile-390', 'Dynamic orientation coverage runs once.')
     const tablist = await openTabs(page)
