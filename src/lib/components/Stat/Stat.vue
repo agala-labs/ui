@@ -48,6 +48,7 @@ const statCls = computed(() => [
   props.icon ? 'statHasIcon' : undefined,
   isRow.value ? 'statRow' : undefined,
   isInline.value ? 'statInline' : undefined,
+  props.valueFirst ? 'statValueFirst' : undefined,
   props.class,
 ].filter(Boolean).join(' '))
 </script>
@@ -166,6 +167,13 @@ const statCls = computed(() => [
   overflow-wrap: anywhere;
 }
 
+.statValueFirst {
+  grid-template-areas:
+    'value icon'
+    'label label'
+    'meta meta';
+}
+
 .statMeta {
   grid-area: meta;
   display: flex;
@@ -225,6 +233,20 @@ const statCls = computed(() => [
     'meta';
 }
 
+.statRow.statValueFirst {
+  grid-template-areas:
+    'icon value'
+    'icon label'
+    'icon meta';
+}
+
+.statRow.statValueFirst:not(.statHasIcon) {
+  grid-template-areas:
+    'value'
+    'label'
+    'meta';
+}
+
 /* Inline layout */
 .statInline {
   display: flex;
@@ -249,6 +271,14 @@ const statCls = computed(() => [
   display: inline-flex;
   flex: 0 1 auto;
   align-self: baseline;
+}
+
+.statInline.statValueFirst .statValue {
+  order: -2;
+}
+
+.statInline.statValueFirst .statLabel {
+  order: -1;
 }
 
 /* Semantic icon marker */

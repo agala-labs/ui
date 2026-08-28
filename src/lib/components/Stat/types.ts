@@ -9,6 +9,7 @@ export interface StatProps {
   icon?: string
   iconBg?: 'primary' | 'danger' | 'success' | 'warning' | 'info'
   layout?: 'vertical' | 'row' | 'inline'
+  valueFirst?: boolean
   bordered?: boolean
   labelTransform?: string
   class?: string
