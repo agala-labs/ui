@@ -783,7 +783,13 @@ watch(isOpen, (open) => {
   z-index: var(--agala-z-dropdown);
   display: flex;
   flex-direction: column;
-  width: var(--reka-select-trigger-width, var(--reka-combobox-trigger-width, auto));
+  width: max(
+    var(--reka-select-trigger-width, var(--reka-combobox-trigger-width, 0px)),
+    min(
+      14rem,
+      var(--reka-select-content-available-width, var(--reka-combobox-content-available-width, calc(100vw - 1rem)))
+    )
+  );
   max-width: var(--reka-select-content-available-width, var(--reka-combobox-content-available-width, calc(100vw - 1rem)));
   max-height: min(24rem, 60vh, var(--reka-select-content-available-height, var(--reka-combobox-content-available-height, 60vh)));
   background-color: hsl(var(--agala-popover));

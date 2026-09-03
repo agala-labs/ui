@@ -5,6 +5,63 @@ const VUE_URL = '/.vitepress/cache/deps/vue.js'
 const LIB_URL = `/@fs${PKG_ROOT}/src/lib/index.ts`
 
 test.describe('per-instance popup IDs', () => {
+  test('Select: a narrow trigger still opens a legible option menu', async ({ page }) => {
+    await page.goto('/')
+
+    const result = await page.evaluate(async ({ vueUrl, libUrl }) => {
+      const Vue = await import(vueUrl)
+      const lib = await import(libUrl)
+
+      const style = document.createElement('style')
+      style.textContent = '.narrow-select { width: 80px; min-width: 0 !important; }'
+      document.head.appendChild(style)
+
+      const div = document.createElement('div')
+      div.style.cssText = 'position:fixed;top:1rem;left:1rem;z-index:99999;background:white;'
+      document.body.appendChild(div)
+
+      const app = Vue.createApp({
+        render() {
+          return Vue.h(lib.AgalaSelect, {
+            class: 'narrow-select',
+            ariaLabel: 'Location',
+            options: [
+              { value: 'all', label: 'All warehouse locations' },
+              { value: 'main', label: 'Main warehouse' },
+            ],
+          })
+        },
+      })
+
+      app.mount(div)
+      await Vue.nextTick()
+
+      const trigger = div.querySelector('[role=combobox]') as HTMLElement
+      trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }))
+      await new Promise(resolve => setTimeout(resolve, 150))
+
+      const listboxId = trigger.getAttribute('aria-controls') as string
+      const portal = document.getElementById(listboxId) as HTMLElement
+      const dropdown = portal.querySelector('.dropdown') as HTMLElement
+      const optionLabel = dropdown.querySelector('.optionLabel') as HTMLElement
+      const dimensions = {
+        triggerWidth: trigger.getBoundingClientRect().width,
+        dropdownWidth: dropdown.getBoundingClientRect().width,
+        labelFits: optionLabel.scrollWidth <= optionLabel.clientWidth,
+      }
+
+      app.unmount()
+      div.remove()
+      style.remove()
+
+      return dimensions
+    }, { vueUrl: VUE_URL, libUrl: LIB_URL })
+
+    expect(result.triggerWidth).toBeLessThan(100)
+    expect(result.dropdownWidth).toBeGreaterThanOrEqual(220)
+    expect(result.labelFits).toBe(true)
+  })
+
   test('Select: two instances have unique aria-controls and listbox IDs', async ({ page }) => {
     await page.goto('/')
 
