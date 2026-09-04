@@ -154,10 +154,7 @@ export type { FileUploadProps, FileUploadVariant, FileItem, FileStatus } from '.
 
 export { default as AgalaVStack } from './components/Stack/VStack.vue'
 
-export { default as AgalaDevEnvBanner } from './components/DevEnvBanner/DevEnvBanner.vue'
-export type { DevEnvBannerProps } from './components/DevEnvBanner'
-
 export { default as AgalaAlert } from './components/Alert/Alert.vue'
-export type { AlertProps, AlertVariant } from './components/Alert'
+export type { AlertProps, AlertRole, AlertVariant } from './components/Alert'
 
 export { AgalaUI } from './plugin'

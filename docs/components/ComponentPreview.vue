@@ -36,7 +36,7 @@ const sidebarActive = ref('active')
 const sidebarExpanded = ref<string[]>(['workspace'])
 const sectionNavActive = ref('clinica')
 const sectionNavSelection = ref('clinica')
-const alertRetryCount = ref(0)
+const alertSessionViewed = ref(false)
 const listActivations = ref(0)
 const tagActivations = ref(0)
 
@@ -253,47 +253,23 @@ const events = [
         <span class="segment-label">List <span class="segment-count">12</span></span>
       </template>
     </AgalaSegmentedControl>
-    <div
+    <AgalaAlert
       v-else-if="slug === 'alert'"
-      class="preview-stack"
+      class="alert-action-demo"
+      variant="warning"
+      title="A previous register is still open"
     >
-      <AgalaAlert
-        variant="info"
-        title="Sync paused"
-      >
-        Reconnect the warehouse before accepting new orders.
-      </AgalaAlert><AgalaAlert
-        class="alert-action-demo"
-        variant="danger"
-        title="Could not load inventory"
-        dismissible
-      >
-        Check the connection and try again.
-        <template #action>
-          <AgalaButton
-            variant="outline"
-            size="sm"
-            @click="alertRetryCount++"
-          >
-            Retry<span v-if="alertRetryCount"> ({{ alertRetryCount }})</span>
-          </AgalaButton>
-        </template>
-      </AgalaAlert><AgalaAlert
-        class="alert-flat-action-demo"
-        variant="warning"
-        flat
-      >
-        Export is taking longer than expected.
-        <template #action>
-          <AgalaButton
-            variant="ghost"
-            size="sm"
-          >
-            View activity
-          </AgalaButton>
-        </template>
-      </AgalaAlert>
-    </div>
+      The August 28, 2026 session must be closed before opening today’s register.
+      <template #action>
+        <AgalaButton
+          variant="outline"
+          size="sm"
+          @click="alertSessionViewed = true"
+        >
+          {{ alertSessionViewed ? 'Session opened' : 'View session' }}
+        </AgalaButton>
+      </template>
+    </AgalaAlert>
     <div
       v-else-if="slug === 'badge'"
       class="preview-row"
@@ -491,10 +467,6 @@ const events = [
         </template>
       </AgalaEmptyState>
     </div>
-    <AgalaDevEnvBanner
-      v-else-if="slug === 'dev-env-banner'"
-      text="Preview environment — data resets daily."
-    />
     <AgalaAccordion v-else-if="slug === 'accordion'">
       <AgalaAccordionItem
         value="install"

@@ -48,7 +48,6 @@ import Pagination from './components/Pagination/Pagination.vue'
 import Drawer from './components/Drawer/Drawer.vue'
 import FileUpload from './components/FileUpload/FileUpload.vue'
 import VStack from './components/Stack/VStack.vue'
-import DevEnvBanner from './components/DevEnvBanner/DevEnvBanner.vue'
 import Alert from './components/Alert/Alert.vue'
 import AgalaIcon from './components/AgalaIcon/AgalaIcon.vue'
 
@@ -103,7 +102,6 @@ const componentMap: Record<string, Component> = {
   AgalaDrawer: Drawer,
   AgalaFileUpload: FileUpload,
   AgalaVStack: VStack,
-  AgalaDevEnvBanner: DevEnvBanner,
   AgalaAlert: Alert,
 }
 

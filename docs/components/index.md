@@ -12,7 +12,7 @@ The complete `@agala-labs/ui` catalog is organized by the user problem each comp
 
 ## Feedback and overlays
 
-[Alert](/components/alert) · [Badge](/components/badge) · [Drawer](/components/drawer) · [Modal](/components/modal) · [Toast](/components/toast) · [Tooltip](/components/tooltip) · [Progress](/components/progress) · [Skeleton](/components/skeleton) · [Empty State](/components/empty-state) · [Dev Environment Banner](/components/dev-env-banner)
+[Alert](/components/alert) · [Badge](/components/badge) · [Drawer](/components/drawer) · [Modal](/components/modal) · [Toast](/components/toast) · [Tooltip](/components/tooltip) · [Progress](/components/progress) · [Skeleton](/components/skeleton) · [Empty State](/components/empty-state)
 
 ## Navigation and data
 

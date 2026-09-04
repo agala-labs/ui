@@ -1,15 +1,21 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { computed, ref } from 'vue'
 import AgalaIcon from '../AgalaIcon/AgalaIcon.vue'
 import type { IconName } from '../AgalaIcon/types'
 import type { AlertProps, AlertVariant } from './types'
 
 const props = withDefaults(defineProps<AlertProps>(), {
   variant: 'info',
+  role: 'status',
   dismissible: false,
   flat: false,
   icon: undefined,
+  dismissLabel: 'Dismiss notification',
 })
+
+const emit = defineEmits<{
+  dismiss: []
+}>()
 
 const slots = defineSlots<{
   default?: () => unknown
@@ -25,16 +31,21 @@ const iconMap: Record<AlertVariant, IconName> = {
   danger: 'alert-circle',
 }
 
-const cls = computed(() => [
+const classes = computed(() => [
   'alert',
   `alert--${props.variant}`,
-  props.title && !props.flat ? 'alert--has-title' : '',
+  props.title ? 'alert--has-title' : '',
   props.flat ? 'alert--flat' : '',
   props.icon !== false ? 'alert--has-icon' : '',
   slots.action ? 'alert--has-action' : '',
   props.dismissible ? 'alert--dismissible' : '',
   props.class,
-].filter(Boolean).join(' '))
+].filter(Boolean))
+
+function dismiss() {
+  dismissed.value = true
+  emit('dismiss')
+}
 </script>
 
 <template>
@@ -43,11 +54,12 @@ const cls = computed(() => [
       v-if="!dismissed"
       class="alertShell"
     >
-      <div class="alertShellInner">
+      <div class="alertShell__inner">
         <div
-          role="alert"
+          :class="classes"
+          :role="props.role"
+          :aria-label="props.ariaLabel"
           aria-atomic="true"
-          :class="cls"
         >
           <span
             v-if="props.icon !== false"
@@ -56,12 +68,13 @@ const cls = computed(() => [
           >
             <AgalaIcon
               :name="(props.icon as IconName) || iconMap[props.variant]"
-              size="md"
+              size="sm"
             />
           </span>
+
           <div class="alert__content">
             <h4
-              v-if="props.title && !props.flat"
+              v-if="props.title"
               class="alert__title"
             >
               {{ props.title }}
@@ -73,22 +86,24 @@ const cls = computed(() => [
               <slot />
             </div>
           </div>
+
           <div
             v-if="$slots.action"
             class="alert__action"
           >
             <slot name="action" />
           </div>
+
           <button
             v-if="props.dismissible"
             type="button"
             class="alert__dismiss"
-            aria-label="Dismiss alert"
-            @click="dismissed = true"
+            :aria-label="props.dismissLabel"
+            @click="dismiss"
           >
             <AgalaIcon
               name="x"
-              size="md"
+              size="sm"
             />
           </button>
         </div>
@@ -98,14 +113,16 @@ const cls = computed(() => [
 </template>
 
 <style scoped>
-/* CSS grid trick for smooth height animation — no JS height calc needed */
 .alertShell {
   display: grid;
   grid-template-rows: 1fr;
-  transition: grid-template-rows var(--agala-transition-base), opacity var(--agala-transition-base);
+  opacity: 1;
+  transition:
+    grid-template-rows var(--agala-transition-base),
+    opacity var(--agala-transition-fast);
 }
 
-.alertShellInner {
+.alertShell__inner {
   min-height: 0;
   overflow: hidden;
 }
@@ -121,23 +138,23 @@ const cls = computed(() => [
   overflow: hidden;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .alertShell {
-    transition: opacity var(--agala-transition-fast);
-  }
-}
-
 .alert {
+  --alert-accent: var(--agala-info);
+
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   grid-template-areas: 'content';
-  align-items: flex-start;
-  gap: var(--agala-alert-row-gap, 0.5rem) var(--agala-alert-gap, 0.625rem);
-  padding: var(--agala-alert-padding, 0.75rem 0.875rem);
-  border: 0;
-  border-radius: var(--agala-alert-radius, var(--agala-radius-md));
-  background: var(--agala-alert-bg, hsl(var(--agala-muted) / 0.45));
-  box-shadow: var(--agala-alert-shadow, none);
+  align-items: center;
+  gap: var(--agala-alert-row-gap, var(--agala-space-2)) var(--agala-alert-gap, var(--agala-space-3));
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  padding: var(--agala-alert-padding, 0.8125rem 0.875rem);
+  border: var(--agala-alert-border, var(--agala-border-width) solid hsl(var(--agala-border) / 0.42));
+  border-radius: var(--agala-alert-radius, var(--agala-radius-lg));
+  background: var(--agala-alert-bg, hsl(var(--agala-muted) / 0.42));
+  box-shadow: var(--agala-alert-shadow, var(--agala-shadow-xs));
+  color: hsl(var(--agala-foreground));
   font-family: var(--agala-font-sans);
 }
 
@@ -176,45 +193,20 @@ const cls = computed(() => [
   grid-template-areas: 'icon content action dismiss';
 }
 
-/* Variants set a semantic pair for the compact status tile. */
 .alert--info {
-  --alert-accent: var(--agala-primary);
-  --alert-accent-foreground: var(--agala-primary-foreground);
-}
-.alert--success {
-  --alert-accent: var(--agala-success);
-  --alert-accent-foreground: var(--agala-success-foreground);
-}
-.alert--warning {
-  --alert-accent: var(--agala-warning);
-  --alert-accent-foreground: var(--agala-warning-foreground);
-}
-.alert--danger {
-  --alert-accent: var(--agala-danger);
-  --alert-accent-foreground: var(--agala-danger-foreground);
+  --alert-accent: var(--agala-info);
 }
 
-/* Flat variant — no surface, just a compact status cue and message. */
-.alert--flat {
-  align-items: center;
-  background: transparent;
-  border: 0;
-  border-radius: 0;
-  padding: var(--agala-alert-flat-padding, 0.25rem 0.875rem);
-  gap: var(--agala-alert-flat-gap, 0.625rem);
+.alert--success {
+  --alert-accent: var(--agala-success);
 }
-.alert--flat .alert__icon {
-  width: var(--agala-alert-icon-size, 1.5rem);
-  height: var(--agala-alert-icon-size, 1.5rem);
-  margin-top: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  color: hsl(var(--alert-accent));
+
+.alert--warning {
+  --alert-accent: var(--agala-warning);
 }
-.alert--flat .alert__body {
-  color: hsl(var(--agala-muted-foreground));
-  font-size: var(--agala-font-size-sm);
+
+.alert--danger {
+  --alert-accent: var(--agala-danger);
 }
 
 .alert__icon {
@@ -222,12 +214,13 @@ const cls = computed(() => [
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: var(--agala-alert-icon-size, 1.5rem);
-  height: var(--agala-alert-icon-size, 1.5rem);
-  margin-top: 0;
-  border: 0;
-  border-radius: 999px;
-  background: hsl(var(--alert-accent) / 0.1);
+  align-self: start;
+  width: var(--agala-alert-icon-size, 1.75rem);
+  height: var(--agala-alert-icon-size, 1.75rem);
+  margin-top: 0.0625rem;
+  border: var(--agala-border-width) solid hsl(var(--alert-accent) / 0.12);
+  border-radius: var(--agala-radius-full);
+  background: hsl(var(--alert-accent) / 0.09);
   color: hsl(var(--alert-accent));
 }
 
@@ -235,41 +228,38 @@ const cls = computed(() => [
   grid-area: content;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: var(--agala-alert-content-gap, var(--agala-space-1));
   min-width: 0;
 }
 
 .alert__title {
   margin: 0;
-  font-weight: var(--agala-alert-title-weight, var(--agala-font-weight-semibold));
-  font-size: var(--agala-alert-title-size, var(--agala-font-size-base));
-  line-height: var(--agala-line-height-normal);
   color: hsl(var(--agala-foreground));
-  overflow-wrap: break-word;
+  font-size: var(--agala-alert-title-size, var(--agala-font-size-base));
+  font-weight: var(--agala-alert-title-weight, var(--agala-font-weight-semibold));
+  line-height: var(--agala-leading-tight);
+  letter-spacing: var(--agala-letter-spacing-tight);
+  overflow-wrap: anywhere;
 }
 
 .alert__body {
-  font-size: var(--agala-alert-body-size, var(--agala-font-size-sm));
-  line-height: var(--agala-line-height-relaxed);
-  color: hsl(var(--agala-foreground));
-  overflow-wrap: break-word;
+  color: hsl(var(--agala-muted-foreground));
+  font-size: var(--agala-alert-body-size, 0.8125rem);
+  font-weight: var(--agala-font-weight-normal);
+  line-height: var(--agala-leading-normal);
+  overflow-wrap: anywhere;
 }
 
-.alert--has-title .alert__body {
-  color: hsl(var(--agala-muted-foreground));
+.alert:not(.alert--has-title) .alert__body {
+  color: hsl(var(--agala-foreground) / 0.84);
 }
 
 .alert__action {
   grid-area: action;
   display: flex;
   align-items: center;
-  align-self: flex-start;
   justify-self: end;
   max-width: 100%;
-}
-
-.alert--flat .alert__action {
-  align-self: center;
 }
 
 .alert__dismiss {
@@ -277,17 +267,20 @@ const cls = computed(() => [
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 1.75rem;
+  height: 1.75rem;
   margin: 0 -0.25rem 0 0;
   padding: 0;
-  border: none;
+  border: 0;
   border-radius: var(--agala-radius-sm);
   background: transparent;
   color: hsl(var(--agala-muted-foreground));
   cursor: pointer;
-  opacity: 0.72;
-  transition: opacity var(--agala-transition-fast), background var(--agala-transition-fast), color var(--agala-transition-fast);
+  opacity: 0.76;
+  transition:
+    opacity var(--agala-transition-fast),
+    background-color var(--agala-transition-fast),
+    color var(--agala-transition-fast);
 }
 
 .alert__dismiss:hover {
@@ -301,7 +294,31 @@ const cls = computed(() => [
   box-shadow: 0 0 0 2px hsl(var(--agala-ring));
 }
 
+.alert--flat {
+  gap: var(--agala-alert-flat-gap, var(--agala-space-2));
+  padding: var(--agala-alert-flat-padding, var(--agala-space-1) 0);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.alert--flat .alert__icon {
+  align-self: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-top: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
 @media (max-width: 639px) {
+  .alert {
+    align-items: start;
+    padding: var(--agala-alert-mobile-padding, var(--agala-space-3));
+  }
+
   .alert--has-action {
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
@@ -331,8 +348,13 @@ const cls = computed(() => [
   }
 
   .alert__action {
-    align-self: start;
     justify-self: start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .alertShell {
+    transition: opacity var(--agala-transition-fast);
   }
 }
 </style>

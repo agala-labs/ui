@@ -198,13 +198,44 @@ function openManagedModal() {
         </AgalaTabs>
       </div>
     </div>
-    <AgalaAlert
+    <div
       v-else-if="slug === 'alert'"
-      variant="info"
-      :icon="false"
+      class="preview-stack"
     >
-      Scheduled maintenance starts at 22:00.
-    </AgalaAlert>
+      <AgalaAlert
+        variant="success"
+        title="Import completed"
+      >
+        128 products are ready to review.
+      </AgalaAlert>
+      <AgalaAlert
+        class="alert-dismissible-demo"
+        variant="danger"
+        role="alert"
+        title="Payments unavailable"
+        dismissible
+        dismiss-label="Dismiss payment notification"
+      >
+        New charges cannot be processed. Existing data is safe.
+      </AgalaAlert>
+      <AgalaAlert
+        class="alert-flat-action-demo"
+        variant="info"
+        flat
+      >
+        Scheduled maintenance starts at 22:00.
+        <template #action>
+          <AgalaButton
+            as="a"
+            href="#api"
+            variant="ghost"
+            size="sm"
+          >
+            View details
+          </AgalaButton>
+        </template>
+      </AgalaAlert>
+    </div>
     <div
       v-else-if="slug === 'badge'"
       class="preview-row"
@@ -304,10 +335,6 @@ function openManagedModal() {
         </AgalaButton>
       </template>
     </AgalaEmptyState>
-    <AgalaDevEnvBanner
-      v-else-if="slug === 'dev-env-banner'"
-      text="Staging environment — payments are simulated."
-    />
     <AgalaAccordion
       v-else-if="slug === 'accordion'"
       multiple

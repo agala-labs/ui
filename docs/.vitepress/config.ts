@@ -17,7 +17,7 @@ const componentGroups = [
     items: [
       ['Alert', 'alert'], ['Badge', 'badge'], ['Drawer', 'drawer'], ['Modal', 'modal'],
       ['Toast', 'toast'], ['Tooltip', 'tooltip'], ['Progress', 'progress'],
-      ['Skeleton', 'skeleton'], ['Empty State', 'empty-state'], ['Dev Environment Banner', 'dev-env-banner'],
+      ['Skeleton', 'skeleton'], ['Empty State', 'empty-state'],
     ],
   },
   {

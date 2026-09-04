@@ -41,7 +41,9 @@ const additionalExamples: Record<string, AdditionalExample> = {
   toggle: { label: 'Disabled', description: 'Explain externally why a managed setting cannot change.', snippet: `<AgalaToggle :model-value="true" disabled />\n<span>Required by workspace policy</span>` },
   'file-upload': { label: 'Inline', description: 'Inline upload works inside compact forms with an existing label.', snippet: `<AgalaFileUpload v-model="files" variant="inline" accept=".pdf" :max-files="1" />` },
   'segmented-control': { label: 'Compared with Tabs', description: 'Segmented Control changes one immediate value inside an enclosed track; Tabs navigate related content panels.', snippet: `<AgalaSegmentedControl v-model="density" :options="densityOptions" size="sm" aria-label="Table density" />\n<AgalaTabs v-model="tab" :tabs="tabs" variant="pills" aria-label="Project sections">…</AgalaTabs>` },
-  alert: { label: 'Without icon', description: 'Hide the icon only when the message and context already carry the status.', snippet: `<AgalaAlert variant="info" :icon="false">Scheduled maintenance starts at 22:00.</AgalaAlert>` },
+  alert: { label: 'Semantic states', description: 'Keep the surface quiet and let the icon carry the semantic color. Reserve role="alert" for urgent messages introduced while the user is working.', snippet: `<AgalaAlert variant="success" title="Import completed">128 products are ready to review.</AgalaAlert>
+<AgalaAlert variant="danger" role="alert" title="Payments unavailable" dismissible>New charges cannot be processed.</AgalaAlert>
+<AgalaAlert variant="info" flat>Scheduled maintenance starts at 22:00.</AgalaAlert>` },
   badge: { label: 'Metadata and custom color', description: 'Passive badges label counts and states without becoming controls. Custom colors accept any valid CSS color.', snippet: `<AgalaBadge variant="secondary">12 items</AgalaBadge>\n<AgalaBadge variant="outline">Draft</AgalaBadge>\n<AgalaBadge size="sm">128</AgalaBadge>\n<AgalaBadge color="rebeccapurple">Custom</AgalaBadge>` },
   drawer: { label: 'Top placement', description: 'Use a top drawer for a short viewport-wide task, not a long form.', snippet: `<AgalaDrawer :open="open" placement="top" size="14rem" title="Quick search" @close="open = false">…</AgalaDrawer>` },
   modal: { label: 'Policy and manager', description: 'Reserve non-dismissible dialogs for decisions with an explicit path. Provider-managed modals use the same leave lifecycle.', snippet: `<AgalaModal v-model:open="open" title="Resolve conflict" :dismissible="false" :escape-closes="false">…</AgalaModal>\nmodalManager.open(ManagedConfirmation, { title: 'Managed confirmation', size: 'sm' })` },
@@ -50,7 +52,6 @@ const additionalExamples: Record<string, AdditionalExample> = {
   progress: { label: 'Indeterminate', description: 'Use indeterminate progress only when completion cannot be estimated.', snippet: `<AgalaProgress indeterminate />` },
   skeleton: { label: 'List row', description: 'Match the loading placeholder to the content geometry it replaces.', snippet: `<div class="loading-row"><AgalaSkeleton variant="circle" width="2.5rem" height="2.5rem" /><AgalaSkeleton width="70%" /></div>` },
   'empty-state': { label: 'Filtered results', description: 'Filtered empty states should offer a direct way back to results.', snippet: `<AgalaEmptyState size="compact" title="No matching records" description="Try changing or clearing the filters.">\n  <template #action><AgalaButton variant="ghost" size="sm">Clear filters</AgalaButton></template>\n</AgalaEmptyState>` },
-  'dev-env-banner': { label: 'Environment copy', description: 'Name the environment and the consequence that matters.', snippet: `<AgalaDevEnvBanner text="Staging environment — payments are simulated." />` },
   accordion: { label: 'Rich content and states', description: 'Allow multiple open items only when users need to compare rich sections; disabled items remain visible.', snippet: `<AgalaAccordion multiple>\n  <AgalaAccordionItem value="access" title="Access"><p>Workspace roles…</p><ul>…</ul></AgalaAccordionItem>\n  <AgalaAccordionItem value="billing" title="Billing" disabled>…</AgalaAccordionItem>\n</AgalaAccordion>` },
   'dropdown-menu': { label: 'Destructive command', description: 'Separate destructive commands and keep unavailable commands visible.', snippet: `<AgalaDropdownMenu :items="[{ label: 'Duplicate' }, { label: 'Archive', separator: true }, { label: 'Delete', variant: 'danger' }]">…</AgalaDropdownMenu>` },
   navbar: { label: 'Compact actions', description: 'Keep product navigation primary and utility actions concise.', snippet: `<AgalaNavbar><template #brand>Inventory</template><a href="#stock">Stock</a><template #actions><AgalaButton size="icon" aria-label="Notifications" icon="bell" /></template></AgalaNavbar>` },
@@ -197,10 +198,14 @@ export const components: ComponentMeta[] = [
     snippet: `<AgalaSegmentedControl v-model="view" :options="views" />`,
   },
   {
-    slug: 'alert', name: 'Alert', exports: ['AgalaAlert'], description: 'Communicates contextual status or a recoverable issue.',
-    props: [p('variant', "'info' | 'success' | 'warning' | 'danger'", 'Semantic status.', "'info'"), p('title', 'string', 'Optional heading.'), p('dismissible', 'boolean', 'Shows an internal close action.', 'false'), p('flat', 'boolean', 'Removes the neutral surface and radius.', 'false'), p('icon', 'string | false', 'Overrides or hides the icon.'), p('class', 'string', 'Consumer override class.')],
-    slots: ['default — alert body', 'action — recovery or follow-up control'], accessibility: 'Icon, content, action, and dismissal remain in DOM order. Actions wrap below narrow messages while staying keyboard reachable. Urgent messages should be announced by the consuming workflow when appropriate. Dismissal collapses and fades the alert out; the transition respects reduced motion.',
-    snippet: `<AgalaAlert variant="danger" title="Could not load"><template #default>Try again.</template><template #action><AgalaButton size="sm" variant="outline">Retry</AgalaButton></template></AgalaAlert>`,
+    slug: 'alert', name: 'Alert', exports: ['AgalaAlert'], description: 'Displays an application banner for contextual status, warnings, and recoverable issues.',
+    props: [p('variant', "'info' | 'success' | 'warning' | 'danger'", 'Semantic status carried by the icon.', "'info'"), p('title', 'string', 'Optional heading.'), p('role', "'alert' | 'status' | 'region'", 'Announcement semantics. Use alert only for urgent dynamic messages.', "'status'"), p('dismissible', 'boolean', 'Shows a close action.', 'false'), p('flat', 'boolean', 'Removes the surface, border, radius, and shadow.', 'false'), p('icon', 'string | false', 'Overrides or hides the icon.'), p('dismissLabel', 'string', 'Accessible label for the close action.', "'Dismiss notification'"), p('ariaLabel', 'string', 'Accessible name when the selected role needs one.'), p('class', 'string', 'Consumer override class.')],
+    events: ['dismiss — emitted after the user dismisses the banner'],
+    slots: ['default — supporting message', 'action — one recovery or follow-up control'], accessibility: 'Status is the non-interruptive default; opt into alert only for urgent dynamic messages. Icon, content, action, and dismissal remain in DOM order. Actions wrap below narrow messages, the dismiss control is labeled, and dismissal motion respects reduced-motion preferences.',
+    snippet: `<AgalaAlert variant="warning" title="A previous register is still open">
+  The previous session must be closed before opening today’s register.
+  <template #action><AgalaButton size="sm" variant="outline">View session</AgalaButton></template>
+</AgalaAlert>`,
   },
   {
     slug: 'badge', name: 'Badge', exports: ['AgalaBadge'], description: 'Reports compact, passive status, counts, or metadata.',
@@ -249,12 +254,6 @@ export const components: ComponentMeta[] = [
     props: [p('title', 'string', 'Required state title.'), p('description', 'string', 'Supporting explanation.'), p('size', "'default' | 'compact'", 'Presentation density.', "'default'"), p('class', 'string', 'Consumer override class.')],
     slots: ['icon', 'action'], accessibility: 'Keep the title explicit and ensure the action is reachable in normal reading order.',
     snippet: `<AgalaEmptyState size="compact" title="No results" description="Try another filter."><template #action><AgalaButton size="sm" variant="ghost">Clear filters</AgalaButton></template></AgalaEmptyState>`,
-  },
-  {
-    slug: 'dev-env-banner', name: 'Dev Environment Banner', exports: ['AgalaDevEnvBanner'], description: 'Warns users that they are viewing a non-production environment.',
-    props: [p('text', 'string', 'Banner message.'), p('class', 'string', 'Consumer override class.')],
-    accessibility: 'Uses visible text and a labeled dismiss action rather than relying on color alone.',
-    snippet: `<AgalaDevEnvBanner text="Preview environment — data resets daily." />`,
   },
   {
     slug: 'accordion', name: 'Accordion', exports: ['AgalaAccordion', 'AgalaAccordionItem'], description: 'Reveals related sections without leaving the current page.',

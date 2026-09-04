@@ -48,7 +48,7 @@ const componentSlugs = [
   'color-picker', 'checkbox', 'radio-group', 'textarea', 'markdown-editor',
   'toggle', 'file-upload', 'segmented-control', 'alert', 'badge', 'drawer',
   'modal', 'toast', 'tooltip', 'progress', 'skeleton', 'empty-state',
-  'dev-env-banner', 'accordion', 'dropdown-menu', 'navbar', 'pagination',
+  'accordion', 'dropdown-menu', 'navbar', 'pagination',
   'sidebar', 'section-nav', 'table', 'tabs', 'calendar', 'list-group', 'avatar', 'card',
   'center', 'divider', 'stack', 'spacer', 'stat', 'tag', 'icon',
 ] as const
@@ -294,51 +294,30 @@ test.describe('refined component interactions', () => {
     await expect(page.locator('.interaction-status')).toHaveText('Activations: 2')
   })
 
-  test('alert action is reachable and the notice treatment stays borderless', async ({ page }) => {
+  test('alert banner keeps its hierarchy, action, and dismissal reachable', async ({ page }) => {
     await openWithTheme(page, '/components/alert')
 
-    const plainAlert = page.getByRole('alert').first()
-    await expect(plainAlert.locator(':scope > .alert__content')).toHaveCount(1)
-    await expect(plainAlert.locator('.alert__message')).toHaveCount(0)
-    await expect(plainAlert).toHaveCSS('border-left-width', '0px')
-
     const actionable = page.locator('.alert-action-demo')
+    await expect(actionable).toHaveAttribute('role', 'status')
+    await expect(actionable.locator(':scope > .alert__content')).toHaveCount(1)
+    await expect(actionable.locator('.alert__title')).toHaveText('A previous register is still open')
+    await expect(actionable).toHaveCSS('border-left-style', 'solid')
     await expect(actionable.locator('.alert__action')).toHaveCount(1)
-    const retry = actionable.getByRole('button', { name: 'Retry' })
-    await retry.focus()
-    await expect(retry).toBeFocused()
-    await retry.press('Enter')
-    await expect(actionable.getByRole('button', { name: 'Retry (1)' })).toBeVisible()
+    const viewSession = actionable.getByRole('button', { name: 'View session' })
+    await viewSession.focus()
+    await expect(viewSession).toBeFocused()
+    await viewSession.press('Enter')
+    await expect(actionable.getByRole('button', { name: 'Session opened' })).toBeVisible()
     await expect(actionable.locator('.alert__icon')).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
-    expect(await actionable.evaluate((element) => {
-      const action = element.querySelector('.alert__action')
-      const dismiss = element.querySelector('.alert__dismiss')
-      return Boolean(action && dismiss && (action.compareDocumentPosition(dismiss) & Node.DOCUMENT_POSITION_FOLLOWING))
-    })).toBe(true)
-    await actionable.getByRole('button', { name: 'Retry (1)' }).press('Tab')
-    await expect(actionable.getByRole('button', { name: 'Dismiss alert' })).toBeFocused()
-
-    const flat = page.locator('.alert-flat-action-demo')
-    await expect(flat.locator('.alert__action')).toHaveCount(1)
-    await expect(flat).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
 
     if ((page.viewportSize()?.width ?? 0) >= 640) {
-      const titledAlignment = await actionable.evaluate((element) => {
-        const content = element.querySelector('.alert__content')?.getBoundingClientRect()
+      const actionCentering = await actionable.evaluate((element) => {
+        const banner = element.getBoundingClientRect()
         const action = element.querySelector('.alert__action')?.getBoundingClientRect()
-        if (!content || !action) return Number.POSITIVE_INFINITY
-        return Math.abs(content.top - action.top)
+        if (!action) return Number.POSITIVE_INFINITY
+        return Math.abs((banner.top + banner.height / 2) - (action.top + action.height / 2))
       })
-      expect(titledAlignment).toBeLessThanOrEqual(1)
-
-      const compactAlignment = await flat.evaluate((element) => {
-        const regions = ['.alert__icon', '.alert__body', '.alert__action']
-          .map(selector => element.querySelector(selector)?.getBoundingClientRect())
-          .filter((rect): rect is DOMRect => Boolean(rect))
-        const centers = regions.map(rect => rect.top + rect.height / 2)
-        return Math.max(...centers) - Math.min(...centers)
-      })
-      expect(compactAlignment).toBeLessThanOrEqual(2)
+      expect(actionCentering).toBeLessThanOrEqual(2)
     } else {
       const wrapsBelow = await actionable.evaluate((element) => {
         const content = element.querySelector('.alert__content')?.getBoundingClientRect()
@@ -348,10 +327,18 @@ test.describe('refined component interactions', () => {
       expect(wrapsBelow).toBe(true)
     }
 
-    await page.getByRole('tab', { name: 'Without icon' }).click()
-    const withoutIcon = page.getByRole('alert')
-    await expect(withoutIcon.locator('.alert__icon')).toHaveCount(0)
-    await expect(withoutIcon).not.toHaveClass(/alert--has-icon/)
+    await page.getByRole('tab', { name: 'Semantic states' }).click()
+    const urgent = page.getByRole('alert')
+    await expect(urgent).toContainText('Payments unavailable')
+    const dismiss = urgent.getByRole('button', { name: 'Dismiss payment notification' })
+    await dismiss.focus()
+    await expect(dismiss).toBeFocused()
+    await dismiss.click()
+    await expect(urgent).toBeHidden()
+
+    const flat = page.locator('.alert-flat-action-demo')
+    await expect(flat.locator('.alert__action')).toHaveCount(1)
+    await expect(flat).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
 
     await expectNoDocumentOverflow(page)
   })
@@ -360,7 +347,7 @@ test.describe('refined component interactions', () => {
     test.skip(testInfo.project.name !== 'tablet-768', 'Cross-theme geometry needs one wide viewport.')
 
     for (const theme of themes) {
-      await openWithTheme(page, '/components/alert', theme)
+      await openWithTheme(page, '/components/alert?example=states', theme)
       const flat = page.locator('.alert-flat-action-demo')
       const centerSpread = await flat.evaluate((element) => {
         const regions = ['.alert__icon', '.alert__body', '.alert__action']
