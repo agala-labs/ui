@@ -16,7 +16,11 @@ LABEL org.opencontainers.image.title="Agala Labs UI documentation" \
       org.opencontainers.image.revision="${VCS_REF}"
 
 COPY Caddyfile /etc/caddy/Caddyfile
+RUN printf '%s\n' "$VCS_REF" | grep -Eq '^[0-9a-f]{40}$' \
+ && sed -i "s/__VCS_REF__/$VCS_REF/g" /etc/caddy/Caddyfile
 COPY --from=build /app/docs/.vitepress/dist /srv
+
+USER 10001:10001
 
 EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
