@@ -24,7 +24,7 @@ steps:
       - /busybox/sh deploy/resolve-release-image.sh
 
   - name: release-commit-image
-    image: ghcr.io/agala-labs/ansible-runner@sha256:3534c8c327dbd5ae9dd250adce5788f176706ff1ca87de6e3797b2b8c8af019b
+    image: ghcr.io/agala-labs/ansible-runner@sha256:e2e79ede82788d07e8ac48d1df9d34c9ebfb3d6e5aa9627a87f0411c9733d7f8
     environment:
       AGALA_RUNNER_MODE: k3s-release
       RELEASE_SERVICE: ui-docs
