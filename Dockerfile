@@ -8,21 +8,16 @@ RUN npm ci --ignore-scripts
 COPY . .
 RUN DOCS_DISABLE_GIT=1 npm run docs:build
 
-FROM caddy:2-alpine
-
-# The upstream binary carries cap_net_bind_service. Kubernetes runs this
-# container with no_new_privs and drops all capabilities, so Linux refuses to
-# exec a file that still has a file capability even though we listen on 8080.
-RUN apk add --no-cache libcap && setcap -r /usr/bin/caddy
+FROM nginx:stable-alpine
 
 ARG VCS_REF=unknown
 LABEL org.opencontainers.image.title="Agala Labs UI documentation" \
       org.opencontainers.image.source="https://github.com/agala-labs/ui" \
       org.opencontainers.image.revision="${VCS_REF}"
 
-COPY Caddyfile /etc/caddy/Caddyfile
+COPY nginx.conf /etc/nginx/nginx.conf
 RUN printf '%s\n' "$VCS_REF" | grep -Eq '^[0-9a-f]{40}$' \
- && sed -i "s/__VCS_REF__/$VCS_REF/g" /etc/caddy/Caddyfile
+ && sed -i "s/__VCS_REF__/$VCS_REF/g" /etc/nginx/nginx.conf
 COPY --from=build /app/docs/.vitepress/dist /srv
 
 USER 10001:10001

@@ -15,8 +15,11 @@ steps:
     commands:
       - npm ci --ignore-scripts
       - DOCS_DISABLE_GIT=1 npm run docs:build
+      - apk add --no-cache nginx
+      - nginx -t -c "$PWD/nginx.conf"
       - sh -n deploy/resolve-release-image.sh
-      - grep -F 'X-Agala-Revision "__VCS_REF__"' Caddyfile
+      - grep -F 'X-Agala-Revision "__VCS_REF__"' nginx.conf
+      - grep -F 'FROM nginx:' Dockerfile
       - grep -F 'USER 10001:10001' Dockerfile
 
   - name: require-published-packages
