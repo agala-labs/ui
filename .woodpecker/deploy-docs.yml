@@ -14,7 +14,7 @@ steps:
     image: node:22-alpine
     commands:
       - npm ci --ignore-scripts
-      - npm run docs:build
+      - DOCS_DISABLE_GIT=1 npm run docs:build
       - sh -n deploy/resolve-release-image.sh
       - grep -F 'X-Agala-Revision "__VCS_REF__"' Caddyfile
       - grep -F 'USER 10001:10001' Dockerfile
