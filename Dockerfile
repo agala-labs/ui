@@ -10,6 +10,11 @@ RUN DOCS_DISABLE_GIT=1 npm run docs:build
 
 FROM caddy:2-alpine
 
+# The upstream binary carries cap_net_bind_service. Kubernetes runs this
+# container with no_new_privs and drops all capabilities, so Linux refuses to
+# exec a file that still has a file capability even though we listen on 8080.
+RUN apk add --no-cache libcap && setcap -r /usr/bin/caddy
+
 ARG VCS_REF=unknown
 LABEL org.opencontainers.image.title="Agala Labs UI documentation" \
       org.opencontainers.image.source="https://github.com/agala-labs/ui" \
