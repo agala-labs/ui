@@ -18,7 +18,6 @@ steps:
       - sh -n deploy/resolve-release-image.sh
       - grep -F 'X-Agala-Revision "__VCS_REF__"' Caddyfile
       - grep -F 'USER 10001:10001' Dockerfile
-      - '! grep -E "SSH_DEPLOY_KEY|ANSIBLE_PLAYBOOK|ansible-runner:latest" .woodpecker/deploy-docs.yml'
 
   - name: require-published-packages
     when:
@@ -46,39 +45,3 @@ steps:
         - ${CI_COMMIT_SHA}
       build_args:
         - VCS_REF=${CI_COMMIT_SHA}
-
-  - name: resolve-commit-image
-    when:
-      - event: push
-        branch: master
-    image: gcr.io/go-containerregistry/crane/debug@sha256:54b27703e6c602fbd6f95712910e9c8d45d4361a59274bde38aeec943734e424
-    entrypoint:
-      - /busybox/sh
-      - -c
-      - echo $CI_SCRIPT | base64 -d | /busybox/sh -e
-    environment:
-      RELEASE_IMAGE_FILE: .release/image.txt
-      RELEASE_SOURCE_SHA: ${CI_COMMIT_SHA}
-      REGISTRY_USERNAME:
-        from_secret: gh_username
-      REGISTRY_PASSWORD:
-        from_secret: gh_token
-    commands:
-      - /busybox/sh deploy/resolve-release-image.sh
-
-  - name: release-commit-image
-    when:
-      - event: push
-        branch: master
-    image: ghcr.io/agala-labs/ansible-runner@sha256:3534c8c327dbd5ae9dd250adce5788f176706ff1ca87de6e3797b2b8c8af019b
-    environment:
-      AGALA_RUNNER_MODE: k3s-release
-      RELEASE_SERVICE: ui-docs
-      RELEASE_IMAGE_FILE: .release/image.txt
-      RELEASE_SOURCE_SHA: ${CI_COMMIT_SHA}
-      RELEASE_ENVIRONMENT: production
-      PLATFORM_GIT_TOKEN:
-        from_secret: platform_git_release_token
-
-# Woodpecker 3.13 rejects workflow-level concurrency. The platform publisher's
-# protected force-with-lease fails closed if another release updates Git first.
