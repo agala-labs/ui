@@ -670,6 +670,14 @@ watch(isOpen, (open) => {
   color: hsl(var(--agala-muted-foreground));
 }
 
+.triggerPlaceholder,
+.triggerSingleLabel,
+.chips {
+  flex: 1;
+  min-width: 0;
+}
+
+.triggerPlaceholder,
 .triggerSingleLabel {
   overflow: hidden;
   text-overflow: ellipsis;

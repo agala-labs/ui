@@ -308,7 +308,13 @@ test.describe('refined component interactions', () => {
     await expect(viewSession).toBeFocused()
     await viewSession.press('Enter')
     await expect(actionable.getByRole('button', { name: 'Session opened' })).toBeVisible()
-    await expect(actionable.locator('.alert__icon')).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+    await expect(actionable.locator('.alert__icon')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+    const firstLineAlignment = await actionable.evaluate((element) => {
+      const icon = element.querySelector('.alert__icon')!.getBoundingClientRect()
+      const title = element.querySelector('.alert__title')!
+      return Math.abs(icon.top + icon.height / 2 - title.getBoundingClientRect().top - parseFloat(getComputedStyle(title).lineHeight) / 2)
+    })
+    expect(firstLineAlignment).toBeLessThanOrEqual(2)
 
     if ((page.viewportSize()?.width ?? 0) >= 640) {
       const actionCentering = await actionable.evaluate((element) => {

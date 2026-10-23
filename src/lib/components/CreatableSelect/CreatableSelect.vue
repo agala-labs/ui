@@ -533,6 +533,10 @@ watch(query, (q) => {
 
 .triggerPlaceholder {
   flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   color: hsl(var(--agala-muted-foreground));
 }
 
